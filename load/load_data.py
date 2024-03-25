@@ -31,6 +31,8 @@ def load_device_data(in_path: List[str], print_report: bool = False) -> Tuple[Li
     report (dictionary): a dictionary with the following fields
                          [names]: The names of the sensors in the order they were loaded into the list.
 
+                         [column names]: The names of the columns in the order they were loaded into the list.
+
                          [number of samples]: The number of samples each sensor recorded.
 
                          [starting times]: The timestamps when the sensors started recording.
@@ -129,7 +131,7 @@ def load_device_data(in_path: List[str], print_report: bool = False) -> Tuple[Li
 
                 # calculate the average sampling rate (the time axis in the files is in nanoseconds)
                 # the sampling rate will not be rounded in order to show the 'true' average sampling rate
-                avg_sampling_rates.append(_calc_avg_sampling_rate(time_axis, unit='nanoseconds', round=False))
+                avg_sampling_rates.append(calc_avg_sampling_rate(time_axis, unit='nanoseconds', round=False))
 
             # get the number of samples
             num_samples.append(time_axis.size)
@@ -153,6 +155,9 @@ def load_device_data(in_path: List[str], print_report: bool = False) -> Tuple[Li
 
                 # add the name of the sensor to the list
                 name = header[device_name]['sensor'][0]
+
+                # remove the x from the name (in case it is a 3-axis sensor)
+                if (name.startswith('x')): name = name[1:]
 
                 # add the name to the list
                 names.append(name)
@@ -200,12 +205,8 @@ def load_device_data(in_path: List[str], print_report: bool = False) -> Tuple[Li
 
     return sensor_data, report
 
-# ------------------------------------------------------------------------------------------------------------------- #
-# private functions
-# ------------------------------------------------------------------------------------------------------------------- #
 
-
-def _calc_avg_sampling_rate(time_axis, unit='seconds', round=True):
+def calc_avg_sampling_rate(time_axis: np.ndarray, unit: str = 'seconds', round: bool = True) -> float:
     """
     function to calculate the average sampling rate of signals recorded with an android sensor. The sampling rate is
     rounded to the next tens digit if specified(i.e 34.4 Hz = 30 Hz | 87.3 Hz = 90 Hz).
@@ -250,12 +251,12 @@ def _calc_avg_sampling_rate(time_axis, unit='seconds', round=True):
 
     # round the sampling rate if specified
     if(round):
-        avg_sampling_rate = _round_sampling_rate(avg_sampling_rate)
+        avg_sampling_rate = round_sampling_rate(avg_sampling_rate)
 
     return avg_sampling_rate
 
 
-def _round_sampling_rate(sampling_rate):
+def round_sampling_rate(sampling_rate: float) -> int:
     """
     Function for round the sampling rate to the nearest tens digit. Sampling rates below 5 Hz are set to 1 Hz
 
