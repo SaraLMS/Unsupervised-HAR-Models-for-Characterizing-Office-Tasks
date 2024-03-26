@@ -1,12 +1,12 @@
 # ------------------------------------------------------------------------------------------------------------------- #
 # imports
 # ------------------------------------------------------------------------------------------------------------------- #
-from load.load_data import load_device_data, calc_avg_sampling_rate, round_sampling_rate
+from load.load_raw_data import load_device_data, calc_avg_sampling_rate, round_sampling_rate
 import numpy as np
 import pandas as pd
 import os
 import scipy.interpolate as scp
-from typing import List, Dict
+from typing import List, Dict, Tuple
 
 
 # ------------------------------------------------------------------------------------------------------------------- #
@@ -41,7 +41,7 @@ def sync_all_classes(data_path: str, out_path: str, folder_names: List[str],
 
     Returns
     -------
-    None
+    None - This function generate csv files with the synchronized data
     """
     for folder_name in folder_names:
         _sync_all_sensors_in_class(data_path, out_path, folder_name, selected_sensors)
@@ -49,6 +49,7 @@ def sync_all_classes(data_path: str, out_path: str, folder_names: List[str],
 # ------------------------------------------------------------------------------------------------------------------- #
 # private functions
 # ------------------------------------------------------------------------------------------------------------------- #
+
 
 def _get_sensor_names(device: str, sensor: str) -> str:
     """
@@ -527,11 +528,19 @@ def _sync_sensors_in_device(in_path, out_path, sync_file_name='android_synchroni
     return df
 
 
-def _extract_date_time(file_path):
+def _extract_date_time(file_path: str) -> Tuple[str,str]:
     """
     extracts the date and the time from the file path
-    :param file_path: the path of the file
-    :return: the time and the date
+
+    Parameters
+    ----------
+
+    file_path: str
+        Path to the file containing the data.
+
+    Returns
+    -------
+    The time and the date strings
     """
     # get the date and the time from the path string
     date_time = file_path.rsplit('.', 1)[0].rsplit('_', 2)
@@ -543,7 +552,26 @@ def _extract_date_time(file_path):
     return date, time
 
 
-def _get_sensor_path_list(folder_path, device, sensor_list):
+def _get_sensor_path_list(folder_path: str, device: str, sensor_list: List[str]) -> List[str]:
+    """
+    Generates a list of file paths for sensor data based on specified device and sensor types.
+
+    Parameters:
+    ----------
+    folder_path : str
+        The directory path where sensor data files are located.
+
+    device : str
+        The type of device the data is being collected from. Supported devices are: "phone", "watch".
+
+    sensor_list : List[str]
+        A list of sensor types.
+
+    Returns:
+    -------
+    A list containing the full paths to the files that match the specified device and
+    sensor types.
+    """
     sensor_path_list = []
 
     for sensor in sensor_list:
@@ -561,7 +589,7 @@ def _get_sensor_path_list(folder_path, device, sensor_list):
 
 
 def _sync_all_sensors_in_class(data_path: str, out_path: str, folder_name: str,
-                              selected_sensors: Dict[str, List[str]]) -> None:
+                              selected_sensors: Dict[str, List[str]], prefix: str = 'Sara') -> None:
     """
     Load data of chosen sensors for one class of movement.
 
@@ -586,6 +614,9 @@ def _sync_all_sensors_in_class(data_path: str, out_path: str, folder_name: str,
             "wearheartrate": heart rate (watch only)
             "noise": ambient noise (phone only)
 
+    prefix: str
+        Prefix of the new file name
+
     Returns
     -------
     None: The function saves the synchronized data to a CSV file.
@@ -603,7 +634,7 @@ def _sync_all_sensors_in_class(data_path: str, out_path: str, folder_name: str,
         date, time = _extract_date_time(path_date_time)
 
         # generate file name
-        sync_file_name = "synchronized_" + device + '_' + folder_name + "_" + date + "_" + time + ".csv"
+        sync_file_name = prefix + "_synchronized_" + device + '_' + folder_name + "_" + date + "_" + time + ".csv"
 
         # generate output directory
         output_path = _create_dir(out_path, folder_name)
