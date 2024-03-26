@@ -31,8 +31,6 @@ def load_device_data(in_path: List[str], print_report: bool = False) -> Tuple[Li
     report (dictionary): a dictionary with the following fields
                          [names]: The names of the sensors in the order they were loaded into the list.
 
-                         [column names]: The names of the columns in the order they were loaded into the list.
-
                          [number of samples]: The number of samples each sensor recorded.
 
                          [starting times]: The timestamps when the sensors started recording.
@@ -93,7 +91,7 @@ def load_device_data(in_path: List[str], print_report: bool = False) -> Tuple[Li
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
 
-            # get columns indices from header
+            # adicionar file de constantes
             if "ACCELEROMETER" in file or "GYROSCOPE" in file or "MAGNETIC_FIELD" in file or "MAGNETOMETER" in file:
                 column_indices = [0, 1, 2, 3]
 
@@ -107,7 +105,7 @@ def load_device_data(in_path: List[str], print_report: bool = False) -> Tuple[Li
             data = data.drop_duplicates(subset=[0])
             data = data.to_numpy()
 
-        # check if data array has values
+            # check if data array has values
         # (the signifcant motion sensor might not return any data if no significant motion was detected)
         # the sensor is only loaded and added to the report if it has at least one sampled data point
         if (data.size):
@@ -142,10 +140,10 @@ def load_device_data(in_path: List[str], print_report: bool = False) -> Tuple[Li
             # get the stop time of the signal
             stop_times.append(time_axis[-1])
 
-            # open the file and retrieve information from the header
+            # open the file and retreive information from the header
             with open(file, encoding='latin-1') as opened_file:
                 # read the information from the header lines (omitting the begin and end tags of the header)
-                header_string = opened_file.readlines()[1][2:]  # omit "# " at the beginning of the sensor information
+                header_string = opened_file.readlines()[1][2:]  # omit "# " at the beginning of the sensor infromation
 
                 # convert the header into a dict
                 header = json.loads(header_string)
@@ -162,11 +160,21 @@ def load_device_data(in_path: List[str], print_report: bool = False) -> Tuple[Li
                 # add the name to the list
                 names.append(name)
 
-                # get all sensor column names
+                # get column names
                 columns = header[device_name]['column']
 
-                # add column to the list
-                column_names.append(columns)
+                if not column_names:
+                    # If column_names is empty, add all columns from the first file
+                    column_names.extend(columns)
+                else:
+                    # From the second file onwards, add only new columns, excluding 'nSeq'
+                    for col in columns:
+                        if col != 'nSeq' and col not in column_names:
+                            column_names.append(col)
+
+    # add suffix '_wear' to the column names if device is watch
+    if any('Wear' in name for name in names):
+        column_names = [column_name if column_name == 'nSeq' else column_name + '_wear' for column_name in column_names]
 
     # calculate max, min, mean and std
     max_sample = np.max(avg_sampling_rates)
@@ -200,7 +208,7 @@ def load_device_data(in_path: List[str], print_report: bool = False) -> Tuple[Li
     if (print_report): [print('{}: {}'.format(key, value)) for key, value in report.items()]
 
     # check if single file was loaded in that case return sensor_data as an array instead of a list
-    if single_file:
+    if (single_file):
         sensor_data = sensor_data[0]
 
     return sensor_data, report

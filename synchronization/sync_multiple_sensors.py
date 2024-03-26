@@ -3,19 +3,127 @@
 # ------------------------------------------------------------------------------------------------------------------- #
 from load.load_data import load_device_data, calc_avg_sampling_rate, round_sampling_rate
 import numpy as np
-from scipy.interpolate import interp1d
+import pandas as pd
+import os
 import scipy.interpolate as scp
+from typing import List, Dict
 
 
 # ------------------------------------------------------------------------------------------------------------------- #
 # public functions
 # ------------------------------------------------------------------------------------------------------------------- #
 
+def sync_all_classes(data_path: str, out_path: str, folder_names: List[str],
+                     selected_sensors: Dict[str, List[str]]) -> None:
+    """
+    Sync sensor data for all classes of movements on a single device.
 
+    Parameters
+    ----------
+    data_path : str
+        The path to the main folder containing the sensor data.
+
+    out_path : str
+        The path where synchronized data will be saved.
+
+    folder_names : List[str]
+        List of class names (folders) from which to load the data. Each class folder should be named after the class.
+
+    selected_sensors : Dict[str, List[str]]
+        A dictionary where keys are device modalities ("phone", "watch") and values are lists of sensor
+        names to be synchronized. Supported sensor names include:
+            - "acc": accelerometer
+            - "gyr": gyroscope
+            - "mag": magnetometer
+            - "rotvec": rotation vector
+            - "wearheartrate": heart rate (applicable only for the "watch" device)
+            - "noise": ambient noise (applicable only for the "phone" device)
+
+    Returns
+    -------
+    None
+    """
+    for folder_name in folder_names:
+        _sync_all_sensors_in_class(data_path, out_path, folder_name, selected_sensors)
 
 # ------------------------------------------------------------------------------------------------------------------- #
 # private functions
 # ------------------------------------------------------------------------------------------------------------------- #
+
+def _get_sensor_names(device: str, sensor: str) -> str:
+    """
+    Generate sensor names that fit the opensignals file name convention.
+
+    Parameters
+    ----------
+    device: str
+               The modality of the device used for the acquisitions The following sensor names are supported:
+               "phone": smartphone
+               "watch": smartwatch
+
+    sensor: str
+                 The sensor which should be loaded from the data. The following sensor names are supported:
+                 "acc": accelerometer
+                 "gyr": gyroscope
+                 "mag": magnetometer
+                 "rotvec": rotation vector
+                 "wearheartrate": heart rate (smartwatch only)
+                 "noise": ambient noise (smartphone only)
+
+    Returns
+    -------
+    Sensor name in opensignals format.
+    """
+
+    if device == "phone":
+
+        device_name = "ANDROID"
+
+        if sensor == "acc":
+            sensor_name = "ACCELEROMETER"
+
+        elif sensor == "gyr":
+            sensor_name = "GYROSCOPE"
+
+        elif sensor == "mag":
+            sensor_name = "MAGNETIC_FIELD"
+
+        elif sensor == "rotvec":
+            sensor_name = "ROTATION_VECTOR"
+
+        elif sensor == "noise":
+            sensor_name = "NOISERECORDER"
+
+        else:
+            raise ValueError(f"Invalid sensor: {sensor}")
+
+    elif device == "watch":
+
+        device_name = "ANDROID_WEAR"
+
+        if sensor == "acc":
+            sensor_name = "ACCELEROMETER"
+
+        elif sensor == "gyr":
+            sensor_name = "GYROSCOPE"
+
+        elif sensor == "wearheartrate":
+            sensor_name = "HEART_RATE"
+
+        elif sensor == "mag":
+            sensor_name = "MAGNETOMETER"
+
+        elif sensor == "rotvec":
+            sensor_name = "ROTATION_VECTOR"
+
+        else:
+            raise ValueError(f"Invalid sensor: {sensor}")
+
+    one_sensor_name = f"opensignals_{device_name}_{sensor_name}"
+
+    # device == "muscleban"
+    # implement
+    return one_sensor_name
 
 
 def _re_sample_data(time_axis, data, start=0, stop=-1, shift_time_axis=True, sampling_rate=100, kind_interp='quadratic'):
@@ -115,7 +223,7 @@ def _re_sample_data(time_axis, data, start=0, stop=-1, shift_time_axis=True, sam
     return time_inter, data_inter, sampling_rate
 
 
-def pad_android_data(sensor_data, report, start_with=None, end_with=None, padding_type='same'):
+def _pad_android_data(sensor_data, report, start_with=None, end_with=None, padding_type='same'):
 
     """
     function in order to pad multiple android signals to the correct same start and end values. This function is
@@ -300,4 +408,210 @@ def pad_android_data(sensor_data, report, start_with=None, end_with=None, paddin
         padded_sensor_data.append(padded_data.T)
 
     return padded_sensor_data
+
+
+def _create_dir(path, folder_name):
+    """
+    creates emg new directory in the specified path
+    :param path: the path in which the folder_name should be created
+    :param folder_name: the name of the folder that should be created
+    :return: the full path to the created folder
+    """
+
+    # join path and folder
+    new_path = os.path.join(path, folder_name)
+
+    # check if the folder does not exist yet
+    if not os.path.exists(new_path):
+        # create the folder
+        os.makedirs(new_path)
+
+    return new_path
+
+
+def _save_synchronised_data(time_axis, data, path, file_name='android_synchronized'):
+    """
+    Function used for saving synchronised android data into a single file. CHANGE DOCSTRING
+
+    Parameters
+    ----------
+    time_axis (N,  array_like): The time axis after the padding and re-sampling the sensor data.
+
+    data (list): List containing the padded and re-sampled sensor signals. The length of data along the 0-axis has to be
+                 the same size as time_axis
+
+
+    path (string): A string with the location where the file should be saved.
+
+    file_name (string, optional): The name of the file, with the suffix '.txt'. If not specified, the file is named
+                             'android_synchronised.txt'.
+
+    """
+    # add .txt suffix to the file name
+    file_name = file_name + '.csv'
+    # create final save path
+    save_path = os.path.join(path, file_name)
+
+    # add the time axis for the final data array
+    # make the time axis a column vector
+    final_data_array = np.expand_dims(time_axis, 1)
+
+    # write all the data into a single array
+    for signals in data:
+        final_data_array = np.append(final_data_array, signals, axis=1)
+
+    return save_path, final_data_array
+
+
+def _sync_sensors_in_device(in_path, out_path, sync_file_name='android_synchronized') -> pd.DataFrame:
+    """
+    Function to synchronise multiple android files into one.
+
+    Parameters
+    ----------
+    in_path (list): list of paths that point to the files that are supposed to be synchronised
+    out_path (string): The path where the synchronised file is supposed to be saved
+    sync_file_name (String, optional): The name of the new file. If not provided then the name will be set to
+                                       'android_synchronised.txt'
+    automatic_sync (boolean, optional): boolean for setting the mode of the function.
+                                        If not provided it will be set to True
+
+    Returns
+    -------
+    pandas DataFrame containing synchronised data from chosen sensors in device
+    """
+
+    # load the data
+    sensor_data, report = load_device_data(in_path, print_report=True)
+
+    # ---- data padding ---- #
+
+    # inform the user
+    print('Synchronizing from start of {} sensor until end of {} sensor.'.format(report['starting order'][-1],
+                                                                                 report['stopping order'][0]))
+    print('Using padding type: same.')
+
+    padded_sensor_data = _pad_android_data(sensor_data, report)
+
+    # ---- data re-sampling ---- #
+    print('\n---- DATA RE-SAMPLING ----\n')
+
+    # list for holding the re-sampled data
+    re_sampled_data = []
+
+    # list for holding the time axes of each sensor
+    re_sampled_time = []
+
+    # get the highest sampling rate and round it accordingly
+    sampling_rate = round_sampling_rate(report['max. sampling rate'])
+
+    # cycle over the sig
+    for data in padded_sensor_data:
+        # resample the data ('_' suppresses the output for the sampling rate)
+        re_time, re_data, _ = _re_sample_data(data[:, 0], data[:, 1:], shift_time_axis=True,
+                                             sampling_rate=sampling_rate, kind_interp='quadratic')
+
+        # add the the time and data to the lists
+        re_sampled_time.append(re_time)
+        re_sampled_data.append(re_data)
+
+    column_names = report['column names']
+
+    # get save path and all data in one numoy array
+    save_path, final_data_array = _save_synchronised_data(re_sampled_time[0], re_sampled_data, out_path,
+                                                         file_name=sync_file_name)
+
+    # put data into a pandas dataframe
+    df = pd.DataFrame(final_data_array, columns=column_names)
+
+    return df
+
+
+def _extract_date_time(file_path):
+    """
+    extracts the date and the time from the file path
+    :param file_path: the path of the file
+    :return: the time and the date
+    """
+    # get the date and the time from the path string
+    date_time = file_path.rsplit('.', 1)[0].rsplit('_', 2)
+
+    # extract date and time
+    date = date_time[1]
+    time = date_time[2]
+
+    return date, time
+
+
+def _get_sensor_path_list(folder_path, device, sensor_list):
+    sensor_path_list = []
+
+    for sensor in sensor_list:
+        sensor_name = _get_sensor_names(device, sensor)
+
+        for filename in os.listdir(folder_path):
+
+            if filename.startswith(sensor_name):
+                sensor_path = os.path.join(folder_path, filename)
+
+                # path for the data of the chosen sensors
+                sensor_path_list.append(sensor_path)
+
+    return sensor_path_list
+
+
+def _sync_all_sensors_in_class(data_path: str, out_path: str, folder_name: str,
+                              selected_sensors: Dict[str, List[str]]) -> None:
+    """
+    Load data of chosen sensors for one class of movement.
+
+    Parameters
+    ----------
+    data_path: str
+        Path to the main directory containing the data.
+
+    out_path : str
+        The path where synchronized data will be saved.
+
+    folder_name: str
+        Folder name (class of movement) from which to load the data.
+
+    selected_sensors: Dict[str, List[str]]
+        A dictionary specifying devices as keys and a list of sensors to load data for as values.
+        Supported sensor names for devices ("phone", "watch") include:
+            "acc": accelerometer
+            "gyr": gyroscope
+            "mag": magnetometer
+            "rotvec": rotation vector
+            "wearheartrate": heart rate (watch only)
+            "noise": ambient noise (phone only)
+
+    Returns
+    -------
+    None: The function saves the synchronized data to a CSV file.
+    """
+
+    folder_path = os.path.join(data_path, folder_name)
+
+    for device, sensor_list in selected_sensors.items():
+        sensor_path_list = _get_sensor_path_list(folder_path, device, sensor_list)
+
+        # extract date and time from the filenames - assume that sensors from the same device
+        # have the dame date and time in the filename
+        path_date_time = sensor_path_list[0]
+
+        date, time = _extract_date_time(path_date_time)
+
+        # generate file name
+        sync_file_name = "synchronized_" + device + '_' + folder_name + "_" + date + "_" + time + ".csv"
+
+        # generate output directory
+        output_path = _create_dir(out_path, folder_name)
+
+        # sync sensors from device
+        df = _sync_sensors_in_device(sensor_path_list, output_path, sync_file_name)
+
+        # save dataframe to a csv file
+        df.to_csv(os.path.join(output_path, sync_file_name))
+
 
