@@ -11,10 +11,26 @@ import warnings
 import json
 from typing import List, Tuple, Dict, Any
 
+# internal imports
+from constants import ACCELEROMETER
+
 
 # ------------------------------------------------------------------------------------------------------------------- #
 # public functions
 # ------------------------------------------------------------------------------------------------------------------- #
+
+def load_logger_file(folder_path: str) -> pd.DataFrame:
+    for filename in os.listdir(folder_path):
+
+        if filename.startswith('opensignals_ACQUISITION_LOG_'):
+
+            logger_file_path = os.path.join(folder_path, filename)
+
+    df = pd.read_csv(logger_file_path, sep='\t', header=None, skiprows=3, names=['time', 'logs'])
+
+    return df
+
+
 def load_device_data(in_path: List[str], print_report: bool = False) -> Tuple[List[np.ndarray], Dict[str, Any]]:
     """
     Function to load data from a single or multiple android files
@@ -88,11 +104,13 @@ def load_device_data(in_path: List[str], print_report: bool = False) -> Tuple[Li
     for file in in_path:
 
         # suppress loadtxt warning that is thrown when there is no sensor data present in the file
+        # # remove nan column (the loading of the opensignals sensor file through read_csv(...) generates a nan column
+        # TODO: sensor_df.dropna(axis=1, how='all', inplace=True)
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
 
             # adicionar file de constantes
-            if "ACCELEROMETER" in file or "GYROSCOPE" in file or "MAGNETIC_FIELD" in file or "MAGNETOMETER" in file:
+            if ACCELEROMETER in file or "GYROSCOPE" in file or "MAGNETIC_FIELD" in file or "MAGNETOMETER" in file:
                 column_indices = [0, 1, 2, 3]
 
             elif "ROTATION_VECTOR" in file:

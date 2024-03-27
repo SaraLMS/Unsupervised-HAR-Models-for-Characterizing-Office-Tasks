@@ -115,37 +115,6 @@ def join_dataframes_on_index(df1: pd.DataFrame, df2: pd.DataFrame) -> pd.DataFra
     return df_joined
 
 
-def get_used_devices(folder_path: str) -> list:
-    """
-    Determine which devices are being used based on the presence of data files.
-
-    Parameters
-    ----------
-    folder_path : str
-        Path to the directory containing the synchronized data files.
-
-    Returns
-    -------
-    List of devices being used.
-    """
-    used_devices: List[str] = []
-
-    for filename in os.listdir(folder_path):
-
-        if "phone" in filename:
-            device: str = "phone"
-
-        elif "watch" in filename:
-            device: str = "watch"
-
-        elif "mban" in filename:
-            device: str = "mban"
-
-        used_devices.append(device)
-
-    return used_devices
-
-
 def generate_filename(datetime_dic: Dict[str, Tuple[str,str]], folder_name: str, sync_type: str, prefix: str = "Sara") -> str:
     """
     Generate a filename for synchronized data based on devices, sensors, class name, synchronization type, and date-time.
@@ -196,6 +165,7 @@ def sync_data_to_csv(output_filename: str, signals_df: pd.DataFrame, output_path
 
     # save dataframe to csv file
     signals_df.to_csv(output_path)
+
 
 
 # PUBLIC FUNCTIONS

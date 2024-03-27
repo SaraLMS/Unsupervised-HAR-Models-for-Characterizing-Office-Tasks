@@ -47,14 +47,18 @@ def _get_axis_from_acc(dataframes_dic: Dict[str, pd.DataFrame], window_range: Tu
     pd.Series]:
     # get the start and end values of the axis - window of samples containing the jumps for cross corr
     start, end = window_range
-
+    # TODO ASK PHILLIP ABOUT THIS!!!!!!!!!!!!!!!!!!!!!!!!!!
     acc_axis_array = []
 
     for device, df in dataframes_dic.items():
 
         if device == 'phone':
 
-            axis_to_sync = df['yAcc'][start:end]  ########### ASK PHILLIP ABOUT THIS!!!!!!!!!!!!!!!!!!!!!!!!!!
+            # column = 'yAcc'
+            # factor = 1
+
+
+            axis_to_sync = df['yAcc'][start:end]
             acc_axis_array.append(axis_to_sync)
 
         elif device == 'watch':
@@ -64,7 +68,7 @@ def _get_axis_from_acc(dataframes_dic: Dict[str, pd.DataFrame], window_range: Tu
 
         elif device == 'mban':
             pass
-
+    # return factor, column
     return acc_axis_array
 
 
