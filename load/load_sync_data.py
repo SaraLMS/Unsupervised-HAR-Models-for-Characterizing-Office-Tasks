@@ -4,26 +4,34 @@
 
 import os
 import pandas as pd
-from typing import Dict
+from typing import Dict, Tuple, Any
+
+from pandas import DataFrame
+
+from synchronization.sync_parser import extract_date_time
 
 
 # ------------------------------------------------------------------------------------------------------------------- #
 # public functions
 # ------------------------------------------------------------------------------------------------------------------- #
 
-def load_used_devices_data(folder_path: str) -> Dict[str, pd.DataFrame]:
-
+def load_used_devices_data(folder_path: str) -> Tuple[dict[str, pd.DataFrame], dict[str, tuple[Any, Any]]]:
     used_devices_dict = _get_used_devices_from_path(folder_path)
 
     dataframes_dict = {}
+    datetimes_dic = {}
 
     for device, path in used_devices_dict.items():
         # load data to a pandas dataframe
         df = _load_data_from_csv(path)
 
+        date, time = extract_date_time(path)
+
         dataframes_dict[device] = df
 
-    return dataframes_dict
+        datetimes_dic[device] = date, time
+
+    return dataframes_dict, datetimes_dic
 
 
 # ------------------------------------------------------------------------------------------------------------------- #
@@ -49,7 +57,7 @@ def _get_used_devices_from_path(folder_path: str) -> Dict[str, str]:
     used_devices_dict = {}
 
     for filename in os.listdir(folder_path):
-        #get the path of the csv file
+        # get the path of the csv file
         data_path = os.path.join(folder_path, filename)
 
         # Check if the filename contains any of the supported sensors

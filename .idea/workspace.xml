@@ -5,13 +5,14 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="3466cb1d-2559-4122-9522-f23b0d0f6b0a" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/load/load_sync_data.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/synchronization/sync_between_devices_crosscorr.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/synchronization/sync_between_devices_timestamps.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/synchronization/sync_devices_timestamps.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/synchronization/sync_parser.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/load/load_data.py" beforeDir="false" afterPath="$PROJECT_DIR$/load/load_raw_data.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/synchronization/sync_multiple_sensors.py" beforeDir="false" afterPath="$PROJECT_DIR$/synchronization/sync_multiple_sensors.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/load/load_sync_data.py" beforeDir="false" afterPath="$PROJECT_DIR$/load/load_sync_data.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/synchronization/sync_between_devices_crosscorr.py" beforeDir="false" afterPath="$PROJECT_DIR$/synchronization/sync_devices_crosscorr.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/synchronization/sync_between_devices_timestamps.py" beforeDir="false" afterPath="$PROJECT_DIR$/synchronization/common.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/synchronization/sync_multiple_sensors.py" beforeDir="false" afterPath="$PROJECT_DIR$/synchronization/sync_android_sensors.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -40,13 +41,15 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;master&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Python.main.executor": "Run",
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "git-widget-placeholder": "master",
+    "ignore.virus.scanning.warn.message": "true"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
       <recent name="C:\Users\srale\PycharmProjects\toolbox\synchronization" />
@@ -100,7 +103,15 @@
       <option name="project" value="LOCAL" />
       <updated>1711451941022</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="Added corrected loading and synchronization of sensors in the same device. Saves to csv with correct column names">
+      <option name="closed" value="true" />
+      <created>1711472720221</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1711472720221</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">

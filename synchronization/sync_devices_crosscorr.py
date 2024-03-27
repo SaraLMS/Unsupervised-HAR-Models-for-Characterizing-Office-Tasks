@@ -3,7 +3,7 @@
 # ------------------------------------------------------------------------------------------------------------------- #
 
 from load.load_sync_data import load_used_devices_data
-import os
+from .common import crop_dataframes_on_shift, join_dataframes_on_index, generate_filename, get_folder_name_from_path,sync_data_to_csv
 import numpy as np
 import pandas as pd
 from typing import List, Tuple, Dict
@@ -13,18 +13,40 @@ from typing import List, Tuple, Dict
 # public functions
 # ------------------------------------------------------------------------------------------------------------------- #
 
+def sync_crosscorr(folder_path: str, output_path: str):
+    # get the dataframes of the signals in the folder
+    dataframes_dic, datetimes_dic = load_used_devices_data(folder_path)
+
+    # get the acc axis depending on the type of device
+    acc_axis_array = _get_axis_from_acc(dataframes_dic)
+
+    # get shift between the signals from different devices
+    tau = _get_shift_to_synchronize_signals(acc_axis_array)
+
+    # crop dataframes
+    sync_signal_1, sync_signal_2 = crop_dataframes_on_shift(tau, dataframes_dic)
+
+    # join signals into one dataframe
+    df_joined = join_dataframes_on_index(sync_signal_1, sync_signal_2)
+
+    # get folder name
+    folder_name = get_folder_name_from_path(folder_path)
+
+    # generate file name
+    output_filename = generate_filename(datetimes_dic, folder_name, sync_type="crosscorr")
+
+    # save csv file
+    sync_data_to_csv(output_filename, df_joined, output_path, folder_name)
+
 # ------------------------------------------------------------------------------------------------------------------- #
 # private functions
 # ------------------------------------------------------------------------------------------------------------------- #
 
-def _get_signals_dataframes(folder_path: str) -> Dict[str, pd.DataFrame]:
-    dataframes_dic = load_used_devices_data(folder_path)
 
-    return dataframes_dic
-
-
-def _get_axis_from_acc(dataframes_dic: Dict[str, pd.DataFrame]) -> List[pd.Series]:
-
+def _get_axis_from_acc(dataframes_dic: Dict[str, pd.DataFrame], window_range: Tuple[int, int] = (0, 500)) -> List[
+    pd.Series]:
+    # get the start and end values of the axis - window of samples containing the jumps for cross corr
+    start, end = window_range
 
     acc_axis_array = []
 
@@ -32,12 +54,12 @@ def _get_axis_from_acc(dataframes_dic: Dict[str, pd.DataFrame]) -> List[pd.Serie
 
         if device == 'phone':
 
-            axis_to_sync = df['yAcc'][0:500] ########### ASK PHILLIP ABOUT THIS!!!!!!!!!!!!!!!!!!!!!!!!!!
+            axis_to_sync = df['yAcc'][start:end]  ########### ASK PHILLIP ABOUT THIS!!!!!!!!!!!!!!!!!!!!!!!!!!
             acc_axis_array.append(axis_to_sync)
 
         elif device == 'watch':
 
-            axis_to_sync = -1 * df['xAcc_wear'][0:500]
+            axis_to_sync = -1 * df['xAcc_wear'][start:end]
             acc_axis_array.append(axis_to_sync)
 
         elif device == 'mban':
@@ -120,3 +142,9 @@ def _get_shift_to_synchronize_signals(acc_axis_array: List[pd.Series]) -> int:
     tau = int(np.argmax(correlation) - (len(correlation)) / 2)
 
     return tau
+
+
+
+
+
+

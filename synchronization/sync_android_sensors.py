@@ -2,6 +2,7 @@
 # imports
 # ------------------------------------------------------------------------------------------------------------------- #
 from load.load_raw_data import load_device_data, calc_avg_sampling_rate, round_sampling_rate
+from common import create_dir
 import numpy as np
 import pandas as pd
 import os
@@ -411,24 +412,6 @@ def _pad_android_data(sensor_data, report, start_with=None, end_with=None, paddi
     return padded_sensor_data
 
 
-def _create_dir(path, folder_name):
-    """
-    creates emg new directory in the specified path
-    :param path: the path in which the folder_name should be created
-    :param folder_name: the name of the folder that should be created
-    :return: the full path to the created folder
-    """
-
-    # join path and folder
-    new_path = os.path.join(path, folder_name)
-
-    # check if the folder does not exist yet
-    if not os.path.exists(new_path):
-        # create the folder
-        os.makedirs(new_path)
-
-    return new_path
-
 
 def _save_synchronised_data(time_axis, data, path, file_name='android_synchronized'):
     """
@@ -637,7 +620,7 @@ def _sync_all_sensors_in_class(data_path: str, out_path: str, folder_name: str,
         sync_file_name = prefix + "_synchronized_" + device + '_' + folder_name + "_" + date + "_" + time + ".csv"
 
         # generate output directory
-        output_path = _create_dir(out_path, folder_name)
+        output_path = create_dir(out_path, folder_name)
 
         # sync sensors from device
         df = _sync_sensors_in_device(sensor_path_list, output_path, sync_file_name)
