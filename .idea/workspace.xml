@@ -5,14 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="3466cb1d-2559-4122-9522-f23b0d0f6b0a" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/constants.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/load/load_raw_data.py" beforeDir="false" afterPath="$PROJECT_DIR$/load/load_raw_data.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/synchronization/common.py" beforeDir="false" afterPath="$PROJECT_DIR$/synchronization/common.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/synchronization/sync_devices_crosscorr.py" beforeDir="false" afterPath="$PROJECT_DIR$/synchronization/sync_devices_crosscorr.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/synchronization/sync_devices_timestamps.py" beforeDir="false" afterPath="$PROJECT_DIR$/synchronization/sync_devices_timestamps.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/synchronization/sync_parser.py" beforeDir="false" afterPath="$PROJECT_DIR$/synchronization/sync_parser.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -41,16 +34,16 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "Python.main.executor": "Run",
-    "Python.sync_devices_timestamps.executor": "Run",
-    "RunOnceActivity.OpenProjectViewOnStart": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "git-widget-placeholder": "master",
-    "ignore.virus.scanning.warn.message": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Python.main.executor&quot;: &quot;Run&quot;,
+    &quot;Python.sync_devices_timestamps.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
+    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
       <recent name="C:\Users\srale\PycharmProjects\toolbox\synchronization" />
@@ -120,13 +113,22 @@
       <option name="project" value="LOCAL" />
       <updated>1711546129105</updated>
     </task>
-    <option name="localTasksCounter" value="7" />
+    <task id="LOCAL-00007" summary="Synchronization based on cross corr and timestamps done.&#10;Working on searching the log for starting times (_get_start_times_from_logger) in Phillip's way.">
+      <option name="closed" value="true" />
+      <created>1711563194981</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1711563194981</updated>
+    </task>
+    <option name="localTasksCounter" value="8" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Load data to list of numpy arrays. Added the column names to the report to later load dataframe with the correct column names." />
     <MESSAGE value="add synchronization" />
     <MESSAGE value="Added corrected loading and synchronization of sensors in the same device. Saves to csv with correct column names" />
-    <option name="LAST_COMMIT_MESSAGE" value="Added corrected loading and synchronization of sensors in the same device. Saves to csv with correct column names" />
+    <MESSAGE value="Synchronization based on cross corr and timestamps done.&#10;Working on searching the log for starting times (_get_start_times_from_logger) in Phillip's way." />
+    <option name="LAST_COMMIT_MESSAGE" value="Synchronization based on cross corr and timestamps done.&#10;Working on searching the log for starting times (_get_start_times_from_logger) in Phillip's way." />
   </component>
 </project>

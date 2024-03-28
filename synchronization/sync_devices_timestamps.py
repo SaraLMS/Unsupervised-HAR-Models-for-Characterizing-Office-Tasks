@@ -160,32 +160,75 @@ def sync_on_filename_timestamps(folder_path: str, output_path: str) -> None:
 
 
 def _filter_logger_file(logger_path: str) -> pd.DataFrame:
-    # load logger file to df
+    """
+    Loads a logger file and first drops rows where the logs column contains "NOISERECORDER",
+    then filters it to keep only the rows where the logs column contains the text
+    "SENSOR_DATA: received first data from". Additionally, strips this part of the text
+    from the 'logs' column in the filtered DataFrame.
+
+    Parameters:
+    ----------
+    logger_path : str
+        The file path to the logger file.
+
+    Returns:
+    -------
+    pd.DataFrame
+        A filtered DataFrame containing only the relevant log rows, with specific
+        text removed from the 'logs' column.
+    """
+    # Load logger file to DataFrame
     logger_df = load_logger_file(logger_path)
 
-    # filter logs column to keep only the rows containing "SENSOR_DATA: received first data from"
+    # Drop rows where 'logs' column contains 'NOISERECORDER'
+    logger_df = logger_df[~logger_df['logs'].str.contains("NOISERECORDER")]
+
+    # Filter logs column to keep only the rows containing the specified text "SENSOR_DATA: received first data from"
     filtered_df = logger_df[logger_df['logs'].str.contains("SENSOR_DATA: received first data from")]
+
+    # Strip the specified part of the string from the 'logs' column
+    filtered_df['logs'] = filtered_df['logs'].str.replace("SENSOR_DATA: received first data from ", "", regex=False)
 
     return filtered_df
 
 
-def _get_start_times_from_logger(dataframes_dic, filtered_logger_df):
-    device_log_keywords = {
-        'phone': 'M',
-        'watch': 'WEAR',
-    }
+def _get_start_times_from_logger(filtered_logger_df):
+    start_times_dic = {}
 
-    start_times = {}
+    # Check for 'watch' based on 'WEAR' keyword
+    wear_logs = filtered_logger_df[filtered_logger_df['logs'].str.startswith('WEAR')]
+    if not wear_logs.empty:
+        # Convert the first matching time string to a datetime.time object
+        wear_time = datetime.strptime(wear_logs.iloc[0]['time'], '%H:%M:%S.%f').time()
+        start_times_dic['watch'] = wear_time
 
-    for device, pattern in device_log_keywords.items():
-        if device in dataframes_dic:
+    # Iterate through the DataFrame to find 'mban' and 'phone'
+    for index, row in filtered_logger_df.iterrows():
 
-            pattern_to_use = f'^.*{pattern}'
-            device_log = filtered_logger_df[filtered_logger_df['logs'].str.contains(pattern_to_use, regex=True)].head(1)
+        if ':' in row['logs']:
+            # Assuming this log entry represents an MBAN device
+            mban_time = datetime.strptime(row['time'], '%H:%M:%S.%f').time()
+            start_times_dic['mban'] = mban_time
 
-            if not device_log.empty:
-                time_str = device_log['time'].iloc[0]
-                time_obj = datetime.strptime(time_str, '%H:%M:%S.%f').time()
-                start_times[device] = time_obj
+        if 'WEAR' not in row['logs']:
 
-    return start_times
+            # Assuming any log entry without 'WEAR' and not identified as MBAN is from the 'phone'
+            phone_time = datetime.strptime(row['time'], '%H:%M:%S.%f').time()
+
+            if 'phone' not in start_times_dic:  # Ensure we capture the first occurrence
+                start_times_dic['phone'] = phone_time
+
+    return start_times_dic
+
+
+def _get_used_devices_start_times(dataframes_dic, filtered_logger_df):
+    all_start_times_dic = _get_start_times_from_logger(filtered_logger_df)
+
+    start_times_dic = {}
+
+    for device in dataframes_dic.keys():
+
+        if device in all_start_times_dic.keys():
+            start_times_dic[device] = all_start_times_dic[device]
+
+    return start_times_dic
