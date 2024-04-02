@@ -2,7 +2,7 @@
 # imports
 # ------------------------------------------------------------------------------------------------------------------- #
 from load.load_raw_data import load_device_data, calc_avg_sampling_rate, round_sampling_rate
-from common import create_dir
+from .common import create_dir, get_folder_name_from_path
 import numpy as np
 import pandas as pd
 import os
@@ -14,21 +14,17 @@ from typing import List, Dict, Tuple
 # public functions
 # ------------------------------------------------------------------------------------------------------------------- #
 
-def sync_all_classes(data_path: str, out_path: str, folder_names: List[str],
-                     selected_sensors: Dict[str, List[str]]) -> None:
+def sync_all_classes(data_path: str, out_path: str, selected_sensors: Dict[str, List[str]]) -> None:
     """
     Sync sensor data for all classes of movements on a single device.
 
     Parameters
     ----------
     data_path : str
-        The path to the main folder containing the sensor data.
+        The path to the main folder containing the raw sensor data.
 
     out_path : str
-        The path where synchronized data will be saved.
-
-    folder_names : List[str]
-        List of class names (folders) from which to load the data. Each class folder should be named after the class.
+        The path to the main folder where synchronized data will be saved.
 
     selected_sensors : Dict[str, List[str]]
         A dictionary where keys are device modalities ("phone", "watch") and values are lists of sensor
@@ -44,8 +40,12 @@ def sync_all_classes(data_path: str, out_path: str, folder_names: List[str],
     -------
     None - This function generate csv files with the synchronized data
     """
-    for folder_name in folder_names:
-        _sync_all_sensors_in_class(data_path, out_path, folder_name, selected_sensors)
+    # iterate through the folders in the main path
+    for folder in os.listdir(data_path):
+        folder_path = os.path.join(data_path, folder)
+
+        _sync_all_sensors_in_class(folder_path, out_path, selected_sensors)
+
 
 # ------------------------------------------------------------------------------------------------------------------- #
 # private functions
@@ -128,7 +128,8 @@ def _get_sensor_names(device: str, sensor: str) -> str:
     return one_sensor_name
 
 
-def _re_sample_data(time_axis, data, start=0, stop=-1, shift_time_axis=True, sampling_rate=100, kind_interp='quadratic'):
+def _re_sample_data(time_axis, data, start=0, stop=-1, shift_time_axis=True, sampling_rate=100,
+                    kind_interp='quadratic'):
     """
     function to re-sample android sensor data from a non-equidistant sampling to an equidistant sampling
     Parameters
@@ -186,7 +187,6 @@ def _re_sample_data(time_axis, data, start=0, stop=-1, shift_time_axis=True, sam
 
     # calculate the approximate sampling rate and round it to the next tens digit
     if sampling_rate is None:
-
         # get the average sampling rate
         sampling_rate = calc_avg_sampling_rate(time_axis)
 
@@ -226,7 +226,6 @@ def _re_sample_data(time_axis, data, start=0, stop=-1, shift_time_axis=True, sam
 
 
 def _pad_android_data(sensor_data, report, start_with=None, end_with=None, padding_type='same'):
-
     """
     function in order to pad multiple android signals to the correct same start and end values. This function is
     needed in order to perform a synchronization of android sensors.
@@ -412,7 +411,6 @@ def _pad_android_data(sensor_data, report, start_with=None, end_with=None, paddi
     return padded_sensor_data
 
 
-
 def _save_synchronised_data(time_axis, data, path, file_name='android_synchronized'):
     """
     Function used for saving synchronised android data into a single file. CHANGE DOCSTRING
@@ -493,7 +491,7 @@ def _sync_sensors_in_device(in_path, out_path, sync_file_name='android_synchroni
     for data in padded_sensor_data:
         # resample the data ('_' suppresses the output for the sampling rate)
         re_time, re_data, _ = _re_sample_data(data[:, 0], data[:, 1:], shift_time_axis=True,
-                                             sampling_rate=sampling_rate, kind_interp='quadratic')
+                                              sampling_rate=sampling_rate, kind_interp='quadratic')
 
         # add the the time and data to the lists
         re_sampled_time.append(re_time)
@@ -503,7 +501,7 @@ def _sync_sensors_in_device(in_path, out_path, sync_file_name='android_synchroni
 
     # get save path and all data in one numoy array
     save_path, final_data_array = _save_synchronised_data(re_sampled_time[0], re_sampled_data, out_path,
-                                                         file_name=sync_file_name)
+                                                          file_name=sync_file_name)
 
     # put data into a pandas dataframe
     df = pd.DataFrame(final_data_array, columns=column_names)
@@ -511,7 +509,7 @@ def _sync_sensors_in_device(in_path, out_path, sync_file_name='android_synchroni
     return df
 
 
-def _extract_date_time(file_path: str) -> Tuple[str,str]:
+def _extract_date_time(file_path: str) -> Tuple[str, str]:
     """
     extracts the date and the time from the file path
 
@@ -571,8 +569,8 @@ def _get_sensor_path_list(folder_path: str, device: str, sensor_list: List[str])
     return sensor_path_list
 
 
-def _sync_all_sensors_in_class(data_path: str, out_path: str, folder_name: str,
-                              selected_sensors: Dict[str, List[str]], prefix: str = 'Sara') -> None:
+def _sync_all_sensors_in_class(folder_path: str, out_path: str,
+                               selected_sensors: Dict[str, List[str]], prefix: str = 'Sara') -> None:
     """
     Load data of chosen sensors for one class of movement.
 
@@ -604,8 +602,8 @@ def _sync_all_sensors_in_class(data_path: str, out_path: str, folder_name: str,
     -------
     None: The function saves the synchronized data to a CSV file.
     """
-
-    folder_path = os.path.join(data_path, folder_name)
+    # get folder name from folder path
+    folder_name = get_folder_name_from_path(folder_path)
 
     for device, sensor_list in selected_sensors.items():
         sensor_path_list = _get_sensor_path_list(folder_path, device, sensor_list)
@@ -627,5 +625,3 @@ def _sync_all_sensors_in_class(data_path: str, out_path: str, folder_name: str,
 
         # save dataframe to a csv file
         df.to_csv(os.path.join(output_path, sync_file_name))
-
-

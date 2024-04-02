@@ -47,7 +47,7 @@ def _get_axis_from_acc(dataframes_dic: Dict[str, pd.DataFrame], window_range: Tu
     pd.Series]:
     # get the start and end values of the axis - window of samples containing the jumps for cross corr
     start, end = window_range
-    # TODO ASK PHILLIP ABOUT THIS!!!!!!!!!!!!!!!!!!!!!!!!!!
+    # TODO ASK PHILLIP ABOUT THIS - no magic numbers
     acc_axis_array = []
 
     for device, df in dataframes_dic.items():

@@ -6,8 +6,6 @@ import os
 import pandas as pd
 from typing import Dict, Tuple, Any
 
-from pandas import DataFrame
-
 from synchronization.sync_parser import extract_date_time
 
 
@@ -15,7 +13,7 @@ from synchronization.sync_parser import extract_date_time
 # public functions
 # ------------------------------------------------------------------------------------------------------------------- #
 
-def load_used_devices_data(folder_path: str) -> Tuple[dict[str, pd.DataFrame], dict[str, tuple[Any, Any]]]:
+def load_used_devices_data(folder_path: str, time_in_seconds: bool = True) -> Tuple[dict[str, pd.DataFrame], dict[str, tuple[Any, Any]]]:
     used_devices_dict = _get_used_devices_from_path(folder_path)
 
     dataframes_dict = {}
@@ -24,6 +22,11 @@ def load_used_devices_data(folder_path: str) -> Tuple[dict[str, pd.DataFrame], d
     for device, path in used_devices_dict.items():
         # load data to a pandas dataframe
         df = _load_data_from_csv(path)
+
+        # if times is in seconds change column name to 'sec
+        # TODO ASK PHILLIP
+        if time_in_seconds:
+            df.rename(columns={'nSeq': 'sec'}, inplace=True)
 
         date, time = extract_date_time(path)
 
