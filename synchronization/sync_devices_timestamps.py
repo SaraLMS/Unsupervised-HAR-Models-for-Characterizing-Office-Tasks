@@ -25,9 +25,15 @@ def sync_timestamps(logger_folder_path: str, folder_path: str, output_path: str)
         # sync signals based on logger timestamps
         _sync_on_logger_timestamps(logger_folder_path, folder_path, output_path)
 
+        #inform user
+        print("Synchronizing data based on logger timestamps")
+
     else:
         # sync signals based on filename timestamps
         _sync_on_filename_timestamps(folder_path, output_path)
+
+        # inform user
+        print("Synchronizing data based on filename timestamps")
 
 
 # ------------------------------------------------------------------------------------------------------------------- #
@@ -221,6 +227,7 @@ def _get_start_times_from_logger(filtered_logger_df: pd.DataFrame) -> Dict[str, 
 
         # Check for logs indicating MBAN devices, identified by presence of colon ':'
         elif not found_mban and ':' in row['logs']:
+            # TODO the second mban
             mban_time = datetime.strptime(row['time'], '%H:%M:%S.%f').time()
             start_times_dic['mban'] = mban_time
             found_mban = True

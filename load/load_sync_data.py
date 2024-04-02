@@ -13,7 +13,8 @@ from synchronization.sync_parser import extract_date_time
 # public functions
 # ------------------------------------------------------------------------------------------------------------------- #
 
-def load_used_devices_data(folder_path: str, time_in_seconds: bool = True) -> Tuple[dict[str, pd.DataFrame], dict[str, tuple[Any, Any]]]:
+def load_used_devices_data(folder_path: str, time_in_seconds: bool = True) -> Tuple[
+    dict[str, pd.DataFrame], dict[str, tuple[Any, Any]]]:
     used_devices_dict = _get_used_devices_from_path(folder_path)
 
     dataframes_dict = {}
@@ -21,7 +22,7 @@ def load_used_devices_data(folder_path: str, time_in_seconds: bool = True) -> Tu
 
     for device, path in used_devices_dict.items():
         # load data to a pandas dataframe
-        df = _load_data_from_csv(path)
+        df = load_data_from_csv(path)
 
         # if times is in seconds change column name to 'sec
         # TODO ASK PHILLIP
@@ -35,6 +36,13 @@ def load_used_devices_data(folder_path: str, time_in_seconds: bool = True) -> Tu
         datetimes_dic[device] = date, time
 
     return dataframes_dict, datetimes_dic
+
+
+def load_data_from_csv(file_path: str) -> pd.DataFrame:
+    # load csv file to a pandas DataFrame
+    df = pd.read_csv(file_path, index_col=0)
+
+    return df
 
 
 # ------------------------------------------------------------------------------------------------------------------- #
@@ -73,10 +81,3 @@ def _get_used_devices_from_path(folder_path: str) -> Dict[str, str]:
             raise ValueError(f"Unsupported sensor type in filename: {filename}")
 
     return used_devices_dict
-
-
-def _load_data_from_csv(file_path: str) -> pd.DataFrame:
-    # load csv file to a pandas DataFrame
-    df = pd.read_csv(file_path, index_col=0)
-
-    return df

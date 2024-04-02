@@ -167,21 +167,3 @@ def sync_data_to_csv(output_filename: str, signals_df: pd.DataFrame, output_path
     signals_df.to_csv(output_path)
 
 
-
-# PUBLIC FUNCTIONS
-
-# get dic = { device: df} - check
-
-# get crop tau in samples - check
-
-#crop dataframes - check
-
-# join dataframes - check
-
-# get used devices - check
-
-# generate filename - check
-
-# creat csv
-
-# create dir

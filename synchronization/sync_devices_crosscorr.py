@@ -43,7 +43,7 @@ def sync_crosscorr(folder_path: str, output_path: str):
 # ------------------------------------------------------------------------------------------------------------------- #
 
 
-def _get_axis_from_acc(dataframes_dic: Dict[str, pd.DataFrame], window_range: Tuple[int, int] = (0, 500)) -> List[
+def _get_axis_from_acc(dataframes_dic: Dict[str, pd.DataFrame], window_range: Tuple[int, int] = (0, 5000)) -> List[
     pd.Series]:
     # get the start and end values of the axis - window of samples containing the jumps for cross corr
     start, end = window_range
