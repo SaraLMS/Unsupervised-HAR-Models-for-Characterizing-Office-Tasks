@@ -59,6 +59,3 @@ def check_logger_file(folder_path:str) -> bool:
         return True
     else:
         return False
-
-
-# check if logger exist and if not empty

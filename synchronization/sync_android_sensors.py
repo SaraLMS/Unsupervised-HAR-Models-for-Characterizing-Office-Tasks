@@ -464,7 +464,7 @@ def _sync_sensors_in_device(in_path, out_path, sync_file_name='android_synchroni
     """
 
     # load the data
-    sensor_data, report = load_device_data(in_path, print_report=True)
+    sensor_data, report = load_device_data(in_path)
 
     # ---- data padding ---- #
 
@@ -476,7 +476,6 @@ def _sync_sensors_in_device(in_path, out_path, sync_file_name='android_synchroni
     padded_sensor_data = _pad_android_data(sensor_data, report)
 
     # ---- data re-sampling ---- #
-    print('\n---- DATA RE-SAMPLING ----\n')
 
     # list for holding the re-sampled data
     re_sampled_data = []

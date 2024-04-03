@@ -15,6 +15,22 @@ from synchronization.sync_parser import extract_date_time
 
 def load_used_devices_data(folder_path: str, time_in_seconds: bool = True) -> Tuple[
     dict[str, pd.DataFrame], dict[str, tuple[Any, Any]]]:
+    """
+    Loads sensor data from used devices.
+
+    Parameters:
+    ----------
+    folder_path : str
+        The directory path containing sensor data files.
+
+    time_in_seconds: bool (default = True)
+        True if time in the sensor data is in seconds.
+
+    Returns:
+    -------
+    A dictionary where keys are the device names and values are the DataFrames containing the sensor data.
+
+    """
     used_devices_dict = _get_used_devices_from_path(folder_path)
 
     dataframes_dict = {}
@@ -39,6 +55,17 @@ def load_used_devices_data(folder_path: str, time_in_seconds: bool = True) -> Tu
 
 
 def load_data_from_csv(file_path: str) -> pd.DataFrame:
+    """
+    Loads data to a pandas dataframe.
+
+    Parameters:
+        file_path (str):
+            Path of the file to be loaded.
+
+    Returns:
+        Pandas DataFrame containing the data.
+
+    """
     # load csv file to a pandas DataFrame
     df = pd.read_csv(file_path, index_col=0)
 
@@ -60,11 +87,11 @@ def _get_used_devices_from_path(folder_path: str) -> Dict[str, str]:
 
     Returns:
     -------
-    A dictionary where keys are sensor types and values are the full paths to their
+    A dictionary where keys are device names and values are the full paths to their
     corresponding data files within the specified folder.
 
     """
-    supported_sensors = ['phone', 'watch', 'mban']
+    supported_devices = ['phone', 'watch', 'mban']
     used_devices_dict = {}
 
     for filename in os.listdir(folder_path):
@@ -72,12 +99,12 @@ def _get_used_devices_from_path(folder_path: str) -> Dict[str, str]:
         data_path = os.path.join(folder_path, filename)
 
         # Check if the filename contains any of the supported sensors
-        for sensor in supported_sensors:
-            if sensor in filename:
-                used_devices_dict[sensor] = data_path
+        for device in supported_devices:
+            if device in filename:
+                used_devices_dict[device] = data_path
                 break
         else:
             # This else clause belongs to the for-loop. It executes if the loop completes normally (no break)
-            raise ValueError(f"Unsupported sensor type in filename: {filename}")
+            raise ValueError(f"Unsupported device type in filename: {filename}")
 
     return used_devices_dict

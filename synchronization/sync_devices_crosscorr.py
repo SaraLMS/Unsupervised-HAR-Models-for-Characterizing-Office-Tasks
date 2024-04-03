@@ -3,7 +3,8 @@
 # ------------------------------------------------------------------------------------------------------------------- #
 
 from load.load_sync_data import load_used_devices_data
-from .common import crop_dataframes_on_shift, join_dataframes_on_index, generate_filename, get_folder_name_from_path,sync_data_to_csv
+from .common import crop_dataframes_on_shift, join_dataframes_on_index, generate_filename, get_folder_name_from_path, \
+    save_data_to_csv
 import numpy as np
 import pandas as pd
 from typing import List, Tuple, Dict
@@ -14,6 +15,18 @@ from typing import List, Tuple, Dict
 # ------------------------------------------------------------------------------------------------------------------- #
 
 def sync_crosscorr(folder_path: str, output_path: str):
+    """
+    Synchronizes sensor data from two different devices based on cross correlation.
+    Generates a new csv file containing all the synchronized sensor data from the two devices.
+
+    Parameters:
+
+        folder_path (str):
+        Path to the folder containing the sensor data from the two devices.
+
+        output_path (str):
+        Path to the location where the file should be saved.
+    """
     # get the dataframes of the signals in the folder
     dataframes_dic, datetimes_dic = load_used_devices_data(folder_path)
 
@@ -36,7 +49,30 @@ def sync_crosscorr(folder_path: str, output_path: str):
     output_filename = generate_filename(datetimes_dic, folder_name, sync_type="crosscorr")
 
     # save csv file
-    sync_data_to_csv(output_filename, df_joined, output_path, folder_name)
+    save_data_to_csv(output_filename, df_joined, output_path, folder_name)
+
+
+def get_tau_crosscorr(folder_path: str) -> int:
+    """
+    Gets the shift in samples when synchronizing signals based on cross correlation.
+
+    Parameters:
+        folder_path (str):
+        Path to the folder containing the sensor data from the two devices.
+
+    Returns:
+        Shift in samples calculated using cross correlation.
+    """
+    # get the dataframes of the signals in the folder
+    dataframes_dic, datetimes_dic = load_used_devices_data(folder_path)
+
+    # get the acc axis depending on the type of device
+    acc_axis_array = _get_axis_from_acc(dataframes_dic)
+
+    # get shift between the signals from different devices
+    tau = _get_shift_to_synchronize_signals(acc_axis_array)
+    return tau
+
 
 # ------------------------------------------------------------------------------------------------------------------- #
 # private functions
@@ -45,6 +81,19 @@ def sync_crosscorr(folder_path: str, output_path: str):
 
 def _get_axis_from_acc(dataframes_dic: Dict[str, pd.DataFrame], window_range: Tuple[int, int] = (0, 5000)) -> List[
     pd.Series]:
+    """
+    Gets the accelerometer axis from the devices used for synchronization
+
+    Parameters:
+        dataframes_dic (Dict[str, pd.DataFrame]):
+        Dictionary containing the chosen device names as keys and sensor data from said devices as values.
+
+        window_range (Tuple[int,int]):
+        Window of samples of the accelerometer axis data to be used for synchronization.
+
+    Returns:
+        List containing the axis for synchronization
+    """
     # get the start and end values of the axis - window of samples containing the jumps for cross corr
     start, end = window_range
     # TODO ASK PHILLIP ABOUT THIS - no magic numbers
@@ -56,7 +105,6 @@ def _get_axis_from_acc(dataframes_dic: Dict[str, pd.DataFrame], window_range: Tu
 
             # column = 'yAcc'
             # factor = 1
-
 
             axis_to_sync = df['yAcc'][start:end]
             acc_axis_array.append(axis_to_sync)
@@ -146,9 +194,3 @@ def _get_shift_to_synchronize_signals(acc_axis_array: List[pd.Series]) -> int:
     tau = int(np.argmax(correlation) - (len(correlation)) / 2)
 
     return tau
-
-
-
-
-
-

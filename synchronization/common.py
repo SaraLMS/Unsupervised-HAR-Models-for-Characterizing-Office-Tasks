@@ -1,4 +1,3 @@
-
 import os
 import pandas as pd
 from typing import Dict, List, Tuple
@@ -10,15 +9,27 @@ from pathlib import Path
 # public functions
 # ------------------------------------------------------------------------------------------------------------------- #
 
-def get_folder_name_from_path(folder_path: str):
+def get_folder_name_from_path(folder_path: str) -> str:
+    """
+    gets folder name from folder path.
 
+    Parameters:
+
+    folder_path (str):
+    Path to the folder containing the data.
+
+    Returns:
+        Folder name in the folder path
+    """
     folder_path = Path(folder_path)
     folder_name = folder_path.name
 
     return folder_name
-def create_dir(path, folder_name):
+
+
+def create_dir(path: str, folder_name: str) -> str:
     """
-    creates emg new directory in the specified path
+    creates a new directory in the specified path
     :param path: the path in which the folder_name should be created
     :param folder_name: the name of the folder that should be created
     :return: the full path to the created folder
@@ -33,6 +44,7 @@ def create_dir(path, folder_name):
         os.makedirs(new_path)
 
     return new_path
+
 
 def sync_signals(tau: int, array_df: List[pd.DataFrame]) -> Tuple[pd.DataFrame, pd.DataFrame]:
     """
@@ -85,8 +97,21 @@ def sync_signals(tau: int, array_df: List[pd.DataFrame]) -> Tuple[pd.DataFrame, 
     return signal_1, signal_2
 
 
-def crop_dataframes_on_shift(tau: int, dataframes_dic: Dict[str, pd.DataFrame]) -> Tuple[pd.DataFrame, pd.DataFrame] :
+def crop_dataframes_on_shift(tau: int, dataframes_dic: Dict[str, pd.DataFrame]) -> Tuple[pd.DataFrame, pd.DataFrame]:
+    """
+    Synchronize sensor data from chosen devices.
 
+    Parameters:
+        tau: int
+        The shift in samples between the two signals.
+
+        dataframes_dic (Dict[str, pd.DataFrame]):
+        Dictionary containing the chosen device names as keys and sensor data from said devices as values.
+
+    Returns:
+        The two signals synchronized
+
+    """
     # array for holding the two signals
     array_df = []
 
@@ -115,22 +140,27 @@ def join_dataframes_on_index(df1: pd.DataFrame, df2: pd.DataFrame) -> pd.DataFra
     return df_joined
 
 
-def generate_filename(datetime_dic: Dict[str, Tuple[str,str]], folder_name: str, sync_type: str, prefix: str = "Sara") -> str:
+def generate_filename(datetime_dic: Dict[str, Tuple[str, str]], folder_name: str, sync_type: str,
+                      prefix: str = "Sara") -> str:
     """
-    Generate a filename for synchronized data based on devices, sensors, class name, synchronization type, and date-time.
+    Generate a filename for synchronized data.
 
     Parameters:
-        devices (List[str]): A list of device names used for data acquisition.
+        datetime_dic: Dict[str, Tuple[str,str]]
+        Dictionary where the keys are the device names and the values are the
+        dates and times extracted from the filenames.
 
-        paths (List[str]): A list of file paths containing synchronized data from each device.
+        folder_name (str):
+        The name of the folder containing the data.
 
-        folder_name (str): The name of the class associated with the data.
+        sync_type (str):
+        The synchronization method used for the data.
 
-        sync_type (str): The synchronization method used for the data.
+        prefix (str):
+        Prefix to be added to the filename names.
 
     Returns:
         str: The generated filename for the synchronized data.
-
     """
 
     # array for holding the device names
@@ -156,7 +186,23 @@ def generate_filename(datetime_dic: Dict[str, Tuple[str,str]], folder_name: str,
     return output_name
 
 
-def sync_data_to_csv(output_filename: str, signals_df: pd.DataFrame, output_path: str, folder_name: str) -> None:
+def save_data_to_csv(output_filename: str, signals_df: pd.DataFrame, output_path: str, folder_name: str) -> None:
+    """
+    Saves synchronized sensor data to a csv file.
+
+    Parameters:
+        output_filename (str):
+        The name for the output file.
+
+        signals_df (pd.DataFrame):
+        DataFrame containing the synchronized sensor data to be saved to a csv file
+
+        output_path (str):
+        Location where the file should be saved.
+
+        folder_name (str):
+        The name of the folder containing the data.
+    """
     # create dir
     output_path = create_dir(output_path, folder_name)
 
@@ -165,5 +211,3 @@ def sync_data_to_csv(output_filename: str, signals_df: pd.DataFrame, output_path
 
     # save dataframe to csv file
     signals_df.to_csv(output_path)
-
-

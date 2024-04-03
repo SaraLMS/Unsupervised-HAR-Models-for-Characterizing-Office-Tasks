@@ -1,6 +1,3 @@
-
-
-
 # ------------------------------------------------------------------------------------------------------------------- #
 # imports
 # ------------------------------------------------------------------------------------------------------------------- #
@@ -20,6 +17,18 @@ from constants import ACCELEROMETER
 # ------------------------------------------------------------------------------------------------------------------- #
 
 def load_logger_file(folder_path: str) -> pd.DataFrame:
+    """
+    Loads the logger file stored in the folder path
+
+    Parameters:
+    ----------
+    folder_path : str
+        The path to the folder containing the logger file.
+
+    Returns:
+    -------
+    DataFrame containing the logger file.
+    """
     for filename in os.listdir(folder_path):
 
         if filename.startswith('opensignals_ACQUISITION_LOG_'):

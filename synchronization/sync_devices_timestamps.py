@@ -2,13 +2,14 @@
 # imports
 # ------------------------------------------------------------------------------------------------------------------- #
 
-from datetime import datetime, time
+from datetime import datetime, time, timedelta
 
 import pandas as pd
 
+from constants import BUFFER_SIZE_SECONDS
 from load.load_sync_data import load_used_devices_data
 from .common import crop_dataframes_on_shift, join_dataframes_on_index, generate_filename, get_folder_name_from_path, \
-    sync_data_to_csv
+    save_data_to_csv
 from load.load_raw_data import load_logger_file
 from typing import Dict, Tuple, Union
 
@@ -20,12 +21,27 @@ from .sync_parser import check_logger_file
 # ------------------------------------------------------------------------------------------------------------------- #
 
 def sync_timestamps(logger_folder_path: str, folder_path: str, output_path: str) -> None:
+    """
+    Synchronizes sensor data from two different devices based on the start times. If logger file exists, synchronizes
+    the signals based on the start times present in the logger file. If not, synchronizes based on the start times
+    present in the filenames. Generates a new csv file containing all the synchronized sensor data from the two devices.
+
+    Parameters:
+        logger_folder_path (str):
+        Path to the folder containing the logger file.
+
+        folder_path (str):
+        Path to the folder containing the sensor data from the two devices.
+
+        output_path (str):
+        Path to the location where the file should be saved.
+    """
     # check if logger file exists and if it is not empty
     if check_logger_file(logger_folder_path):
         # sync signals based on logger timestamps
         _sync_on_logger_timestamps(logger_folder_path, folder_path, output_path)
 
-        #inform user
+        # inform user
         print("Synchronizing data based on logger timestamps")
 
     else:
@@ -33,7 +49,57 @@ def sync_timestamps(logger_folder_path: str, folder_path: str, output_path: str)
         _sync_on_filename_timestamps(folder_path, output_path)
 
         # inform user
-        print("Synchronizing data based on filename timestamps")
+        print("No logger life found. Synchronizing data based on filename timestamps")
+
+
+def get_tau_filename(folder_path: str) -> int:
+    """
+    Gets the shift in samples when synchronizing signals based on filename timestamps.
+
+    Parameters:
+        folder_path (str):
+        Path to the folder containing the sensor data from the two devices.
+
+    Returns:
+        Shift in samples calculated using filename timestamps.
+    """
+    # get the dataframes of the signals in the folder
+    dataframes_dic, datetimes_dic = load_used_devices_data(folder_path)
+
+    # get start times as datetime objects for each device
+    datetimes_obj_dic = _get_datetime_object(datetimes_dic)
+
+    # calculate start time difference
+    samples_difference = _calculate_start_time_difference(datetimes_obj_dic)
+    return samples_difference
+
+
+def get_tau_logger(logger_folder_path: str, folder_path: str) -> int:
+    """
+    Gets the shift in samples when synchronizing signals based on logger timestamps.
+
+    Parameters:
+        logger_folder_path (str):
+        Path to the folder containing the logger file.
+
+        folder_path (str):
+        Path to the folder containing the sensor data from the two devices.
+
+    Returns:
+        Shift in samples calculated using logger timestamps.
+    """
+    # get the dataframes of the signals in the folder
+    dataframes_dic, datetimes_dic = load_used_devices_data(folder_path)
+
+    # get logger file from folder containing the raw signals
+    logger_df = _filter_logger_file(logger_folder_path)
+
+    # get start times from the devices used
+    start_times_dic = _get_used_devices_start_times_from_logger(dataframes_dic, logger_df)
+
+    # calculate start time difference between devices in samples
+    shift = _calculate_start_time_difference(start_times_dic)
+    return shift
 
 
 # ------------------------------------------------------------------------------------------------------------------- #
@@ -70,35 +136,6 @@ def _get_datetime_object(datetime_dic: Dict[str, Tuple[str, str]]) -> Dict[str, 
     return datetime_obj_dic
 
 
-# def _calculate_start_time_difference(datetime_obj_dic: Dict[str, datetime], sampling_rate: int = 100) -> int:
-#     """
-#     Calculates the time difference in seconds between the start times of two devices,
-#     and converts this time difference to the number of samples based on the sampling rate.
-#
-#     Parameters:
-#         datetime_obj_dic (Dict[str, datetime]): Dictionary containing datetime objects for at least two devices.
-#         sampling_rate (int): The sampling rate in Hz.
-#
-#     Returns:
-#         float: The time difference in number of samples. A positive value indicates the first
-#                mentioned device started before the second, and a negative value indicates the
-#                first mentioned device started after the second.
-#     """
-#     if len(datetime_obj_dic) != 2:
-#         raise ValueError("The dictionary must contain datetime objects for exactly two devices.")
-#
-#     # Convert the datetime objects to a list to ensure correct ordering for comparison
-#     datetimes = list(datetime_obj_dic.values())
-#
-#     # Calculate the seconds difference
-#     seconds_difference = (datetimes[1] - datetimes[0]).total_seconds()
-#
-#     # The sign of seconds_difference will indicate which device started first
-#
-#     # Convert the seconds difference to samples
-#     samples_difference = int(seconds_difference * sampling_rate)
-#
-#     return samples_difference
 def _time_to_seconds(t: time) -> float:
     """Convert a datetime.time object to seconds."""
     return t.hour * 3600 + t.minute * 60 + t.second + t.microsecond / 1_000_000
@@ -121,7 +158,7 @@ def _calculate_start_time_difference(start_times_dic: Dict[str, Union[datetime, 
     Returns:
          The shift between the signals in samples. A positive value indicates the first
          mentioned device starts first, and a negative value indicates the
-         first mentioned device starts last.
+         second mentioned device starts first.
     """
     if len(start_times_dic) != 2:
         raise ValueError("The dictionary must contain datetime or time objects for exactly two devices.")
@@ -149,6 +186,17 @@ def _calculate_start_time_difference(start_times_dic: Dict[str, Union[datetime, 
 
 
 def _sync_on_filename_timestamps(folder_path: str, output_path: str) -> None:
+    """
+    Synchronizes sensor data from two different devices based on the start times present in the filenames.
+    Generates a new csv file containing all the synchronized sensor data from the two devices.
+
+    Parameters:
+        folder_path (str):
+        Path to the folder containing the sensor data from the two devices.
+
+        output_path (str):
+        Path to the location where the file should be saved.
+    """
     # get the dataframes of the signals in the folder
     dataframes_dic, datetimes_dic = load_used_devices_data(folder_path)
 
@@ -171,7 +219,7 @@ def _sync_on_filename_timestamps(folder_path: str, output_path: str) -> None:
     output_filename = generate_filename(datetimes_dic, folder_name, sync_type="filename_timestamps")
 
     # save csv file
-    sync_data_to_csv(output_filename, df_joined, output_path, folder_name)
+    save_data_to_csv(output_filename, df_joined, output_path, folder_name)
 
 
 def _filter_logger_file(raw_folder_path: str) -> pd.DataFrame:
@@ -189,8 +237,7 @@ def _filter_logger_file(raw_folder_path: str) -> pd.DataFrame:
     Returns:
     -------
     pd.DataFrame
-        A filtered DataFrame containing only the relevant log rows, with specific
-        text removed from the 'logs' column.
+        A filtered DataFrame containing only the relevant log rows.
     """
     # Load logger file to DataFrame
     logger_df = load_logger_file(raw_folder_path)
@@ -209,6 +256,16 @@ def _filter_logger_file(raw_folder_path: str) -> pd.DataFrame:
 
 
 def _get_start_times_from_logger(filtered_logger_df: pd.DataFrame) -> Dict[str, datetime.time]:
+    """
+    Gets the start times from all existing devices in the logger file.
+
+    Parameters:
+        filtered_logger_df (pd.DataFrame):
+        DataFrame containing only the relevant rows of the logger file.
+
+    Returns:
+        Dictionary with the device names as keys and start times as values of all devices present in the logger file.
+    """
     start_times_dic = {}
 
     # Flags to check if the start time for each device type has been found
@@ -222,6 +279,12 @@ def _get_start_times_from_logger(filtered_logger_df: pd.DataFrame) -> Dict[str, 
         # Check for 'WEAR_' prefix to identify watch logs
         if not found_wear and 'WEAR' in row['logs']:
             wear_time = datetime.strptime(row['time'], '%H:%M:%S.%f').time()
+            # Remove buffer
+            # Create a timedelta object representing the buffer size in seconds
+            half_second = timedelta(seconds=BUFFER_SIZE_SECONDS)
+
+            # Subtract buffer time from the wear_time
+            wear_time = (datetime.combine(datetime.min, wear_time) - half_second).time()
             start_times_dic['watch'] = wear_time
             found_wear = True
 
@@ -233,7 +296,6 @@ def _get_start_times_from_logger(filtered_logger_df: pd.DataFrame) -> Dict[str, 
             found_mban = True
 
         # If the log doesn't fall into previous categories, assume it's from the 'phone'
-        # This is the fallback case and doesn't have a specific check
         elif not found_phone:
             phone_time = datetime.strptime(row['time'], '%H:%M:%S.%f').time()
             start_times_dic['phone'] = phone_time
@@ -248,6 +310,19 @@ def _get_start_times_from_logger(filtered_logger_df: pd.DataFrame) -> Dict[str, 
 
 def _get_used_devices_start_times_from_logger(dataframes_dic: Dict[str, pd.DataFrame],
                                               filtered_logger_df: pd.DataFrame) -> Dict[str, time]:
+    """
+    Gets the start times of the chosen devices from a dictionary containing all starting times.
+
+    Parameters:
+        dataframes_dic (Dict[str, pd.DataFrame]):
+        Dictionary containing the chosen device names as keys and sensor data from said devices as values.
+
+        filtered_logger_df (pd.DataFrame):
+        DataFrame containing only the relevant rows of the logger file.
+
+    Returns:
+        Dictionary with the device names as keys and start times as values from chosen devices.
+    """
     all_start_times_dic = _get_start_times_from_logger(filtered_logger_df)
 
     start_times_dic = {}
@@ -261,6 +336,20 @@ def _get_used_devices_start_times_from_logger(dataframes_dic: Dict[str, pd.DataF
 
 
 def _sync_on_logger_timestamps(logger_folder_path: str, folder_path: str, output_path: str) -> None:
+    """
+    Synchronizes sensor data from two different devices based on the start times present in the logger file.
+    Generates a new csv file containing all the synchronized sensor data from the two devices.
+
+    Parameters:
+        logger_folder_path (str):
+        Path to the folder containing the logger file.
+
+        folder_path (str):
+        Path to the folder containing the sensor data from the two devices.
+
+        output_path (str):
+        Path to the location where the file should be saved.
+    """
     # get the dataframes of the signals in the folder
     dataframes_dic, datetimes_dic = load_used_devices_data(folder_path)
 
@@ -286,4 +375,4 @@ def _sync_on_logger_timestamps(logger_folder_path: str, folder_path: str, output
     output_filename = generate_filename(datetimes_dic, folder_name, sync_type="logger_timestamps")
 
     # save csv file
-    sync_data_to_csv(output_filename, df_joined, output_path, folder_name)
+    save_data_to_csv(output_filename, df_joined, output_path, folder_name)
