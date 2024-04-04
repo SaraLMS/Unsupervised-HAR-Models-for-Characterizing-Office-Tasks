@@ -8,7 +8,8 @@ import os
 
 import pandas as pd
 
-from constants import CROSSCORR, TIMESTAMPS
+from constants import CROSSCORR, TIMESTAMPS, ACCELEROMETER, WEAR_ACCELEROMETER, WATCH, PHONE, SUPPORTED_DEVICES, MBAN, \
+    SUPPORTED_PHONE_SENSORS, SUPPORTED_WATCH_SENSORS, SUPPORTED_MBAN_SENSORS, ACC
 from synchronization.sync_android_sensors import sync_all_classes
 from synchronization.sync_devices_crosscorr import sync_crosscorr
 from synchronization.sync_devices_timestamps import sync_timestamps
@@ -21,11 +22,12 @@ from synchronization.sync_evaluation import sync_evaluation
 
 def synchronization(raw_data_in_path: str, sync_android_out_path: str, selected_sensors: Dict[str, List[str]],
                     output_path: str, sync_type: str, evaluation_output_path: str,
-                    save_intermediate_files: bool = True) -> None:
+                    evaluation_filename: str = "evaluation_report.csv", save_intermediate_files: bool = True) -> None:
     """
     Synchronizes android sensor data and between two different devices. Two different synchronization methods are
     supported: cross correlation and timestamps. Generates a new csv file containing all the synchronized sensor data
-    from the two devices.
+    from the two devices. Generates a csv file containing the report with evaluation of the performance of the
+    synchronization methods: cross correlation, filename timestamps, logger file timestamps (if logger file exists)
     MuscleBans not entirely implemented.
 
     Parameters:
@@ -40,6 +42,7 @@ def synchronization(raw_data_in_path: str, sync_android_out_path: str, selected_
         Devices supported are:
             "watch": smartwatch
             "phone": smartphone
+            "mban" : MuscleBAN - To implement later
         Supported sensors include:
             "acc": accelerometer
             "gyr": gyroscope
@@ -57,10 +60,14 @@ def synchronization(raw_data_in_path: str, sync_android_out_path: str, selected_
             "timestamps": Start times in the sensor files
 
         evaluation_output_path (str):
-        Path to save the synchronization evaluation
+        Path to save the synchronization evaluation.
 
-        save_intermediate_files (bool): Default = True
-        Keep the csv files generated when synchronizing android sensors. False to delete.
+        evaluation_filename (str):
+        Name of the file containing the sync evaluation report.
+
+        save_intermediate_files (bool): Default = True.
+        Keep the csv files generated when synchronizing android
+        sensors. False to delete. If there's only one device, these files are not deleted.
     """
     # check if in path is valid
     _check_in_path(raw_data_in_path)
@@ -68,54 +75,63 @@ def synchronization(raw_data_in_path: str, sync_android_out_path: str, selected_
     # check if selected sensors are valid
     _check_supported_sensors(selected_sensors)
 
-    # check if accelerometer is selected for every device
-    _check_acc_sensor_selected(selected_sensors)
+    # check if the chosen sensors exist!!!!!!!!!!!!!
 
     # synchronize android sensors
+    # if there's only one device, sync android sensors and save csv
     sync_all_classes(raw_data_in_path, sync_android_out_path, selected_sensors)
 
-    # array for holding the dataframes containing the sync evaluation
-    evaluation_df_array = []
+    # synchronize in pairs of devices
+    if len(selected_sensors) == 2:
 
-    # synchronize data from different devices
-    for sync_folder, raw_folder in zip(os.listdir(sync_android_out_path), os.listdir(raw_data_in_path)):
+        # array for holding the dataframes containing the sync evaluation
+        evaluation_df_array = []
 
-        # get raw and synchronized folder paths
-        sync_folder_path = os.path.join(sync_android_out_path, sync_folder)
-        raw_folder_path = os.path.join(raw_data_in_path, raw_folder)
+        # synchronize data from different devices
+        for sync_folder, raw_folder in zip(os.listdir(sync_android_out_path), os.listdir(raw_data_in_path)):
 
-        if sync_type == CROSSCORR:
-            # synchronize data based on cross correlation
-            sync_crosscorr(sync_folder_path, output_path)
+            # get raw and synchronized folder paths
+            sync_folder_path = os.path.join(sync_android_out_path, sync_folder)
+            raw_folder_path = os.path.join(raw_data_in_path, raw_folder)
 
-            # inform user
-            print("Signals synchronized based on cross correlation")
+            if sync_type == CROSSCORR:
+                # check if accelerometer is selected for every device
+                _check_acc_sensor_selected(selected_sensors)
 
-        elif sync_type == TIMESTAMPS:
-            # synchronize data based on timestamps
-            sync_timestamps(raw_folder_path, sync_folder_path, output_path)
+                # check if accelerometer files exist
+                _check_acc_file(raw_folder_path, selected_sensors)
 
-            # inform user
-            print("Signals synchronized based on timestamps")
+                # synchronize data based on cross correlation
+                sync_crosscorr(sync_folder_path, output_path)
 
-        sync_report_df = sync_evaluation(raw_folder_path, sync_folder_path)
-        evaluation_df_array.append(sync_report_df)
+                # inform user
+                print("Signals synchronized based on cross correlation")
 
-    if not save_intermediate_files:
-        # remove the folder containing the csv files generated when synchronizing android sensors
-        shutil.rmtree(sync_android_out_path)
+            elif sync_type == TIMESTAMPS:
+                # synchronize data based on timestamps
+                sync_timestamps(raw_folder_path, sync_folder_path, output_path)
 
-    # concat dataframes in array to one
-    combined_df = pd.concat(evaluation_df_array, ignore_index=True)
+                # inform user
+                print("Signals synchronized based on timestamps")
 
-    # define filename
-    filename = "evaluation_report.csv"
+            sync_report_df = sync_evaluation(raw_folder_path, sync_folder_path)
+            evaluation_df_array.append(sync_report_df)
 
-    # define output path
-    evaluation_output_path = os.path.join(evaluation_output_path, filename)
+        if not save_intermediate_files:
+            # remove the folder containing the csv files generated when synchronizing android sensors
+            shutil.rmtree(sync_android_out_path)
 
-    # save csv file containing sync evaluation
-    combined_df.to_csv(evaluation_output_path)
+        # concat dataframes in array to one
+        combined_df = pd.concat(evaluation_df_array, ignore_index=True)
+
+        # define output path
+        evaluation_output_path = os.path.join(evaluation_output_path, evaluation_filename)
+
+        # save csv file containing sync evaluation
+        combined_df.to_csv(evaluation_output_path)
+
+    if len(selected_sensors) > 2:
+        print("MuscleBANs not implemented yet. Available devices: phone and watch")
 
 
 # ------------------------------------------------------------------------------------------------------------------- #
@@ -136,10 +152,11 @@ def _check_supported_sensors(selected_sensors: Dict[str, List[str]]):
     or if any device name or sensor name is invalid.
     """
 
-    supported_devices = ["watch", "phone"]
+    supported_devices = SUPPORTED_DEVICES
     supported_sensors = {
-        "watch": ["acc", "gyr", "mag", "rotvec", "wearheartrate"],
-        "phone": ["acc", "gyr", "mag", "rotvec", "noise"]
+        PHONE: SUPPORTED_PHONE_SENSORS,
+        WATCH: SUPPORTED_WATCH_SENSORS,
+        MBAN: SUPPORTED_MBAN_SENSORS
     }
 
     invalid_devices = [device for device in selected_sensors.keys() if device not in supported_devices]
@@ -201,8 +218,49 @@ def _check_acc_sensor_selected(selected_sensors: Dict[str, List[str]]) -> None:
     Raises:
     ValueError: If the accelerometer sensor is not selected for any of the devices, listing all such devices.
     """
-    devices_missing_acc = [device for device, sensors in selected_sensors.items() if "acc" not in sensors]
+    devices_missing_acc = [device for device, sensors in selected_sensors.items() if ACC not in sensors]
 
     if devices_missing_acc:
         missing_str = ", ".join(devices_missing_acc)
         raise ValueError(f"Accelerometer sensor ('acc') must be selected for device(s): {missing_str}")
+
+
+def _check_acc_file(folder_path: str, selected_sensors: Dict[str, List[str]]) -> None:
+    """
+    Checks for the presence of accelerometer data files for each selected device in the specified folder. Raises an
+    error if accelerometer data is missing for any device selected for synchronization.
+
+    Parameters:
+    - folder_path (str): The path to the folder containing the data files.
+    - selected_sensors (Dict[str, List[str]]): A dictionary where keys are device types and values are lists of sensors
+      selected for each device type.
+
+    Raises:
+    - ValueError: If accelerometer data is missing for any of the selected devices.
+    """
+    # Map device types to the expected substring in the accelerometer file names
+    acc_file_identifiers = {
+        WATCH: WEAR_ACCELEROMETER,
+        PHONE: ACCELEROMETER
+        # Add other device types and their identifiers as needed
+    }
+
+    # Identify which devices are supposed to have accelerometer data
+    devices_needing_acc_files = [device for device, sensors in selected_sensors.items() if ACC in sensors]
+
+    # Keep track of which devices have been verified to have accelerometer data
+    verified_devices = set()
+
+    # Check files in the specified folder
+    for filename in os.listdir(folder_path):
+        for device in devices_needing_acc_files:
+            if acc_file_identifiers[device] in filename.upper():
+                verified_devices.add(device)
+
+    # Determine if any selected devices are missing accelerometer data
+    missing_devices = set(devices_needing_acc_files) - verified_devices
+
+    if missing_devices:
+        missing_str = ", ".join(missing_devices)
+        raise ValueError(f"Missing accelerometer data file(s) for device(s): {missing_str}")
+

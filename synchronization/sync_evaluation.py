@@ -71,7 +71,7 @@ def sync_evaluation(logger_folder_path: str, sync_folder_path: str) -> pd.DataFr
         filename_position = "lags"
 
     # check if logger method lags or precedes cross correlation
-    if np.sign(filename_tau - crosscorr_tau) == -1:
+    if np.sign(logger_tau - crosscorr_tau) == -1:
         logger_position = "precedes"
     else:
         logger_position = "lags"
