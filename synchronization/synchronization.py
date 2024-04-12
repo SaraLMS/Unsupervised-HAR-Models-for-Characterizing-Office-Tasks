@@ -75,7 +75,7 @@ def synchronization(raw_data_in_path: str, sync_android_out_path: str, selected_
     # check if selected sensors are valid
     _check_supported_sensors(selected_sensors)
 
-    # check if the chosen sensors exist!!!!!!!!!!!!!
+    # TODO check if the chosen sensors exist!!!!!!!!!!!!!
 
     # synchronize android sensors
     # if there's only one device, sync android sensors and save csv
@@ -109,26 +109,26 @@ def synchronization(raw_data_in_path: str, sync_android_out_path: str, selected_
 
             elif sync_type == TIMESTAMPS:
                 # synchronize data based on timestamps
-                sync_timestamps(raw_folder_path, sync_folder_path, output_path)
+                sync_timestamps(raw_folder_path, sync_folder_path, output_path, selected_sensors)
 
                 # inform user
                 print("Signals synchronized based on timestamps")
 
-            sync_report_df = sync_evaluation(raw_folder_path, sync_folder_path)
-            evaluation_df_array.append(sync_report_df)
+            # sync_report_df = sync_evaluation(raw_folder_path, sync_folder_path)
+            # evaluation_df_array.append(sync_report_df)
 
         if not save_intermediate_files:
             # remove the folder containing the csv files generated when synchronizing android sensors
             shutil.rmtree(sync_android_out_path)
 
-        # concat dataframes in array to one
-        combined_df = pd.concat(evaluation_df_array, ignore_index=True)
+        # # concat dataframes in array to one
+        # combined_df = pd.concat(evaluation_df_array, ignore_index=True)
 
         # define output path
         evaluation_output_path = os.path.join(evaluation_output_path, evaluation_filename)
 
-        # save csv file containing sync evaluation
-        combined_df.to_csv(evaluation_output_path)
+        # # save csv file containing sync evaluation
+        # combined_df.to_csv(evaluation_output_path)
 
     if len(selected_sensors) > 2:
         print("MuscleBANs not implemented yet. Available devices: phone and watch")

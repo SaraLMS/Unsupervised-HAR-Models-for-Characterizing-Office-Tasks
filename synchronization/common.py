@@ -141,7 +141,7 @@ def join_dataframes_on_index(df1: pd.DataFrame, df2: pd.DataFrame) -> pd.DataFra
 
 
 def generate_filename(datetime_dic: Dict[str, Tuple[str, str]], folder_name: str, sync_type: str,
-                      prefix: str = "Sara") -> str:
+                      prefix: str = "P001") -> str:
     """
     Generate a filename for synchronized data.
 

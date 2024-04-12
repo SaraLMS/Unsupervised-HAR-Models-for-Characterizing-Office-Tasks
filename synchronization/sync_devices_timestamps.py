@@ -11,7 +11,7 @@ from load.load_sync_data import load_used_devices_data
 from .common import crop_dataframes_on_shift, join_dataframes_on_index, generate_filename, get_folder_name_from_path, \
     save_data_to_csv
 from load.load_raw_data import load_logger_file
-from typing import Dict, Tuple, Union
+from typing import Dict, Tuple, Union, List
 
 from .sync_parser import check_logger_file
 
@@ -20,7 +20,8 @@ from .sync_parser import check_logger_file
 # public functions
 # ------------------------------------------------------------------------------------------------------------------- #
 
-def sync_timestamps(logger_folder_path: str, folder_path: str, output_path: str) -> None:
+def sync_timestamps(logger_folder_path: str, folder_path: str, output_path: str,
+                    selected_sensors: Dict[str, List[str]]) -> None:
     """
     Synchronizes sensor data from two different devices based on the start times. If logger file exists, synchronizes
     the signals based on the start times present in the logger file. If not, synchronizes based on the start times
@@ -35,9 +36,12 @@ def sync_timestamps(logger_folder_path: str, folder_path: str, output_path: str)
 
         output_path (str):
         Path to the location where the file should be saved.
+
+        selected_sensors (Dict[str, List[str]]):
+        Dictionary containing the devices and sensors chosen to be loaded and synchronized.
     """
     # check if logger file exists and if it is not empty
-    if check_logger_file(logger_folder_path):
+    if check_logger_file(logger_folder_path) and check_logger_timestamps(logger_folder_path, folder_path, selected_sensors):
         # sync signals based on logger timestamps
         _sync_on_logger_timestamps(logger_folder_path, folder_path, output_path)
 
@@ -49,7 +53,7 @@ def sync_timestamps(logger_folder_path: str, folder_path: str, output_path: str)
         _sync_on_filename_timestamps(folder_path, output_path)
 
         # inform user
-        print("No logger life found. Synchronizing data based on filename timestamps")
+        print("No logger file or timestamps found. Synchronizing data based on filename timestamps")
 
 
 def get_tau_filename(folder_path: str) -> int:
@@ -161,7 +165,8 @@ def _calculate_start_time_difference(start_times_dic: Dict[str, Union[datetime, 
          second mentioned device starts first.
     """
     if len(start_times_dic) != 2:
-        raise ValueError("The dictionary must contain datetime or time objects for exactly two devices.")
+        raise ValueError("The dictionary must contain datetime or time objects for exactly two devices.",
+                         start_times_dic)
 
     # Convert the datetime/time objects to a list to ensure correct ordering for comparison
     times = list(start_times_dic.values())
@@ -333,6 +338,23 @@ def _get_used_devices_start_times_from_logger(dataframes_dic: Dict[str, pd.DataF
             start_times_dic[device] = all_start_times_dic[device]
 
     return start_times_dic
+
+
+def check_logger_timestamps(logger_folder_path, folder_path, selected_sensors):
+    # get the dataframes of the signals in the folder
+    dataframes_dic, datetimes_dic = load_used_devices_data(folder_path)
+
+    # get logger file from folder containing the raw signals
+    logger_df = _filter_logger_file(logger_folder_path)
+
+    # get start times from the devices used
+    start_times_dic = _get_used_devices_start_times_from_logger(dataframes_dic, logger_df)
+
+    # check if the start times were found in the logger file
+    if len(start_times_dic) == len(selected_sensors):
+        return True
+    else:
+        return False
 
 
 def _sync_on_logger_timestamps(logger_folder_path: str, folder_path: str, output_path: str) -> None:

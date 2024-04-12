@@ -6,8 +6,10 @@
   <component name="ChangeListManager">
     <list default="true" id="3466cb1d-2559-4122-9522-f23b0d0f6b0a" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/constants.py" beforeDir="false" afterPath="$PROJECT_DIR$/constants.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/synchronization/sync_evaluation.py" beforeDir="false" afterPath="$PROJECT_DIR$/synchronization/sync_evaluation.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/synchronization/common.py" beforeDir="false" afterPath="$PROJECT_DIR$/synchronization/common.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/synchronization/sync_android_sensors.py" beforeDir="false" afterPath="$PROJECT_DIR$/synchronization/sync_android_sensors.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/synchronization/sync_devices_timestamps.py" beforeDir="false" afterPath="$PROJECT_DIR$/synchronization/sync_devices_timestamps.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/synchronization/synchronization.py" beforeDir="false" afterPath="$PROJECT_DIR$/synchronization/synchronization.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -38,18 +40,19 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;Python tests.Python tests in test_supported_sensors.py.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.Python tests in test_sync.py.executor&quot;: &quot;Run&quot;,
-    &quot;Python.main.executor&quot;: &quot;Run&quot;,
-    &quot;Python.sync_devices_timestamps.executor&quot;: &quot;Run&quot;,
-    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
-    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Python tests.Python tests in test_supported_sensors.py.executor": "Run",
+    "Python tests.Python tests in test_sync.py.executor": "Run",
+    "Python.main.executor": "Run",
+    "Python.sync_devices_timestamps.executor": "Run",
+    "Python.synchronization.executor": "Run",
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "git-widget-placeholder": "master",
+    "ignore.virus.scanning.warn.message": "true"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
       <recent name="C:\Users\srale\PycharmProjects\toolbox\synchronization" />
@@ -159,7 +162,15 @@
       <option name="project" value="LOCAL" />
       <updated>1712164532712</updated>
     </task>
-    <option name="localTasksCounter" value="12" />
+    <task id="LOCAL-00012" summary="Added some constants (only changed this in synchronization.py). &#10;Corrected an error in sync_evaluation.py (in the precedes and lags part).&#10;Added another layer of checks for synchronization to check for acc files and if acc is present for every device if cross corr is chosen. Synchronization in pair is assured with len(selected_sensors).">
+      <option name="closed" value="true" />
+      <created>1712246851411</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1712246851411</updated>
+    </task>
+    <option name="localTasksCounter" value="13" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
@@ -171,6 +182,7 @@
     <MESSAGE value="Finished syncronization based on logger timestamps and the wrapper function.&#10;Created a new python package 'visualization' - no code here yet&#10;Code works but haven't checked if it's cutting the signals correctly" />
     <MESSAGE value="added visualize_sync.py to visualize the synchronization" />
     <MESSAGE value="Implemented sync_evaluation.py and added to the synchronization function, saving a csv file with the evaluation report.&#10;Added _check functions in synchronization.py to check for selected_sensors validity, presence of accelerometer sensor and in_path validity.&#10;Implemented unittests to test these &quot;checks&quot;.&#10;Added missing docstrings.&#10;Removed buffer size from watch timestamp in the logger file." />
-    <option name="LAST_COMMIT_MESSAGE" value="Implemented sync_evaluation.py and added to the synchronization function, saving a csv file with the evaluation report.&#10;Added _check functions in synchronization.py to check for selected_sensors validity, presence of accelerometer sensor and in_path validity.&#10;Implemented unittests to test these &quot;checks&quot;.&#10;Added missing docstrings.&#10;Removed buffer size from watch timestamp in the logger file." />
+    <MESSAGE value="Added some constants (only changed this in synchronization.py). &#10;Corrected an error in sync_evaluation.py (in the precedes and lags part).&#10;Added another layer of checks for synchronization to check for acc files and if acc is present for every device if cross corr is chosen. Synchronization in pair is assured with len(selected_sensors)." />
+    <option name="LAST_COMMIT_MESSAGE" value="Added some constants (only changed this in synchronization.py). &#10;Corrected an error in sync_evaluation.py (in the precedes and lags part).&#10;Added another layer of checks for synchronization to check for acc files and if acc is present for every device if cross corr is chosen. Synchronization in pair is assured with len(selected_sensors)." />
   </component>
 </project>

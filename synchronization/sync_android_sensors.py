@@ -569,7 +569,7 @@ def _get_sensor_path_list(folder_path: str, device: str, sensor_list: List[str])
 
 
 def _sync_all_sensors_in_class(folder_path: str, out_path: str,
-                               selected_sensors: Dict[str, List[str]], prefix: str = 'Sara') -> None:
+                               selected_sensors: Dict[str, List[str]], prefix: str = 'P001') -> None:
     """
     Load data of chosen sensors for one class of movement.
 
