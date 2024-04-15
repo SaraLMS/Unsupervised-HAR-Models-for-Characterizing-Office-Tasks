@@ -22,15 +22,31 @@ from synchronization.sync_evaluation import sync_evaluation
 
 def synchronization(raw_data_in_path: str, sync_android_out_path: str, selected_sensors: Dict[str, List[str]],
                     output_path: str, sync_type: str, evaluation_output_path: str,
-                    evaluation_filename: str = "evaluation_report.csv", save_intermediate_files: bool = True) -> None:
+                    evaluation_filename: str = "evaluation_report.csv", save_intermediate_files: bool = True,
+                    prefix: str = "P001") -> None:
     """
     Synchronizes android sensor data and between two different devices. Two different synchronization methods are
     supported: cross correlation and timestamps. Generates a new csv file containing all the synchronized sensor data
-    from the two devices. Generates a csv file containing the report with evaluation of the performance of the
-    synchronization methods: cross correlation, filename timestamps, logger file timestamps (if logger file exists)
-    MuscleBans not entirely implemented.
+    from the two devices.
+    MuscleBans not entirely implemented. Only smartwatch and smartphone.
+
+    To synchronize the signals based on cross correlation, every acquisition must start with a series of vertical
+    jumps with the arms straight and parallel to the trunk. When choosing cross correlation, the window (in samples)
+    containing the jumps should be correctly defined in _get_axis_from_acc in synchronization.sync_devices_crosscorr.
+    Without the correct window_size the results might be incorrect.
+
+    The synchronization based on time stamps extracts the start times of the sensors from the logger .txt file. If
+    this file does not exist or does not contain the needed start times, the start times in the raw data filenames will
+    be used.
+
+    Generates a csv file containing the evaluation of the performance of the three synchronization methods:
+    cross correlation and timestamps (logger file and filename start times); being the cross correlation the
+    reference method since, if followed the jumps protocol and with the correct window size, presents the best results.
 
     Parameters:
+        prefix (str):
+        Prefix do add to the generated filenames.
+
         raw_data_in_path (str):
         Main folder path containing subfolders with raw sensor data.
 
@@ -79,7 +95,7 @@ def synchronization(raw_data_in_path: str, sync_android_out_path: str, selected_
 
     # synchronize android sensors
     # if there's only one device, sync android sensors and save csv
-    sync_all_classes(raw_data_in_path, sync_android_out_path, selected_sensors)
+    sync_all_classes(prefix, raw_data_in_path, sync_android_out_path, selected_sensors)
 
     # synchronize in pairs of devices
     if len(selected_sensors) == 2:
@@ -102,33 +118,33 @@ def synchronization(raw_data_in_path: str, sync_android_out_path: str, selected_
                 _check_acc_file(raw_folder_path, selected_sensors)
 
                 # synchronize data based on cross correlation
-                sync_crosscorr(sync_folder_path, output_path)
+                sync_crosscorr(prefix, sync_folder_path, output_path)
 
                 # inform user
                 print("Signals synchronized based on cross correlation")
 
             elif sync_type == TIMESTAMPS:
                 # synchronize data based on timestamps
-                sync_timestamps(raw_folder_path, sync_folder_path, output_path, selected_sensors)
+                sync_timestamps(prefix, raw_folder_path, sync_folder_path, output_path, selected_sensors)
 
                 # inform user
                 print("Signals synchronized based on timestamps")
 
-            # sync_report_df = sync_evaluation(raw_folder_path, sync_folder_path)
-            # evaluation_df_array.append(sync_report_df)
+            sync_report_df = sync_evaluation(raw_folder_path, sync_folder_path, selected_sensors)
+            evaluation_df_array.append(sync_report_df)
 
         if not save_intermediate_files:
             # remove the folder containing the csv files generated when synchronizing android sensors
             shutil.rmtree(sync_android_out_path)
 
-        # # concat dataframes in array to one
-        # combined_df = pd.concat(evaluation_df_array, ignore_index=True)
+        # concat dataframes in array to one
+        combined_df = pd.concat(evaluation_df_array, ignore_index=True)
 
         # define output path
         evaluation_output_path = os.path.join(evaluation_output_path, evaluation_filename)
 
-        # # save csv file containing sync evaluation
-        # combined_df.to_csv(evaluation_output_path)
+        # save csv file containing sync evaluation
+        combined_df.to_csv(evaluation_output_path, index=False)
 
     if len(selected_sensors) > 2:
         print("MuscleBANs not implemented yet. Available devices: phone and watch")

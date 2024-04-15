@@ -14,12 +14,15 @@ from typing import List, Dict, Tuple
 # public functions
 # ------------------------------------------------------------------------------------------------------------------- #
 
-def sync_all_classes(data_path: str, out_path: str, selected_sensors: Dict[str, List[str]]) -> None:
+def sync_all_classes(prefix: str, data_path: str, out_path: str, selected_sensors: Dict[str, List[str]]) -> None:
     """
     Sync sensor data for all classes of movements on a single device.
 
     Parameters
     ----------
+    prefix : str
+        Prefix to add to the generated filename.
+
     data_path : str
         The path to the main folder containing the raw sensor data.
 
@@ -44,7 +47,7 @@ def sync_all_classes(data_path: str, out_path: str, selected_sensors: Dict[str, 
     for folder in os.listdir(data_path):
         folder_path = os.path.join(data_path, folder)
 
-        _sync_all_sensors_in_class(folder_path, out_path, selected_sensors)
+        _sync_all_sensors_in_class(prefix, folder_path, out_path, selected_sensors)
 
 
 # ------------------------------------------------------------------------------------------------------------------- #
@@ -568,8 +571,8 @@ def _get_sensor_path_list(folder_path: str, device: str, sensor_list: List[str])
     return sensor_path_list
 
 
-def _sync_all_sensors_in_class(folder_path: str, out_path: str,
-                               selected_sensors: Dict[str, List[str]], prefix: str = 'P001') -> None:
+def _sync_all_sensors_in_class(prefix, folder_path: str, out_path: str,
+                               selected_sensors: Dict[str, List[str]]) -> None:
     """
     Load data of chosen sensors for one class of movement.
 

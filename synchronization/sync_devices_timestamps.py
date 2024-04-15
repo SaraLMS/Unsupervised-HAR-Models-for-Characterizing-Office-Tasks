@@ -20,7 +20,7 @@ from .sync_parser import check_logger_file
 # public functions
 # ------------------------------------------------------------------------------------------------------------------- #
 
-def sync_timestamps(logger_folder_path: str, folder_path: str, output_path: str,
+def sync_timestamps(prefix: str, logger_folder_path: str, folder_path: str, output_path: str,
                     selected_sensors: Dict[str, List[str]]) -> None:
     """
     Synchronizes sensor data from two different devices based on the start times. If logger file exists, synchronizes
@@ -28,6 +28,9 @@ def sync_timestamps(logger_folder_path: str, folder_path: str, output_path: str,
     present in the filenames. Generates a new csv file containing all the synchronized sensor data from the two devices.
 
     Parameters:
+        prefix (str):
+        Prefix to be added to the generated filename
+
         logger_folder_path (str):
         Path to the folder containing the logger file.
 
@@ -43,14 +46,14 @@ def sync_timestamps(logger_folder_path: str, folder_path: str, output_path: str,
     # check if logger file exists and if it is not empty
     if check_logger_file(logger_folder_path) and check_logger_timestamps(logger_folder_path, folder_path, selected_sensors):
         # sync signals based on logger timestamps
-        _sync_on_logger_timestamps(logger_folder_path, folder_path, output_path)
+        _sync_on_logger_timestamps(prefix,logger_folder_path, folder_path, output_path)
 
         # inform user
         print("Synchronizing data based on logger timestamps")
 
     else:
         # sync signals based on filename timestamps
-        _sync_on_filename_timestamps(folder_path, output_path)
+        _sync_on_filename_timestamps(prefix,folder_path, output_path)
 
         # inform user
         print("No logger file or timestamps found. Synchronizing data based on filename timestamps")
@@ -190,12 +193,15 @@ def _calculate_start_time_difference(start_times_dic: Dict[str, Union[datetime, 
     return samples_difference
 
 
-def _sync_on_filename_timestamps(folder_path: str, output_path: str) -> None:
+def _sync_on_filename_timestamps(prefix: str, folder_path: str, output_path: str) -> None:
     """
     Synchronizes sensor data from two different devices based on the start times present in the filenames.
     Generates a new csv file containing all the synchronized sensor data from the two devices.
 
     Parameters:
+        prefix (str):
+        Prefix to be added to the generated filename
+
         folder_path (str):
         Path to the folder containing the sensor data from the two devices.
 
@@ -221,7 +227,7 @@ def _sync_on_filename_timestamps(folder_path: str, output_path: str) -> None:
     folder_name = get_folder_name_from_path(folder_path)
 
     # generate file name
-    output_filename = generate_filename(datetimes_dic, folder_name, sync_type="filename_timestamps")
+    output_filename = generate_filename(datetimes_dic, folder_name, prefix, sync_type="filename_timestamps")
 
     # save csv file
     save_data_to_csv(output_filename, df_joined, output_path, folder_name)
@@ -357,12 +363,15 @@ def check_logger_timestamps(logger_folder_path, folder_path, selected_sensors):
         return False
 
 
-def _sync_on_logger_timestamps(logger_folder_path: str, folder_path: str, output_path: str) -> None:
+def _sync_on_logger_timestamps(prefix: str, logger_folder_path: str, folder_path: str, output_path: str) -> None:
     """
     Synchronizes sensor data from two different devices based on the start times present in the logger file.
     Generates a new csv file containing all the synchronized sensor data from the two devices.
 
     Parameters:
+        prefix (str):
+        Prefix to be added to the generated filename
+
         logger_folder_path (str):
         Path to the folder containing the logger file.
 
@@ -394,7 +403,7 @@ def _sync_on_logger_timestamps(logger_folder_path: str, folder_path: str, output
     folder_name = get_folder_name_from_path(folder_path)
 
     # generate file name
-    output_filename = generate_filename(datetimes_dic, folder_name, sync_type="logger_timestamps")
+    output_filename = generate_filename(datetimes_dic, folder_name, prefix, sync_type="logger_timestamps")
 
     # save csv file
     save_data_to_csv(output_filename, df_joined, output_path, folder_name)

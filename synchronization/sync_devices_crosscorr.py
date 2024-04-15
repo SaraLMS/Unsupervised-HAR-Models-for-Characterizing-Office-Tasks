@@ -14,12 +14,14 @@ from typing import List, Tuple, Dict
 # public functions
 # ------------------------------------------------------------------------------------------------------------------- #
 
-def sync_crosscorr(folder_path: str, output_path: str):
+def sync_crosscorr(prefix: str, folder_path: str, output_path: str):
     """
     Synchronizes sensor data from two different devices based on cross correlation.
     Generates a new csv file containing all the synchronized sensor data from the two devices.
 
     Parameters:
+        prefix (str):
+        Prefix to add to the generated filename
 
         folder_path (str):
         Path to the folder containing the sensor data from the two devices.
@@ -46,7 +48,7 @@ def sync_crosscorr(folder_path: str, output_path: str):
     folder_name = get_folder_name_from_path(folder_path)
 
     # generate file name
-    output_filename = generate_filename(datetimes_dic, folder_name, sync_type="crosscorr")
+    output_filename = generate_filename(datetimes_dic, folder_name, prefix, sync_type="crosscorr")
 
     # save csv file
     save_data_to_csv(output_filename, df_joined, output_path, folder_name)
@@ -79,7 +81,7 @@ def get_tau_crosscorr(folder_path: str) -> int:
 # ------------------------------------------------------------------------------------------------------------------- #
 
 
-def _get_axis_from_acc(dataframes_dic: Dict[str, pd.DataFrame], window_range: Tuple[int, int] = (0, 5000)) -> List[
+def _get_axis_from_acc(dataframes_dic: Dict[str, pd.DataFrame], window_range: Tuple[int, int] = (0, 10000)) -> List[
     pd.Series]:
     """
     Gets the accelerometer axis from the devices used for synchronization
