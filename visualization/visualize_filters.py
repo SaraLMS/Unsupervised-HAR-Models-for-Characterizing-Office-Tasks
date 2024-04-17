@@ -58,3 +58,8 @@ def visualize_filtering_results(filtered_signals_dict, sync_data_path):
         plt.xlabel('Time (indices)')
         plt.tight_layout(rect=[0, 0.03, 1, 0.95])
         plt.show()
+
+        print(f"Plotting data for {folder_name}")
+        print(f"Number of sensors detected: {num_sensors}")
+        print(f"Number of entries in raw data: {len(raw_df)}")
+        print(f"Number of entries in filtered data: {len(filtered_df)}")

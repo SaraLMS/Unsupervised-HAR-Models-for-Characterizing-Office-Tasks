@@ -30,3 +30,11 @@ SUPPORTED_MBAN_SENSORS = [ACC, EMG]
 # column dataframes prefixes
 ACCELEROMETER_PREFIX = "Acc"
 GYROSCOPE_PREFIX = "Gyr"
+
+# activity types
+WALKING = "walking"
+STANDING = "standing"
+SITTING = "sitting"
+CABINETS = "cabinets"
+
+SUPPORTED_ACTIVITIES = [WALKING, STANDING, SITTING, CABINETS]

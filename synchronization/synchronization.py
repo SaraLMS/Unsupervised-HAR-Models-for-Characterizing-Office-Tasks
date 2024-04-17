@@ -10,6 +10,7 @@ import pandas as pd
 
 from constants import CROSSCORR, TIMESTAMPS, ACCELEROMETER, WEAR_ACCELEROMETER, WATCH, PHONE, SUPPORTED_DEVICES, MBAN, \
     SUPPORTED_PHONE_SENSORS, SUPPORTED_WATCH_SENSORS, SUPPORTED_MBAN_SENSORS, ACC
+from parser.check_files_directories import check_in_path
 from synchronization.sync_android_sensors import sync_all_classes
 from synchronization.sync_devices_crosscorr import sync_crosscorr
 from synchronization.sync_devices_timestamps import sync_timestamps
@@ -86,7 +87,7 @@ def synchronization(raw_data_in_path: str, sync_android_out_path: str, selected_
         sensors. False to delete. If there's only one device, these files are not deleted.
     """
     # check if in path is valid
-    _check_in_path(raw_data_in_path)
+    check_in_path(raw_data_in_path)
 
     # check if selected sensors are valid
     _check_supported_sensors(selected_sensors)
@@ -196,33 +197,6 @@ def _check_supported_sensors(selected_sensors: Dict[str, List[str]]):
         raise ValueError("\n".join(error_messages))
 
 
-def _check_in_path(raw_data_in_path: str) -> None:
-    """
-    Checks if the specified path is valid according to the criteria:
-    - The path exists and is a directory.
-    - Contains subdirectories.
-    - Each subdirectory contains at least one .txt file.
-
-    Parameters:
-    raw_data_in_path (str):
-    The main folder path containing subfolders with raw sensor data.
-
-    Raises:
-    ValueError: If any of the criteria are not met.
-    """
-    if not os.path.isdir(raw_data_in_path):
-        raise ValueError(f"The path {raw_data_in_path} does not exist or is not a directory.")
-
-    subfolders = [f.path for f in os.scandir(raw_data_in_path) if f.is_dir()]
-    if not subfolders:
-        raise ValueError(f"No subfolders found in the main path {raw_data_in_path}.")
-
-    for subfolder in subfolders:
-        txt_files = glob(os.path.join(subfolder, "*.txt"))
-        if not txt_files:
-            raise ValueError(f"No .txt files found in subfolder {subfolder}.")
-
-
 def _check_acc_sensor_selected(selected_sensors: Dict[str, List[str]]) -> None:
     """
     Checks if the accelerometer ("acc") sensor is selected for each device.
@@ -279,4 +253,3 @@ def _check_acc_file(folder_path: str, selected_sensors: Dict[str, List[str]]) ->
     if missing_devices:
         missing_str = ", ".join(missing_devices)
         raise ValueError(f"Missing accelerometer data file(s) for device(s): {missing_str}")
-

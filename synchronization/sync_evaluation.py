@@ -16,7 +16,7 @@ from synchronization.sync_parser import check_logger_file
 # ------------------------------------------------------------------------------------------------------------------- #
 
 
-def sync_evaluation(logger_folder_path: str, sync_folder_path: str, selected_sensors: list) -> pd.DataFrame:
+def sync_evaluation(logger_folder_path: str, sync_folder_path: str, selected_sensors: Dict[str, List[str]]) -> pd.DataFrame:
     """
     Evaluates the performance of three synchronization methods: cross correlation, filename timestamps,
     and logger file timestamps.

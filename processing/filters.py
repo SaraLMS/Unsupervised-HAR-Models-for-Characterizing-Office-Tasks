@@ -14,7 +14,7 @@ def median_and_lowpass_filter(sensor_data: np.ndarray, fs: int, medfilt_window_l
     """
     First a median filter is applied and then a 3rd order butterworth lowpass
     filter with a cutoff frequency of 20 Hz is applied.
-    The filtering scheme is based on:
+    The processing scheme is based on:
     "A Public Domain Dataset for Human Activity Recognition Using Smartphones"
     https://www.esann.org/sites/default/files/proceedings/legacy/es2013-84.pdf
     :param sensor_data: a 1-D or (MxN) array, where M is the signal length in samples and

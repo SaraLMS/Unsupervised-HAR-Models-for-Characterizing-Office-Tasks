@@ -8,8 +8,8 @@ import pandas as pd
 
 from constants import BUFFER_SIZE_SECONDS
 from load.load_sync_data import load_used_devices_data
-from .common import crop_dataframes_on_shift, join_dataframes_on_index, generate_filename, get_folder_name_from_path, \
-    save_data_to_csv
+from parser.extract_from_path import get_folder_name_from_path
+from .common import crop_dataframes_on_shift, join_dataframes_on_index, generate_filename, save_data_to_csv
 from load.load_raw_data import load_logger_file
 from typing import Dict, Tuple, Union, List
 

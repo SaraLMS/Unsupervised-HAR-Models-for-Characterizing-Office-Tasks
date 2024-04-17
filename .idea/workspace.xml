@@ -5,9 +5,23 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="3466cb1d-2559-4122-9522-f23b0d0f6b0a" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/parser/check_files_directories.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/parser/extract_from_path.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/processing/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/processing/task_segmentation.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/filtering/filtering.py" beforeDir="false" afterPath="$PROJECT_DIR$/filtering/filtering.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/constants.py" beforeDir="false" afterPath="$PROJECT_DIR$/constants.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/filtering/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/parser/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/filtering/filtering.py" beforeDir="false" afterPath="$PROJECT_DIR$/processing/processing.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/filtering/filters.py" beforeDir="false" afterPath="$PROJECT_DIR$/processing/filters.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/synchronization/common.py" beforeDir="false" afterPath="$PROJECT_DIR$/synchronization/common.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/synchronization/sync_android_sensors.py" beforeDir="false" afterPath="$PROJECT_DIR$/synchronization/sync_android_sensors.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/synchronization/sync_devices_crosscorr.py" beforeDir="false" afterPath="$PROJECT_DIR$/synchronization/sync_devices_crosscorr.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/synchronization/sync_devices_timestamps.py" beforeDir="false" afterPath="$PROJECT_DIR$/synchronization/sync_devices_timestamps.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/synchronization/sync_evaluation.py" beforeDir="false" afterPath="$PROJECT_DIR$/synchronization/sync_evaluation.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/synchronization/synchronization.py" beforeDir="false" afterPath="$PROJECT_DIR$/synchronization/synchronization.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/test_in_paths.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/test_in_paths.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/visualization/visualize_filters.py" beforeDir="false" afterPath="$PROJECT_DIR$/visualization/visualize_filters.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -192,7 +206,15 @@
       <option name="project" value="LOCAL" />
       <updated>1713188239773</updated>
     </task>
-    <option name="localTasksCounter" value="16" />
+    <task id="LOCAL-00016" summary="Filtering implemented and visualization of filtering results.">
+      <option name="closed" value="true" />
+      <created>1713344121232</created>
+      <option name="number" value="00016" />
+      <option name="presentableId" value="LOCAL-00016" />
+      <option name="project" value="LOCAL" />
+      <updated>1713344121232</updated>
+    </task>
+    <option name="localTasksCounter" value="17" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
@@ -208,6 +230,7 @@
     <MESSAGE value="added checks for timestamps in the logger file" />
     <MESSAGE value="Corrected sync_evaluation (when logger file can't be used). Added prefix parameter in synchronization.py" />
     <MESSAGE value="started filters" />
-    <option name="LAST_COMMIT_MESSAGE" value="started filters" />
+    <MESSAGE value="Filtering implemented and visualization of filtering results." />
+    <option name="LAST_COMMIT_MESSAGE" value="Filtering implemented and visualization of filtering results." />
   </component>
 </project>

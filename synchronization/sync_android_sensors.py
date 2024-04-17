@@ -2,7 +2,8 @@
 # imports
 # ------------------------------------------------------------------------------------------------------------------- #
 from load.load_raw_data import load_device_data, calc_avg_sampling_rate, round_sampling_rate
-from .common import create_dir, get_folder_name_from_path
+from parser.extract_from_path import get_folder_name_from_path
+from .common import create_dir
 import numpy as np
 import pandas as pd
 import os
