@@ -5,13 +5,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="3466cb1d-2559-4122-9522-f23b0d0f6b0a" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/filtering/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/filtering/filtering.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/filtering/filters.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/visualization/visualize_filters.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/constants.py" beforeDir="false" afterPath="$PROJECT_DIR$/constants.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/synchronization/sync_evaluation.py" beforeDir="false" afterPath="$PROJECT_DIR$/synchronization/sync_evaluation.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/filtering/filtering.py" beforeDir="false" afterPath="$PROJECT_DIR$/filtering/filtering.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/visualization/visualize_filters.py" beforeDir="false" afterPath="$PROJECT_DIR$/visualization/visualize_filters.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -187,7 +184,15 @@
       <option name="project" value="LOCAL" />
       <updated>1713185771826</updated>
     </task>
-    <option name="localTasksCounter" value="15" />
+    <task id="LOCAL-00015" summary="started filters">
+      <option name="closed" value="true" />
+      <created>1713188239773</created>
+      <option name="number" value="00015" />
+      <option name="presentableId" value="LOCAL-00015" />
+      <option name="project" value="LOCAL" />
+      <updated>1713188239773</updated>
+    </task>
+    <option name="localTasksCounter" value="16" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
@@ -202,6 +207,7 @@
     <MESSAGE value="Added some constants (only changed this in synchronization.py). &#10;Corrected an error in sync_evaluation.py (in the precedes and lags part).&#10;Added another layer of checks for synchronization to check for acc files and if acc is present for every device if cross corr is chosen. Synchronization in pair is assured with len(selected_sensors)." />
     <MESSAGE value="added checks for timestamps in the logger file" />
     <MESSAGE value="Corrected sync_evaluation (when logger file can't be used). Added prefix parameter in synchronization.py" />
-    <option name="LAST_COMMIT_MESSAGE" value="Corrected sync_evaluation (when logger file can't be used). Added prefix parameter in synchronization.py" />
+    <MESSAGE value="started filters" />
+    <option name="LAST_COMMIT_MESSAGE" value="started filters" />
   </component>
 </project>
