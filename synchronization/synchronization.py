@@ -10,7 +10,7 @@ import pandas as pd
 
 from constants import CROSSCORR, TIMESTAMPS, ACCELEROMETER, WEAR_ACCELEROMETER, WATCH, PHONE, SUPPORTED_DEVICES, MBAN, \
     SUPPORTED_PHONE_SENSORS, SUPPORTED_WATCH_SENSORS, SUPPORTED_MBAN_SENSORS, ACC
-from parser.check_files_directories import check_in_path
+from parser.check_create_directories import check_in_path
 from synchronization.sync_android_sensors import sync_all_classes
 from synchronization.sync_devices_crosscorr import sync_crosscorr
 from synchronization.sync_devices_timestamps import sync_timestamps

@@ -2,15 +2,65 @@
 # imports
 # ------------------------------------------------------------------------------------------------------------------- #
 import numpy as np
+import pandas as pd
 from scipy.signal import butter, medfilt, sosfilt
 import scipy as scp
+
+from constants import ACCELEROMETER_PREFIX, GYROSCOPE_PREFIX
+from load.load_sync_data import load_data_from_csv
 
 
 # ------------------------------------------------------------------------------------------------------------------- #
 # public functions
 # ------------------------------------------------------------------------------------------------------------------- #
 
-def median_and_lowpass_filter(sensor_data: np.ndarray, fs: int, medfilt_window_length=11) -> np.ndarray:
+def apply_filters(data: pd.DataFrame, fs: int) -> pd.DataFrame:
+    """
+    Applies various filters to sensor data columns in a CSV file.
+
+    This function processes each sensor data column in the file, applying median and lowpass filters.
+    For accelerometer data, it additionally removes the gravitational component.
+
+    Parameters:
+        data (pd.DataFrame): DataFrame containing the sensor data.
+        fs (int): The sampling frequency of the sensor data.
+
+    Returns:
+        pd.DataFrame: A DataFrame containing the filtered sensor data, with the same structure as the input file.
+    """
+    # TODO add other valid sensors for filtering
+
+    filtered_data = data.copy()
+
+    # Process each sensor column directly
+    for sensor in filtered_data.columns:
+
+        # Determine if the sensor is an accelerometer or gyroscope by its prefix
+        if ACCELEROMETER_PREFIX in sensor or GYROSCOPE_PREFIX in sensor:
+            # Get raw sensor data
+            raw_data = filtered_data[sensor].values
+
+            # Apply median and lowpass filters
+            filtered_median_lowpass_data = _median_and_lowpass_filter(raw_data, fs)
+
+            if ACCELEROMETER_PREFIX in sensor:
+                # For accelerometer data, additionally remove the gravitational component
+                gravitational_component = _gravitational_filter(raw_data, fs)
+
+                # Remove gravitational component from filtered data
+                filtered_median_lowpass_data -= gravitational_component
+
+            # Update DataFrame with filtered sensor data
+            filtered_data[sensor] = pd.Series(filtered_median_lowpass_data, index=filtered_data.index)
+
+    return filtered_data
+
+
+# ------------------------------------------------------------------------------------------------------------------- #
+# private functions
+# ------------------------------------------------------------------------------------------------------------------- #
+
+def _median_and_lowpass_filter(sensor_data: np.ndarray, fs: int, medfilt_window_length=11) -> np.ndarray:
     """
     First a median filter is applied and then a 3rd order butterworth lowpass
     filter with a cutoff frequency of 20 Hz is applied.
@@ -57,7 +107,7 @@ def median_and_lowpass_filter(sensor_data: np.ndarray, fs: int, medfilt_window_l
     return filtered_data
 
 
-def gravitational_filter(acc_data: np.ndarray, fs: int) -> np.ndarray:
+def _gravitational_filter(acc_data: np.ndarray, fs: int) -> np.ndarray:
     """
     Function to filter out the gravitational component of ACC signals using a 3rd order butterworth lowpass filter with
     a cuttoff frequency of 0.3 Hz

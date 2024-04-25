@@ -7,29 +7,12 @@ import pandas as pd
 from typing import Dict, List, Tuple
 from datetime import datetime
 
+from parser.check_create_directories import create_dir
+
 
 # ------------------------------------------------------------------------------------------------------------------- #
 # public functions
 # ------------------------------------------------------------------------------------------------------------------- #
-
-
-def create_dir(path: str, folder_name: str) -> str:
-    """
-    creates a new directory in the specified path
-    :param path: the path in which the folder_name should be created
-    :param folder_name: the name of the folder that should be created
-    :return: the full path to the created folder
-    """
-
-    # join path and folder
-    new_path = os.path.join(path, folder_name)
-
-    # check if the folder does not exist yet
-    if not os.path.exists(new_path):
-        # create the folder
-        os.makedirs(new_path)
-
-    return new_path
 
 
 def sync_signals(tau: int, array_df: List[pd.DataFrame]) -> Tuple[pd.DataFrame, pd.DataFrame]:
@@ -171,31 +154,4 @@ def generate_filename(datetime_dic: Dict[str, Tuple[str, str]], folder_name: str
     return output_name
 
 
-def save_data_to_csv(output_filename: str, signals_df: pd.DataFrame, output_path: str, folder_name: str) -> None:
-    """
-    Saves synchronized sensor data to a csv file.
 
-    Parameters:
-        output_filename (str):
-        The name for the output file.
-
-        signals_df (pd.DataFrame):
-        DataFrame containing the synchronized sensor data to be saved to a csv file
-
-        output_path (str):
-        Location where the file should be saved.
-
-        folder_name (str):
-        The name of the folder containing the data.
-    """
-    # get folder name without _
-    folder = folder_name.split('_')
-
-    # create dir
-    output_path = create_dir(output_path, folder[0])
-
-    # add filename to get full path
-    output_path = os.path.join(output_path, output_filename)
-
-    # save dataframe to csv file
-    signals_df.to_csv(output_path)

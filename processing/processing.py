@@ -2,14 +2,14 @@
 # imports
 # ------------------------------------------------------------------------------------------------------------------- #
 import os
-from typing import Dict
+from typing import Dict, List
 
 import pandas as pd
 
-from constants import ACCELEROMETER_PREFIX, GYROSCOPE_PREFIX
-from parser.check_files_directories import check_in_path
+from constants import WALKING, CABINETS, STANDING, SITTING
 from parser.extract_from_path import get_folder_name_from_path
-from processing.filters import median_and_lowpass_filter, gravitational_filter
+from parser.save_to_csv import save_data_to_csv
+from processing.filters import apply_filters
 from load.load_sync_data import load_data_from_csv
 from processing.task_segmentation import segment_tasks
 
@@ -18,7 +18,7 @@ from processing.task_segmentation import segment_tasks
 # public functions
 # ------------------------------------------------------------------------------------------------------------------- #
 
-def processing(sync_data_path: str, fs: int = 100) -> None:
+def processing(sync_data_path: str, output_path: str, fs: int = 100) -> None:
     """
     Processes and filters signal data from csv files in a directory structure, storing the results in a dictionary.
 
@@ -27,6 +27,7 @@ def processing(sync_data_path: str, fs: int = 100) -> None:
 
     Parameters:
         sync_data_path (str): The path to the directory containing folders of synchronized signal data files.
+        output_path (str): Path where the data should be saved
         fs (int, optional): The sampling frequency used for the processing process. Defaults to 100 Hz.
 
     Returns:
@@ -36,8 +37,6 @@ def processing(sync_data_path: str, fs: int = 100) -> None:
     """
     # TODO check directories and csv files
 
-    filtered_signals_dict = {}
-
     for folder_name in os.listdir(sync_data_path):
 
         folder_path = os.path.join(sync_data_path, folder_name)
@@ -45,65 +44,61 @@ def processing(sync_data_path: str, fs: int = 100) -> None:
         folder_name = get_folder_name_from_path(folder_path)
 
         for filename in os.listdir(folder_path):
-
             # get the path to the signals
             file_path = os.path.join(folder_path, filename)
 
             # load data to csv
+            data = load_data_from_csv(file_path)
 
-            # # cut activities
-            # cut_data = segment_tasks(folder_name, filtered_data)
+            # cut activities
+            tasks_array = segment_tasks(folder_name, data)
 
-            # # filter signals
-            # filtered_data = _apply_filters(file_path, fs)
+            filtered_tasks = []
 
-            # save to csv file
+            for df in tasks_array:
+                # filter signals
+                filtered_data = apply_filters(df, fs)
+                filtered_tasks.append(filtered_data)
 
+            # generate output filenames
+            output_filenames = _generate_task_filenames(folder_name, filename)
 
+            for df, output_filename in zip(filtered_tasks, output_filenames):
 
+                # save data to csv
+                save_data_to_csv(output_filename, df, output_path, folder_name)
 
 
 # ------------------------------------------------------------------------------------------------------------------- #
 # private functions
 # ------------------------------------------------------------------------------------------------------------------- #
 
-def _apply_filters(file_path: str, fs: int) -> pd.DataFrame:
-    """
-    Applies various filters to sensor data columns in a CSV file.
+def _generate_task_filenames(folder_name: str, filename: str) -> List[str]:
+    # list to store the new filenames
+    filenames = []
 
-    This function processes each sensor data column in the file, applying median and lowpass filters.
-    For accelerometer data, it additionally removes the gravitational component.
+    # split .csv from the filename
+    base_filename, extension = os.path.splitext(filename)
 
-    Parameters:
-        file_path (str): The file path of the CSV containing sensor data.
-        fs (int): The sampling frequency of the sensor data.
+    # get the suffixes to be added according to the activity
+    if WALKING in folder_name:
+        suffixes = ['_slow', '_medium', '_fast']
 
-    Returns:
-        pd.DataFrame: A DataFrame containing the filtered sensor data, with the same structure as the input file.
-    """
-    data = load_data_from_csv(file_path)
+    elif CABINETS in folder_name:
+        suffixes = ['_coffee', '_folders']
 
-    filtered_data = data.copy()
+    elif STANDING in folder_name:
+        suffixes = ['_gestures', '_no_gestures']
 
-    # Process each sensor column directly
-    for sensor in filtered_data.columns:
+    elif SITTING in folder_name:
+        suffixes = ['_sit']
 
-        # Determine if the sensor is an accelerometer or gyroscope by its prefix
-        if ACCELEROMETER_PREFIX in sensor or GYROSCOPE_PREFIX in sensor:
-            # Get raw sensor data
-            raw_data = filtered_data[sensor].values
+    else:
+        raise ValueError(f"The activity: {folder_name} is not supported")
 
-            # Apply median and lowpass filters
-            filtered_median_lowpass_data = median_and_lowpass_filter(raw_data, fs)
+    for suffix in suffixes:
+        # add the suffix and extension to the previous filename
+        new_filename = f"{base_filename}{suffix}{extension}"
+        filenames.append(new_filename)
 
-            if ACCELEROMETER_PREFIX in sensor:
-                # For accelerometer data, additionally remove the gravitational component
-                gravitational_component = gravitational_filter(raw_data, fs)
-
-                # Remove gravitational component from filtered data
-                filtered_median_lowpass_data -= gravitational_component
-
-            # Update DataFrame with filtered sensor data
-            filtered_data[sensor] = pd.Series(filtered_median_lowpass_data, index=filtered_data.index)
-
-    return filtered_data
+    return filenames

@@ -1,9 +1,8 @@
 # ------------------------------------------------------------------------------------------------------------------- #
 # imports
 # ------------------------------------------------------------------------------------------------------------------- #
-from typing import Tuple, List
+from typing import List
 
-import numpy as np
 import pandas as pd
 
 from constants import WALKING, STANDING, SITTING, CABINETS, SUPPORTED_ACTIVITIES
@@ -48,11 +47,6 @@ def segment_tasks(folder_name: str, data: pd.DataFrame):
         # If no supported activity is found, raise a ValueError
         raise ValueError(f"The activity: {folder_name} is not supported")
 
-    # reset time
-
-    # new_time_axis = _generate_time_axis(df.iloc[:, 0].values)
-    # df.['sec'] = new_time_axis
-
     return tasks
 
 
@@ -62,22 +56,24 @@ def segment_tasks(folder_name: str, data: pd.DataFrame):
 
 def _reset_index_to_column(df):
     """ Reset the index and convert it into a column called 'sec'. """
-    df.reset_index(inplace=True)  # This moves the index to a column
+
+    # Move the current index to a column and reset
+    df.reset_index(inplace=True)
     df.rename(columns={'index': 'sec'}, inplace=True)  # Rename the new column to 'sec'
     return df
 
 
-def _generate_time_axis(signal, sampling_rate=100):
-    # get the number of samples
-    num_samples = len(signal)
-
-    # calculate the end of the signal in seconds
-    end_time = num_samples / sampling_rate
-
-    # generate the time axis
-    time_axis = np.arange(0, end_time, 1 / sampling_rate)
-
-    return time_axis
+# def _generate_time_axis(signal, sampling_rate=100):
+#     # get the number of samples
+#     num_samples = len(signal)
+#
+#     # calculate the end of the signal in seconds
+#     end_time = num_samples / sampling_rate
+#
+#     # generate the time axis
+#     time_axis = np.arange(0, end_time, 1 / sampling_rate)
+#
+#     return time_axis
 
 
 def _cut_recording_time(df: pd.DataFrame, recording_size: int) -> pd.DataFrame:
@@ -87,19 +83,19 @@ def _cut_recording_time(df: pd.DataFrame, recording_size: int) -> pd.DataFrame:
     return df
 
 
-def _trim_data(emg_series: pd.Series, trim_length: int, print_message=False):
+def _trim_data(sensor_data: pd.Series, trim_length: int, print_message=False):
     """
     trims the data in emg_series to the length defined by trim_length. This is done by trimming out a window of
     size trim_length in the middle of the emg_series. The input emg_series should have an index that runs continuously
     from [0:len(emg_series)], otherwise the trimming will not be performed as expected.
-    :param emg_series: the emg_series containing the longest sitting period for a particular session
+    :param sensor_data: the emg_series containing the longest sitting period for a particular session
     :param trim_length: the length to which the signal should be trimmed
     :param print_message: boolean that defines whether a message for the user should be printed. Default: True
     :return: the emg_series trimmed to trim_length
     """
 
     # get the length of the series
-    series_length = emg_series.size
+    series_length = sensor_data.size
 
     if print_message:
         # inform user
@@ -109,12 +105,12 @@ def _trim_data(emg_series: pd.Series, trim_length: int, print_message=False):
     if series_length < trim_length:
 
         # inform user
-        IOError("--> Error: the emg_series is smaller than the trim_length.")
+        IOError("--> Error: the data_series is smaller than the trim_length.")
 
     # check for same length. This is the case when the shortest sitting sequence is passed
     elif series_length == trim_length:
 
-        return emg_series
+        return sensor_data
 
     else:
 
@@ -123,14 +119,14 @@ def _trim_data(emg_series: pd.Series, trim_length: int, print_message=False):
         stop_idx = start_idx + trim_length - 1
 
         # trim the emg series
-        trimmed_emg_series = emg_series.loc[start_idx:stop_idx]
+        trimmed_data_series = sensor_data.loc[start_idx:stop_idx]
 
-        return trimmed_emg_series.reset_index(drop=True)
+        return trimmed_data_series.reset_index(drop=True)
 
 
-def _trim_dataframe(df, trim_lenght):
+def _trim_dataframe(df, trim_length):
     for column in df.columns:
-        df[column] = _trim_data(df[column], trim_lenght)
+        df[column] = _trim_data(df[column], trim_length)
     df.dropna(inplace=True)
     return df
 
