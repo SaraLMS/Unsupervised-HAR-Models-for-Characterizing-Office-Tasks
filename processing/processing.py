@@ -18,7 +18,7 @@ from processing.task_segmentation import segment_tasks
 # public functions
 # ------------------------------------------------------------------------------------------------------------------- #
 
-def processing(sync_data_path: str, fs: int = 100) -> Dict[str, pd.DataFrame]:
+def processing(sync_data_path: str, fs: int = 100) -> None:
     """
     Processes and filters signal data from csv files in a directory structure, storing the results in a dictionary.
 
@@ -49,16 +49,18 @@ def processing(sync_data_path: str, fs: int = 100) -> Dict[str, pd.DataFrame]:
             # get the path to the signals
             file_path = os.path.join(folder_path, filename)
 
-            # filter signals
-            filtered_data = _apply_filters(file_path, fs)
+            # load data to csv
 
-            # cut activities
-            cut_data = segment_tasks(folder_name, filtered_data)
+            # # cut activities
+            # cut_data = segment_tasks(folder_name, filtered_data)
 
-            # save in dictionary
-            filtered_signals_dict[folder_name] = cut_data
+            # # filter signals
+            # filtered_data = _apply_filters(file_path, fs)
 
-    return filtered_signals_dict
+            # save to csv file
+
+
+
 
 
 # ------------------------------------------------------------------------------------------------------------------- #

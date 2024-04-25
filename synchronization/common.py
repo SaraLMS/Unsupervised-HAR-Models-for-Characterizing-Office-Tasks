@@ -188,8 +188,11 @@ def save_data_to_csv(output_filename: str, signals_df: pd.DataFrame, output_path
         folder_name (str):
         The name of the folder containing the data.
     """
+    # get folder name without _
+    folder = folder_name.split('_')
+
     # create dir
-    output_path = create_dir(output_path, folder_name)
+    output_path = create_dir(output_path, folder[0])
 
     # add filename to get full path
     output_path = os.path.join(output_path, output_filename)

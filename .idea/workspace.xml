@@ -5,24 +5,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="3466cb1d-2559-4122-9522-f23b0d0f6b0a" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/parser/check_files_directories.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/parser/extract_from_path.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/processing/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/processing/task_segmentation.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/constants.py" beforeDir="false" afterPath="$PROJECT_DIR$/constants.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/filtering/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/parser/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/filtering/filtering.py" beforeDir="false" afterPath="$PROJECT_DIR$/processing/processing.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/filtering/filters.py" beforeDir="false" afterPath="$PROJECT_DIR$/processing/filters.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/processing/processing.py" beforeDir="false" afterPath="$PROJECT_DIR$/processing/processing.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/processing/task_segmentation.py" beforeDir="false" afterPath="$PROJECT_DIR$/processing/task_segmentation.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/synchronization/common.py" beforeDir="false" afterPath="$PROJECT_DIR$/synchronization/common.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/synchronization/sync_android_sensors.py" beforeDir="false" afterPath="$PROJECT_DIR$/synchronization/sync_android_sensors.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/synchronization/sync_devices_crosscorr.py" beforeDir="false" afterPath="$PROJECT_DIR$/synchronization/sync_devices_crosscorr.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/synchronization/sync_devices_timestamps.py" beforeDir="false" afterPath="$PROJECT_DIR$/synchronization/sync_devices_timestamps.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/synchronization/sync_evaluation.py" beforeDir="false" afterPath="$PROJECT_DIR$/synchronization/sync_evaluation.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/synchronization/synchronization.py" beforeDir="false" afterPath="$PROJECT_DIR$/synchronization/synchronization.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/test_in_paths.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/test_in_paths.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/visualization/visualize_filters.py" beforeDir="false" afterPath="$PROJECT_DIR$/visualization/visualize_filters.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -214,8 +201,27 @@
       <option name="project" value="LOCAL" />
       <updated>1713344121232</updated>
     </task>
-    <option name="localTasksCounter" value="17" />
+    <task id="LOCAL-00017" summary="Implementing the task_segmentation. Not working, it's not cropping the actuall signal?">
+      <option name="closed" value="true" />
+      <created>1713369456734</created>
+      <option name="number" value="00017" />
+      <option name="presentableId" value="LOCAL-00017" />
+      <option name="project" value="LOCAL" />
+      <updated>1713369456734</updated>
+    </task>
+    <option name="localTasksCounter" value="18" />
     <servers />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Load data to list of numpy arrays. Added the column names to the report to later load dataframe with the correct column names." />
@@ -231,6 +237,7 @@
     <MESSAGE value="Corrected sync_evaluation (when logger file can't be used). Added prefix parameter in synchronization.py" />
     <MESSAGE value="started filters" />
     <MESSAGE value="Filtering implemented and visualization of filtering results." />
-    <option name="LAST_COMMIT_MESSAGE" value="Filtering implemented and visualization of filtering results." />
+    <MESSAGE value="Implementing the task_segmentation. Not working, it's not cropping the actuall signal?" />
+    <option name="LAST_COMMIT_MESSAGE" value="Implementing the task_segmentation. Not working, it's not cropping the actuall signal?" />
   </component>
 </project>
