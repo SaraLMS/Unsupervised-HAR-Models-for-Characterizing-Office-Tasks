@@ -2,7 +2,6 @@
 # imports
 # ------------------------------------------------------------------------------------------------------------------- #
 import shutil
-from glob import glob
 from typing import Dict, List
 import os
 
@@ -23,8 +22,8 @@ from synchronization.sync_evaluation import sync_evaluation
 
 def synchronization(raw_data_in_path: str, sync_android_out_path: str, selected_sensors: Dict[str, List[str]],
                     output_path: str, sync_type: str, evaluation_output_path: str,
-                    evaluation_filename: str = "evaluation_report.csv", save_intermediate_files: bool = True,
-                    prefix: str = "P001") -> None:
+                    evaluation_filename: str = "evaluation_report.csv", save_intermediate_files: bool = False,
+                    prefix: str = "P002") -> None:
     """
     Synchronizes android sensor data and between two different devices. Two different synchronization methods are
     supported: cross correlation and timestamps. Generates a new csv file containing all the synchronized sensor data
@@ -87,7 +86,7 @@ def synchronization(raw_data_in_path: str, sync_android_out_path: str, selected_
         sensors. False to delete. If there's only one device, these files are not deleted.
     """
     # check if in path is valid
-    check_in_path(raw_data_in_path)
+    check_in_path(raw_data_in_path, '.txt')
 
     # check if selected sensors are valid
     _check_supported_sensors(selected_sensors)

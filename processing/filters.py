@@ -6,8 +6,7 @@ import pandas as pd
 from scipy.signal import butter, medfilt, sosfilt
 import scipy as scp
 
-from constants import ACCELEROMETER_PREFIX, GYROSCOPE_PREFIX
-from load.load_sync_data import load_data_from_csv
+from constants import ACCELEROMETER_PREFIX, SUPPORTED_PREFIXES
 
 
 # ------------------------------------------------------------------------------------------------------------------- #
@@ -28,7 +27,6 @@ def apply_filters(data: pd.DataFrame, fs: int) -> pd.DataFrame:
     Returns:
         pd.DataFrame: A DataFrame containing the filtered sensor data, with the same structure as the input file.
     """
-    # TODO add other valid sensors for filtering
 
     filtered_data = data.copy()
 
@@ -36,7 +34,7 @@ def apply_filters(data: pd.DataFrame, fs: int) -> pd.DataFrame:
     for sensor in filtered_data.columns:
 
         # Determine if the sensor is an accelerometer or gyroscope by its prefix
-        if ACCELEROMETER_PREFIX in sensor or GYROSCOPE_PREFIX in sensor:
+        if any(prefix in sensor for prefix in SUPPORTED_PREFIXES):
             # Get raw sensor data
             raw_data = filtered_data[sensor].values
 

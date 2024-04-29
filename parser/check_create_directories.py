@@ -27,16 +27,16 @@ def create_dir(path: str, folder_name: str) -> str:
     return new_path
 
 
-def check_in_path(raw_data_in_path: str) -> None:
+def check_in_path(raw_data_in_path: str, file_extension: str) -> None:
     """
     Checks if the specified path is valid according to the criteria:
     - The path exists and is a directory.
     - Contains subdirectories.
-    - Each subdirectory contains at least one .txt file.
+    - Each subdirectory contains at least one file with the specified extension.
 
     Parameters:
-    raw_data_in_path (str):
-    The main folder path containing subfolders with raw sensor data.
+    raw_data_in_path (str): The main folder path containing subfolders with raw sensor data.
+    file_extension (str): File extension to check for in each subdirectory (default is '.txt').
 
     Raises:
     ValueError: If any of the criteria are not met.
@@ -46,9 +46,10 @@ def check_in_path(raw_data_in_path: str) -> None:
 
     subfolders = [f.path for f in os.scandir(raw_data_in_path) if f.is_dir()]
     if not subfolders:
-        raise ValueError(f"No subfolders found in the main path {raw_data_in_path}.")
+        raise ValueError(f"No subfolders found in the main path {raw_data_in_path}. Path should be: main_folder -> "
+                         f"subfolders -> files {file_extension}")
 
     for subfolder in subfolders:
-        txt_files = glob(os.path.join(subfolder, "*.txt"))
-        if not txt_files:
-            raise ValueError(f"No .txt files found in subfolder {subfolder}.")
+        files = glob(os.path.join(subfolder, f"*{file_extension}"))
+        if not files:
+            raise ValueError(f"No {file_extension} files found in subfolder {subfolder}.")

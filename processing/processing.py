@@ -6,7 +6,8 @@ from typing import Dict, List
 
 import pandas as pd
 
-from constants import WALKING, CABINETS, STANDING, SITTING
+from constants import WALKING, CABINETS, STANDING, SITTING, SUPPORTED_ACTIVITIES
+from parser.check_create_directories import check_in_path
 from parser.extract_from_path import get_folder_name_from_path
 from parser.save_to_csv import save_data_to_csv
 from processing.filters import apply_filters
@@ -35,7 +36,8 @@ def processing(sync_data_path: str, output_path: str, fs: int = 100) -> None:
         containing the filtered data from that folder.
 
     """
-    # TODO check directories and csv files
+
+    check_in_path(sync_data_path, '.csv')
 
     for folder_name in os.listdir(sync_data_path):
 
@@ -64,9 +66,11 @@ def processing(sync_data_path: str, output_path: str, fs: int = 100) -> None:
             output_filenames = _generate_task_filenames(folder_name, filename)
 
             for df, output_filename in zip(filtered_tasks, output_filenames):
-
                 # save data to csv
                 save_data_to_csv(output_filename, df, output_path, folder_name)
+
+        # inform user
+        print(f"Segment and filter{folder_name} tasks")
 
 
 # ------------------------------------------------------------------------------------------------------------------- #
@@ -74,6 +78,17 @@ def processing(sync_data_path: str, output_path: str, fs: int = 100) -> None:
 # ------------------------------------------------------------------------------------------------------------------- #
 
 def _generate_task_filenames(folder_name: str, filename: str) -> List[str]:
+    """
+    Generates a list of new filenames based on the activity type specified in the folder name by appending relevant
+    suffixes to the original filename.
+
+    :param folder_name: str.
+        Name of the folder indicating the activity type which will determine the suffixes added to the filename.
+    :param filename: str.
+        Original filename to which the suffixes will be added.
+    :return: List[str].
+        A list of modified filenames with activity-specific suffixes appended to the base filename.
+    """
     # list to store the new filenames
     filenames = []
 
@@ -94,7 +109,8 @@ def _generate_task_filenames(folder_name: str, filename: str) -> List[str]:
         suffixes = ['_sit']
 
     else:
-        raise ValueError(f"The activity: {folder_name} is not supported")
+        raise ValueError(f"The activity: {folder_name} is not supported. "
+                         f"Supported activities are {SUPPORTED_ACTIVITIES}")
 
     for suffix in suffixes:
         # add the suffix and extension to the previous filename
