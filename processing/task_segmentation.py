@@ -267,10 +267,10 @@ def _cut_cabinets_tasks(df: pd.DataFrame, recording_size: int = 91000, stop_size
 
     # Remove 10 seconds stop separating coffee and folder tasks
     # First segment to keep
-    coffee_task_df = _cut_and_trim_task(df, 0, int(recording_size / 2), 1500)
+    coffee_task_df = _cut_and_trim_task(df, 0, int(recording_size / 2 - stop_size/2), 1500)
 
     # Second segment to keep
-    folder_task_df = _cut_and_trim_task(df, int(recording_size / 2 + stop_size), None, 1500)
+    folder_task_df = _cut_and_trim_task(df, int(recording_size / 2 + stop_size/2), None, 1500)
 
     # Store the DataFrames in a list and return
     return [coffee_task_df, folder_task_df]

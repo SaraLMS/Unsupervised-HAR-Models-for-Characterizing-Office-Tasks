@@ -43,7 +43,7 @@ def processing(sync_data_path: str, output_path: str, fs: int = 100) -> None:
 
         folder_path = os.path.join(sync_data_path, folder_name)
 
-        folder_name = get_folder_name_from_path(folder_path)
+        # removed - folder_name = get_folder_name_from_path(folder_path)
 
         for filename in os.listdir(folder_path):
             # get the path to the signals
@@ -52,9 +52,10 @@ def processing(sync_data_path: str, output_path: str, fs: int = 100) -> None:
             # load data to csv
             data = load_data_from_csv(file_path)
 
-            # cut activities
+            # cut tasks
             tasks_array = segment_tasks(folder_name, data)
 
+            # list to store the segmented and filtered signals
             filtered_tasks = []
 
             for df in tasks_array:

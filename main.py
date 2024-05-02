@@ -1,6 +1,7 @@
 from typing import Dict, List
 
-from processing.processing import processing
+from feature_extraction.feature_extractor import feature_extractor, generate_cfg_file
+from processing.processor import processing
 from synchronization.synchronization import synchronization
 from visualization.visualize_filters import visualize_filtering_results
 from visualization.visualize_sync import visualize_sync_signals
@@ -18,15 +19,13 @@ from visualization.visualize_sync import visualize_sync_signals
 # file_path = "C:/Users/srale/OneDrive - FCT NOVA/Tese/P001/synchronized_P001/standing_2/P001_synchronized_phone_watch_standing_2_2024-04-11_11_37_30_crosscorr.csv"
 # visualize_sync_signals(file_path)
 
+# output_path = "C:/Users/srale/OneDrive - FCT NOVA/Tese/P002/cut_and_filtered_P002"
+# sync_data_path = "C:/Users/srale/OneDrive - FCT NOVA/Tese/P002/synchronized_P002"
+# # cut and filter
+# processing(sync_data_path, output_path)
 
-# sync_data_main_path = "C:/Users/srale/OneDrive - FCT NOVA/Tese/P001/synchronized_P001"
-#
-# filtered_data_dict = processing(sync_data_main_path)
-#
-# # visualize_filtering_results(filtered_data_dict, sync_data_main_path)
-# df = filtered_data_dict['cabinets_1']
 
-output_path = "C:/Users/srale/OneDrive - FCT NOVA/Tese/P002/cut_and_filtered_P002"
-sync_data_path = "C:/Users/srale/OneDrive - FCT NOVA/Tese/P002/synchronized_P002"
-# cut and filter
-processing(sync_data_path, output_path)
+main_path = "C:/Users/srale/OneDrive - FCT NOVA/Tese/P002/cut_and_filtered_P002"
+output_path = "C:/Users/srale/OneDrive - FCT NOVA/Tese/P002"
+feature_extractor(main_path, output_path)
+

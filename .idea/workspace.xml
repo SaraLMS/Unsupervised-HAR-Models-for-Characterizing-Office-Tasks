@@ -5,15 +5,13 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="3466cb1d-2559-4122-9522-f23b0d0f6b0a" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/feature_extraction/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/feature_extraction/cfg_file.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/feature_extraction/feature_extractor.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/constants.py" beforeDir="false" afterPath="$PROJECT_DIR$/constants.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/parser/check_create_directories.py" beforeDir="false" afterPath="$PROJECT_DIR$/parser/check_create_directories.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/parser/save_to_csv.py" beforeDir="false" afterPath="$PROJECT_DIR$/parser/save_to_csv.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/processing/filters.py" beforeDir="false" afterPath="$PROJECT_DIR$/processing/filters.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/processing/processing.py" beforeDir="false" afterPath="$PROJECT_DIR$/processing/processing.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/processing/processing.py" beforeDir="false" afterPath="$PROJECT_DIR$/processing/processor.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/processing/task_segmentation.py" beforeDir="false" afterPath="$PROJECT_DIR$/processing/task_segmentation.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/synchronization/synchronization.py" beforeDir="false" afterPath="$PROJECT_DIR$/synchronization/synchronization.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -58,6 +56,8 @@
 }</component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\srale\PycharmProjects\toolbox\feature_extraction" />
+      <recent name="C:\Users\srale\PycharmProjects\toolbox" />
       <recent name="C:\Users\srale\PycharmProjects\toolbox\synchronization" />
     </key>
   </component>
@@ -229,7 +229,15 @@
       <option name="project" value="LOCAL" />
       <updated>1714055587481</updated>
     </task>
-    <option name="localTasksCounter" value="20" />
+    <task id="LOCAL-00020" summary="Segmentation and filtering implemented and working. Added docstrings and checks for directories">
+      <option name="closed" value="true" />
+      <created>1714397013484</created>
+      <option name="number" value="00020" />
+      <option name="presentableId" value="LOCAL-00020" />
+      <option name="project" value="LOCAL" />
+      <updated>1714397013484</updated>
+    </task>
+    <option name="localTasksCounter" value="21" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -260,6 +268,7 @@
     <MESSAGE value="Implementing the task_segmentation. Not working, it's not cropping the actuall signal?" />
     <MESSAGE value="Implementing the task_segmentation. All cutting functions. No testing" />
     <MESSAGE value="task segmentation and filtering implemented. NOT TESTED YET!" />
-    <option name="LAST_COMMIT_MESSAGE" value="task segmentation and filtering implemented. NOT TESTED YET!" />
+    <MESSAGE value="Segmentation and filtering implemented and working. Added docstrings and checks for directories" />
+    <option name="LAST_COMMIT_MESSAGE" value="Segmentation and filtering implemented and working. Added docstrings and checks for directories" />
   </component>
 </project>
