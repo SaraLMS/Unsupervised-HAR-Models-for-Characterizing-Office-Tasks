@@ -13,8 +13,7 @@ from synchronization.sync_parser import extract_date_time
 # public functions
 # ------------------------------------------------------------------------------------------------------------------- #
 
-def load_used_devices_data(folder_path: str, time_in_seconds: bool = True) -> Tuple[
-    dict[str, pd.DataFrame], dict[str, tuple[Any, Any]]]:
+def load_used_devices_data(folder_path: str) -> Tuple[dict[str, pd.DataFrame], dict[str, tuple[Any, Any]]]:
     """
     Loads sensor data from used devices.
 
@@ -42,8 +41,6 @@ def load_used_devices_data(folder_path: str, time_in_seconds: bool = True) -> Tu
 
         # if times is in seconds change column name to 'sec
         # TODO ASK PHILLIP
-        if time_in_seconds:
-            df.rename(columns={'nSeq': 'sec'}, inplace=True)
 
         date, time = extract_date_time(path)
 

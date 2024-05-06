@@ -26,8 +26,8 @@ def segment_tasks(folder_name: str, data: pd.DataFrame) -> List[pd.DataFrame]:
         A list of DataFrames, where each DataFrame is a segment of the original data corresponding to a specific task
         within the given activity type.
     """
-    # get time back to column named 'sec'
-    data = _reset_index_to_column(data)
+    # # get time back to column named 'sec'
+    # data = _reset_index_to_column(data)
 
     # dataframes array
     tasks = []
@@ -68,19 +68,19 @@ def segment_tasks(folder_name: str, data: pd.DataFrame) -> List[pd.DataFrame]:
 # private functions
 # ------------------------------------------------------------------------------------------------------------------- #
 
-def _reset_index_to_column(df: pd.DataFrame) -> pd.DataFrame:
-    """
-    Reset the index and convert it into a column called 'sec'.
-    :param df: pd.DataFrame.
-        Dataframe containing the sensor data with the index being the time in seconds.
-    :return: pd.DataFrame.
-        Dataframe with the previous index in seconds converted into a column 'sec' and with new index in samples.
-    """
-
-    # Move the current index to a column and reset
-    df.reset_index(inplace=True)
-    df.rename(columns={'index': 'sec'}, inplace=True)  # Rename the new column to 'sec'
-    return df
+# def _reset_index_to_column(df: pd.DataFrame) -> pd.DataFrame:
+#     """
+#     Reset the index and convert it into a column called 'sec'.
+#     :param df: pd.DataFrame.
+#         Dataframe containing the sensor data with the index being the time in seconds.
+#     :return: pd.DataFrame.
+#         Dataframe with the previous index in seconds converted into a column 'sec' and with new index in samples.
+#     """
+#
+#     # Move the current index to a column and reset
+#     df.reset_index(inplace=True)
+#     df.rename(columns={'index': 'sec'}, inplace=True)  # Rename the new column to 'sec'
+#     return df
 
 
 def _cut_recording_time(df: pd.DataFrame, recording_size: int) -> pd.DataFrame:

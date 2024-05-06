@@ -573,7 +573,7 @@ def _get_sensor_path_list(folder_path: str, device: str, sensor_list: List[str])
 
 
 def _sync_all_sensors_in_class(prefix, folder_path: str, out_path: str,
-                               selected_sensors: Dict[str, List[str]]) -> None:
+                               selected_sensors: Dict[str, List[str]], time_in_seconds: bool = True) -> None:
     """
     Load data of chosen sensors for one class of movement.
 
@@ -625,6 +625,10 @@ def _sync_all_sensors_in_class(prefix, folder_path: str, out_path: str,
 
         # sync sensors from device
         df = _sync_sensors_in_device(sensor_path_list, output_path, sync_file_name)
+
+        # rename nSeq to sec
+        if time_in_seconds:
+            df.rename(columns={'nSeq': 'sec'}, inplace=True)
 
         # save dataframe to a csv file
         df.to_csv(os.path.join(output_path, sync_file_name))

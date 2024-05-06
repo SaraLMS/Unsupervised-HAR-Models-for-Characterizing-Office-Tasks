@@ -38,6 +38,8 @@ def apply_filters(data: pd.DataFrame, fs: int) -> pd.DataFrame:
             # Get raw sensor data
             raw_data = filtered_data[sensor].values
 
+
+
             # Apply median and lowpass filters
             filtered_median_lowpass_data = _median_and_lowpass_filter(raw_data, fs)
 
@@ -75,7 +77,7 @@ def _median_and_lowpass_filter(sensor_data: np.ndarray, fs: int, medfilt_window_
     # define the filter
     order = 3
     f_c = 20
-    filt = scp.signal.butter(order, f_c, fs=fs, output='sos')
+    filt = butter(order, f_c, fs=fs, output='sos')
 
     # copy the array
     filtered_data = sensor_data.copy()
@@ -89,18 +91,18 @@ def _median_and_lowpass_filter(sensor_data: np.ndarray, fs: int, medfilt_window_
             sig = sensor_data[:, channel]
 
             # apply the median filter
-            sig = scp.signal.medfilt(sig, medfilt_window_length)
+            sig = medfilt(sig, medfilt_window_length)
 
             # apply butterworth filter
-            filtered_data[:, channel] = scp.signal.sosfilt(filt, sig)
+            filtered_data[:, channel] = sosfilt(filt, sig)
 
     else:  # 1-D array
 
         # apply median filter
-        med_filt = scp.signal.medfilt(sensor_data, medfilt_window_length)
+        med_filt = medfilt(sensor_data, medfilt_window_length)
 
         # apply butterworth filter
-        filtered_data = scp.signal.sosfilt(filt, med_filt)
+        filtered_data = sosfilt(filt, med_filt)
 
     return filtered_data
 
@@ -121,7 +123,7 @@ def _gravitational_filter(acc_data: np.ndarray, fs: int) -> np.ndarray:
     # define the filter
     order = 3
     f_c = 0.3
-    filter = scp.signal.butter(order, f_c, fs=fs, output='sos')
+    filter = butter(order, f_c, fs=fs, output='sos')
 
     # copy the array
     gravity_data = acc_data.copy()
@@ -135,10 +137,10 @@ def _gravitational_filter(acc_data: np.ndarray, fs: int) -> np.ndarray:
             sig = acc_data[:, channel]
 
             # apply butterworth filter
-            gravity_data[:, channel] = scp.signal.sosfilt(filter, sig)
+            gravity_data[:, channel] = sosfilt(filter, sig)
 
     else:  # 1-D array
 
-        gravity_data = scp.signal.sosfilt(filter, acc_data)
+        gravity_data = sosfilt(filter, acc_data)
 
     return gravity_data

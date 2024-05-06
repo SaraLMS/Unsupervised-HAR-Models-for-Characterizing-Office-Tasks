@@ -59,9 +59,9 @@ def sync_signals(tau: int, array_df: List[pd.DataFrame]) -> Tuple[pd.DataFrame, 
         # Keeping signal_1's time axis, as signal_2 was cut for tau
         signal_2['sec'] = signal_1['sec'].values
 
-    # set time axis as index
-    signal_1.set_index('sec', inplace=True)
-    signal_2.set_index('sec', inplace=True)
+    # # set time axis as index
+    # signal_1.set_index('sec', inplace=True)
+    # signal_2.set_index('sec', inplace=True)
 
     return signal_1, signal_2
 

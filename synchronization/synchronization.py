@@ -22,7 +22,7 @@ from synchronization.sync_evaluation import sync_evaluation
 
 def synchronization(raw_data_in_path: str, sync_android_out_path: str, selected_sensors: Dict[str, List[str]],
                     output_path: str, sync_type: str, evaluation_output_path: str,
-                    evaluation_filename: str = "evaluation_report.csv", save_intermediate_files: bool = False,
+                    evaluation_filename: str = "evaluation_report.csv", save_intermediate_files: bool = True,
                     prefix: str = "P002") -> None:
     """
     Synchronizes android sensor data and between two different devices. Two different synchronization methods are
@@ -93,6 +93,7 @@ def synchronization(raw_data_in_path: str, sync_android_out_path: str, selected_
 
     # TODO check if the chosen sensors exist!!!!!!!!!!!!!
 
+    # TODO check if mban was selected - raise exception
     # synchronize android sensors
     # if there's only one device, sync android sensors and save csv
     sync_all_classes(prefix, raw_data_in_path, sync_android_out_path, selected_sensors)
@@ -231,16 +232,16 @@ def _check_acc_file(folder_path: str, selected_sensors: Dict[str, List[str]]) ->
     acc_file_identifiers = {
         WATCH: WEAR_ACCELEROMETER,
         PHONE: ACCELEROMETER
-        # Add other device types and their identifiers as needed
+        # Add other device types
     }
 
     # Identify which devices are supposed to have accelerometer data
     devices_needing_acc_files = [device for device, sensors in selected_sensors.items() if ACC in sensors]
 
-    # Keep track of which devices have been verified to have accelerometer data
+    # Keep track of which devices have accelerometer data
     verified_devices = set()
 
-    # Check files in the specified folder
+    # Check files in the folder
     for filename in os.listdir(folder_path):
         for device in devices_needing_acc_files:
             if acc_file_identifiers[device] in filename.upper():

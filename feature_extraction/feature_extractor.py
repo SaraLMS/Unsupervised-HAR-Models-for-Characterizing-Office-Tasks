@@ -37,7 +37,7 @@ def generate_cfg_file():
 
 
 def feature_extractor(data_main_path: str, output_path: str,
-                      output_filename: str = "P002_features_dataset.csv") -> None:
+                      output_filename: str = "P002_watch_acc_phone_acc_gyr_dataset.csv") -> None:
     # check directory
     check_in_path(data_main_path, '.csv')
 
@@ -89,8 +89,9 @@ def _extract_features_from_signal(df: pd.DataFrame, features_dict: Dict[Any, Any
     # drop time column
     df.drop(columns=['sec'], inplace=True)
 
+
     # extract the features
-    features_df = tsfel.time_series_features_extractor(features_dict, df, fs=100, window_size=120, overlap=0)
+    features_df = tsfel.time_series_features_extractor(features_dict, df, fs=100, window_size=120, overlap=0.6)
 
     return features_df
 
