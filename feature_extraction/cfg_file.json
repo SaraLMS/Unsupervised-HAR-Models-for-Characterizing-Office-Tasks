@@ -6,7 +6,7 @@
             "function": "tsfel.fft_mean_coeff",
             "parameters": {
                 "fs": 100,
-                "nfreq": 256
+                "nfreq": 3
             },
             "n_features": "nfreq",
             "use": "no"
@@ -70,7 +70,7 @@
                 "fs": 100
             },
             "n_features": 1,
-            "use": "no"
+            "use": "yes"
         },
         "Maximum frequency": {
             "complexity": "log",
@@ -80,7 +80,7 @@
                 "fs": 100
             },
             "n_features": 1,
-            "use": "no"
+            "use": "yes"
         },
         "Median frequency": {
             "complexity": "log",

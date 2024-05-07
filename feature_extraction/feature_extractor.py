@@ -91,7 +91,7 @@ def _extract_features_from_signal(df: pd.DataFrame, features_dict: Dict[Any, Any
 
 
     # extract the features
-    features_df = tsfel.time_series_features_extractor(features_dict, df, fs=100, window_size=120, overlap=0.6)
+    features_df = tsfel.time_series_features_extractor(features_dict, df, fs=100, window_size=240, overlap=0.5)
 
     return features_df
 

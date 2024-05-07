@@ -38,8 +38,6 @@ def apply_filters(data: pd.DataFrame, fs: int) -> pd.DataFrame:
             # Get raw sensor data
             raw_data = filtered_data[sensor].values
 
-
-
             # Apply median and lowpass filters
             filtered_median_lowpass_data = _median_and_lowpass_filter(raw_data, fs)
 
@@ -52,6 +50,9 @@ def apply_filters(data: pd.DataFrame, fs: int) -> pd.DataFrame:
 
             # Update DataFrame with filtered sensor data
             filtered_data[sensor] = pd.Series(filtered_median_lowpass_data, index=filtered_data.index)
+
+    # remove first 200 samples to remove impulse response of the bandpass filter
+    filtered_data = filtered_data.iloc[200:]
 
     return filtered_data
 
