@@ -6,7 +6,7 @@
             "function": "tsfel.fft_mean_coeff",
             "parameters": {
                 "fs": 100,
-                "nfreq": 3
+                "nfreq": 256
             },
             "n_features": "nfreq",
             "use": "no"
@@ -70,7 +70,7 @@
                 "fs": 100
             },
             "n_features": 1,
-            "use": "yes"
+            "use": "no"
         },
         "Maximum frequency": {
             "complexity": "log",
@@ -80,7 +80,7 @@
                 "fs": 100
             },
             "n_features": 1,
-            "use": "yes"
+            "use": "no"
         },
         "Median frequency": {
             "complexity": "log",
@@ -91,6 +91,26 @@
             },
             "n_features": 1,
             "use": "no"
+        },
+        "Mean frequency": {
+            "complexity": "log",
+            "description": "Computes the mean frequency.",
+            "function": "tsfel.mean_frequency",
+            "parameters": {
+                "fs": 100
+            },
+            "n_features": 1,
+            "use": "yes"
+        },
+        "Std frequency": {
+            "complexity": "log",
+            "description": "Computes the standard deviation of frequencies.",
+            "function": "tsfel.std_frequency",
+            "parameters": {
+                "fs": 100
+            },
+            "n_features": 1,
+            "use": "yes"
         },
         "Power bandwidth": {
             "complexity": "log",
@@ -409,7 +429,7 @@
             "function": "tsfel.calc_median",
             "parameters": "",
             "n_features": 1,
-            "use": "yes"
+            "use": "no"
         },
         "Median absolute deviation": {
             "complexity": "constant",
@@ -461,7 +481,7 @@
             "function": "tsfel.calc_std",
             "parameters": "",
             "n_features": 1,
-            "use": "no"
+            "use": "yes"
         },
         "Variance": {
             "complexity": "constant",
@@ -469,7 +489,7 @@
             "function": "tsfel.calc_var",
             "parameters": "",
             "n_features": 1,
-            "use": "yes"
+            "use": "no"
         }
     },
     "temporal": {

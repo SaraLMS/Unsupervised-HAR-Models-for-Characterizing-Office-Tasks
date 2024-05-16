@@ -5,13 +5,27 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="3466cb1d-2559-4122-9522-f23b0d0f6b0a" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/tsfel/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/tsfel/constants.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/tsfel/feature_extraction/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/tsfel/feature_extraction/calc_features.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/tsfel/feature_extraction/features.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/tsfel/feature_extraction/features.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/tsfel/feature_extraction/features_settings.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/tsfel/feature_extraction/features_utils.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/tsfel/utils/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/tsfel/utils/add_personal_features.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/tsfel/utils/calculate_complexity.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/tsfel/utils/progress_bar.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/tsfel/utils/signal_processing.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/constants.py" beforeDir="false" afterPath="$PROJECT_DIR$/constants.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/feature_extraction/cfg_file.json" beforeDir="false" afterPath="$PROJECT_DIR$/feature_extraction/cfg_file.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/feature_extraction/feature_extractor.py" beforeDir="false" afterPath="$PROJECT_DIR$/feature_extraction/feature_extractor.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/processing/filters.py" beforeDir="false" afterPath="$PROJECT_DIR$/processing/filters.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/processing/task_segmentation.py" beforeDir="false" afterPath="$PROJECT_DIR$/processing/task_segmentation.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/synchronization/common.py" beforeDir="false" afterPath="$PROJECT_DIR$/synchronization/common.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/synchronization/synchronization.py" beforeDir="false" afterPath="$PROJECT_DIR$/synchronization/synchronization.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -56,9 +70,11 @@
 }</component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\srale\PycharmProjects\toolbox\tsfel" />
+      <recent name="C:\Users\srale\PycharmProjects\toolbox\tsfel\utils" />
+      <recent name="C:\Users\srale\PycharmProjects\toolbox\tsfel\feature_extraction" />
       <recent name="C:\Users\srale\PycharmProjects\toolbox\feature_extraction" />
       <recent name="C:\Users\srale\PycharmProjects\toolbox" />
-      <recent name="C:\Users\srale\PycharmProjects\toolbox\synchronization" />
     </key>
   </component>
   <component name="SharedIndexes">
@@ -253,7 +269,15 @@
       <option name="project" value="LOCAL" />
       <updated>1715001923361</updated>
     </task>
-    <option name="localTasksCounter" value="23" />
+    <task id="LOCAL-00023" summary="cut first 200 samples after filtering">
+      <option name="closed" value="true" />
+      <created>1715091425209</created>
+      <option name="number" value="00023" />
+      <option name="presentableId" value="LOCAL-00023" />
+      <option name="project" value="LOCAL" />
+      <updated>1715091425209</updated>
+    </task>
+    <option name="localTasksCounter" value="24" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -288,6 +312,7 @@
     <MESSAGE value="Corrected segmentation and implemented feature extraction" />
     <MESSAGE value="corrected Sec column and indes" />
     <MESSAGE value="corrected Sec column and index" />
-    <option name="LAST_COMMIT_MESSAGE" value="corrected Sec column and index" />
+    <MESSAGE value="cut first 200 samples after filtering" />
+    <option name="LAST_COMMIT_MESSAGE" value="cut first 200 samples after filtering" />
   </component>
 </project>

@@ -106,6 +106,10 @@ def join_dataframes_on_index(df1: pd.DataFrame, df2: pd.DataFrame) -> pd.DataFra
     """
     df_joined = df1.join(df2, how='inner')
 
+    # reset index and 'sec' back to column
+    df_joined.reset_index(inplace=True)
+    df_joined.rename(columns={'index': 'sec'}, inplace=True)
+
     return df_joined
 
 

@@ -3,10 +3,16 @@
 # ------------------------------------------------------------------------------------------------------------------- #
 import json
 import os
-from typing import Dict, Any
+from typing import Dict, Any, List
+
+import numpy as np
 import pandas as pd
+from tsfel.feature_extraction.features_settings import get_features_by_domain
+
+from tsfel.feature_extraction.calc_features import time_series_features_extractor
+
 import tsfel
-from constants import SUPPORTED_ACTIVITIES, CABINETS, SITTING, STANDING, WALKING
+from constants import SUPPORTED_ACTIVITIES, CABINETS, SITTING, STANDING, WALKING, WEAR_PREFIX, ACCELEROMETER_PREFIX
 from load.load_sync_data import load_data_from_csv
 from parser.check_create_directories import check_in_path
 
@@ -27,7 +33,7 @@ SUPPORTED_SUBCLASSES = [COFFEE, FOLDERS, SIT, NO_GESTURES, GESTURES, FAST, MEDIU
 
 def generate_cfg_file():
     # generate dictionary with all the features
-    cfg = tsfel.get_features_by_domain()
+    cfg = get_features_by_domain()
     path = "C:/Users/srale/PycharmProjects/toolbox/feature_extraction"
     # specify the full path to save the file
     file_path = os.path.join(path, "cfg_file.json")
@@ -37,7 +43,8 @@ def generate_cfg_file():
 
 
 def feature_extractor(data_main_path: str, output_path: str,
-                      output_filename: str = "P002_watch_acc_phone_acc_gyr_dataset.csv") -> None:
+                      output_filename: str = "P002_means_stds_freq_150.csv",
+                      total_acceleration: bool = False) -> None:
     # check directory
     check_in_path(data_main_path, '.csv')
 
@@ -60,6 +67,27 @@ def feature_extractor(data_main_path: str, output_path: str,
 
             # load csv
             df = load_data_from_csv(file_path)
+
+            if total_acceleration:
+                # check if there's phone accelerometer or watch accelerometer
+                phone_acc_columns = []
+                watch_acc_columns = []
+
+                # Separate the columns by device
+                for col in df.columns:
+                    if ACCELEROMETER_PREFIX in col:
+                        if WEAR_PREFIX in col:
+                            watch_acc_columns.append(col)
+                        else:
+                            phone_acc_columns.append(col)
+
+                # Check if accelerometer data is available for phone and calculate total acceleration
+                if phone_acc_columns:
+                    df['total_acc_phone'] = _calculate_total_acceleration(df, phone_acc_columns)
+
+                # Check if accelerometer data is available for smartwatch and calculate total acceleration
+                if watch_acc_columns:
+                    df['total_acc_wear'] = _calculate_total_acceleration(df, watch_acc_columns)
 
             # extract the features
             df = _extract_features_from_signal(df, features_dict)
@@ -89,11 +117,14 @@ def _extract_features_from_signal(df: pd.DataFrame, features_dict: Dict[Any, Any
     # drop time column
     df.drop(columns=['sec'], inplace=True)
 
-
     # extract the features
-    features_df = tsfel.time_series_features_extractor(features_dict, df, fs=100, window_size=240, overlap=0.5)
+    features_df = time_series_features_extractor(features_dict, df.to_numpy(), fs=100, window_size=150, overlap=0.5)
 
     return features_df
+
+
+def _calculate_total_acceleration(df: pd.DataFrame, columns: List[str]) -> pd.DataFrame:
+    return np.sqrt((df[columns[0]]**2) + (df[columns[1]]**2) + (df[columns[2]]**2))
 
 
 def _add_class_and_subclass_column(df: pd.DataFrame, folder_name: str, filename: str) -> pd.DataFrame:
