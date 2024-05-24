@@ -9,7 +9,7 @@ import pandas as pd
 
 from constants import CROSSCORR, TIMESTAMPS, ACCELEROMETER, WEAR_ACCELEROMETER, WATCH, PHONE, SUPPORTED_DEVICES, MBAN, \
     SUPPORTED_PHONE_SENSORS, SUPPORTED_WATCH_SENSORS, SUPPORTED_MBAN_SENSORS, ACC
-from parser.check_create_directories import check_in_path
+from parser.check_create_directories import check_in_path, create_dir
 from synchronization.sync_android_sensors import sync_all_classes
 from synchronization.sync_devices_crosscorr import sync_crosscorr
 from synchronization.sync_devices_timestamps import sync_timestamps
@@ -22,8 +22,8 @@ from synchronization.sync_evaluation import sync_evaluation
 
 def synchronization(raw_data_in_path: str, sync_android_out_path: str, selected_sensors: Dict[str, List[str]],
                     output_path: str, sync_type: str, evaluation_output_path: str,
-                    evaluation_filename: str = "evaluation_report_imu.csv", save_intermediate_files: bool = False,
-                    prefix: str = "P002") -> None:
+                    evaluation_filename: str = "evaluation_report_imu.csv", save_intermediate_files: bool = True,
+                    prefix: str = "P003") -> None:
     """
     Synchronizes android sensor data and between two different devices. Two different synchronization methods are
     supported: cross correlation and timestamps. Generates a new csv file containing all the synchronized sensor data
@@ -95,6 +95,7 @@ def synchronization(raw_data_in_path: str, sync_android_out_path: str, selected_
 
     # TODO check if mban was selected - raise exception
     # synchronize android sensors
+
     # if there's only one device, sync android sensors and save csv
     sync_all_classes(prefix, raw_data_in_path, sync_android_out_path, selected_sensors)
 
@@ -141,6 +142,8 @@ def synchronization(raw_data_in_path: str, sync_android_out_path: str, selected_
         # concat dataframes in array to one
         combined_df = pd.concat(evaluation_df_array, ignore_index=True)
 
+        # create dir
+        evaluation_output_path = create_dir(evaluation_output_path, folder_name="sync_evaluation_"+prefix)
         # define output path
         evaluation_output_path = os.path.join(evaluation_output_path, evaluation_filename)
 

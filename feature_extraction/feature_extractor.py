@@ -7,6 +7,8 @@ from typing import Dict, Any, List
 
 import numpy as np
 import pandas as pd
+
+from load.load_dataset import load_part_from_csv
 from tsfel.feature_extraction.features_settings import get_features_by_domain
 
 from tsfel.feature_extraction.calc_features import time_series_features_extractor
@@ -43,15 +45,15 @@ def generate_cfg_file():
 
 
 def feature_extractor(data_main_path: str, output_path: str,
-                      output_filename: str = "P002_means_stds_freq_150.csv",
+                      json_path: str = "C:/Users/srale/PycharmProjects/toolbox/feature_extraction",
+                      output_filename: str = "TEST_P001.csv",
                       total_acceleration: bool = False) -> None:
     # check directory
     check_in_path(data_main_path, '.csv')
 
-    path = "C:/Users/srale/PycharmProjects/toolbox/feature_extraction"
-    file_path = os.path.join(path, "cfg_file.json")
+    json_file_path = os.path.join(json_path, "cfg_file.json")
     # read json file to a features dict
-    with open(file_path, "r") as file:
+    with open(json_file_path, "r") as file:
         features_dict = json.load(file)
 
     # list to hold the dataframes
@@ -62,11 +64,22 @@ def feature_extractor(data_main_path: str, output_path: str,
         folder_path = os.path.join(data_main_path, folder_name)
 
         for filename in os.listdir(folder_path):
-            # get file_path
+
             file_path = os.path.join(folder_path, filename)
 
-            # load csv
-            df = load_data_from_csv(file_path)
+            if STANDING in folder_name:
+                df = load_part_from_csv(file_path, portion=50)
+
+            elif CABINETS in folder_name:
+                df = load_part_from_csv(file_path, portion=50)
+
+            elif WALKING in folder_name:
+
+                df = load_part_from_csv(folder_path, portion=100)
+            elif SITTING in folder_name:
+                df = load_part_from_csv(folder_path,portion=100)
+            else:
+                ValueError(f" The Activity in {folder_name} is not supported")
 
             if total_acceleration:
                 # check if there's phone accelerometer or watch accelerometer
@@ -101,6 +114,10 @@ def feature_extractor(data_main_path: str, output_path: str,
     # concat all dataframes
     all_data_df = pd.concat(df_list, ignore_index=True)
 
+    class_counts = all_data_df['class'].value_counts()
+
+    print(class_counts)
+
     # save to csv file
     output_path = os.path.join(output_path, output_filename)
     all_data_df.to_csv(output_path)
@@ -124,26 +141,22 @@ def _extract_features_from_signal(df: pd.DataFrame, features_dict: Dict[Any, Any
 
 
 def _calculate_total_acceleration(df: pd.DataFrame, columns: List[str]) -> pd.DataFrame:
-    return np.sqrt((df[columns[0]]**2) + (df[columns[1]]**2) + (df[columns[2]]**2))
+    return np.sqrt((df[columns[0]] ** 2) + (df[columns[1]] ** 2) + (df[columns[2]] ** 2))
 
 
 def _add_class_and_subclass_column(df: pd.DataFrame, folder_name: str, filename: str) -> pd.DataFrame:
-    # atribute class and subclass numbers according to the activity and tasks
-    if CABINETS in folder_name:
+    # attribute class and subclass numbers according to the activity and tasks
+    if CABINETS in folder_name or STANDING in folder_name:
         class_number = 1
-        subclass_number = _check_subclass(filename)
+        subclass_str = _check_subclass(filename)
 
     elif SITTING in folder_name:
         class_number = 2
-        subclass_number = _check_subclass(filename)
-
-    elif STANDING in folder_name:
-        class_number = 3
-        subclass_number = _check_subclass(filename)
+        subclass_str = _check_subclass(filename)
 
     elif WALKING in folder_name:
-        class_number = 4
-        subclass_number = _check_subclass(filename)
+        class_number = 3
+        subclass_str = _check_subclass(filename)
 
     else:
         raise ValueError(
@@ -153,38 +166,38 @@ def _add_class_and_subclass_column(df: pd.DataFrame, folder_name: str, filename:
     df['class'] = class_number
 
     # add subclass column
-    df['subclass'] = subclass_number
+    df['subclass'] = subclass_str
 
     return df
 
 
-def _check_subclass(filename: str) -> float:
+def _check_subclass(filename: str) -> str:
     # check subclass
     if COFFEE in filename:
-        subclass_number = 1.1
+        subclass_str = "standing_coffee"
 
     elif FOLDERS in filename:
-        subclass_number = 1.2
+        subclass_str = "standing_folders"
 
     elif SIT in filename:
-        subclass_number = 2.1
+        subclass_str = "sit"
 
     elif GESTURES in filename:
-        subclass_number = 3.1
+        subclass_str = "standing_gestures"
 
     elif NO_GESTURES in filename:
-        subclass_number = 3.2
+        subclass_str = "standing_no_gestures"
 
     elif SLOW in filename:
-        subclass_number = 4.1
+        subclass_str = "walk_slow"
 
     elif MEDIUM in filename:
-        subclass_number = 4.2
+        subclass_str = "walk_medium"
 
     elif FAST in filename:
-        subclass_number = 4.3
+        subclass_str = "walk_fast"
 
     else:
         raise ValueError(f"Subclass not supported. Supported subclasses are: ")
 
-    return subclass_number
+    return subclass_str

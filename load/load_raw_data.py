@@ -40,7 +40,7 @@ def load_logger_file(folder_path: str) -> pd.DataFrame:
     return df
 
 
-def load_device_data(in_path: List[str], print_report: bool = False) -> Tuple[List[np.ndarray], Dict[str, Any]]:
+def load_device_data(in_path: List[str], print_report: bool = True) -> Tuple[List[np.ndarray], Dict[str, Any]]:
     """
     Function to load data from a single or multiple android files
     Parameters

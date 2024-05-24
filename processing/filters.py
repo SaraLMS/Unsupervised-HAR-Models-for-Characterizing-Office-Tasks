@@ -3,65 +3,16 @@
 # ------------------------------------------------------------------------------------------------------------------- #
 import numpy as np
 import pandas as pd
-from scipy.signal import butter, medfilt, sosfilt
 import scipy as scp
-
-from constants import ACCELEROMETER_PREFIX, SUPPORTED_PREFIXES
+from scipy import signal
 
 
 # ------------------------------------------------------------------------------------------------------------------- #
 # public functions
 # ------------------------------------------------------------------------------------------------------------------- #
 
-def apply_filters(data: pd.DataFrame, fs: int) -> pd.DataFrame:
-    """
-    Applies various filters to sensor data columns in a CSV file.
 
-    This function processes each sensor data column in the file, applying median and lowpass filters.
-    For accelerometer data, it additionally removes the gravitational component.
-
-    Parameters:
-        data (pd.DataFrame): DataFrame containing the sensor data.
-        fs (int): The sampling frequency of the sensor data.
-
-    Returns:
-        pd.DataFrame: A DataFrame containing the filtered sensor data, with the same structure as the input file.
-    """
-
-    filtered_data = data.copy()
-
-    # Process each sensor column directly
-    for sensor in filtered_data.columns:
-
-        # Determine if the sensor is an accelerometer or gyroscope by its prefix
-        if any(prefix in sensor for prefix in SUPPORTED_PREFIXES):
-            # Get raw sensor data
-            raw_data = filtered_data[sensor].values
-
-            # Apply median and lowpass filters
-            filtered_median_lowpass_data = _median_and_lowpass_filter(raw_data, fs)
-
-            if ACCELEROMETER_PREFIX in sensor:
-                # For accelerometer data, additionally remove the gravitational component
-                gravitational_component = _gravitational_filter(raw_data, fs)
-
-                # Remove gravitational component from filtered data
-                filtered_median_lowpass_data -= gravitational_component
-
-            # Update DataFrame with filtered sensor data
-            filtered_data[sensor] = pd.Series(filtered_median_lowpass_data, index=filtered_data.index)
-
-    # remove first 200 samples to remove impulse response of the bandpass filter
-    filtered_data = filtered_data.iloc[200:]
-
-    return filtered_data
-
-
-# ------------------------------------------------------------------------------------------------------------------- #
-# private functions
-# ------------------------------------------------------------------------------------------------------------------- #
-
-def _median_and_lowpass_filter(sensor_data: np.ndarray, fs: int, medfilt_window_length=11) -> np.ndarray:
+def median_and_lowpass_filter(sensor_data: np.ndarray, fs: int, medfilt_window_length=11) -> np.ndarray:
     """
     First a median filter is applied and then a 3rd order butterworth lowpass
     filter with a cutoff frequency of 20 Hz is applied.
@@ -78,7 +29,7 @@ def _median_and_lowpass_filter(sensor_data: np.ndarray, fs: int, medfilt_window_
     # define the filter
     order = 3
     f_c = 20
-    filt = butter(order, f_c, fs=fs, output='sos')
+    filt = scp.signal.butter(order, f_c, fs=fs, output='sos')
 
     # copy the array
     filtered_data = sensor_data.copy()
@@ -92,23 +43,23 @@ def _median_and_lowpass_filter(sensor_data: np.ndarray, fs: int, medfilt_window_
             sig = sensor_data[:, channel]
 
             # apply the median filter
-            sig = medfilt(sig, medfilt_window_length)
+            sig = scp.signal.medfilt(sig, medfilt_window_length)
 
             # apply butterworth filter
-            filtered_data[:, channel] = sosfilt(filt, sig)
+            filtered_data[:, channel] = scp.signal.sosfilt(filt, sig)
 
     else:  # 1-D array
 
         # apply median filter
-        med_filt = medfilt(sensor_data, medfilt_window_length)
+        med_filt = scp.signal.medfilt(sensor_data, medfilt_window_length)
 
         # apply butterworth filter
-        filtered_data = sosfilt(filt, med_filt)
+        filtered_data = scp.signal.sosfilt(filt, med_filt)
 
     return filtered_data
 
 
-def _gravitational_filter(acc_data: np.ndarray, fs: int) -> np.ndarray:
+def gravitational_filter(acc_data: np.ndarray, fs: int) -> np.ndarray:
     """
     Function to filter out the gravitational component of ACC signals using a 3rd order butterworth lowpass filter with
     a cuttoff frequency of 0.3 Hz
@@ -124,7 +75,7 @@ def _gravitational_filter(acc_data: np.ndarray, fs: int) -> np.ndarray:
     # define the filter
     order = 3
     f_c = 0.3
-    filter = butter(order, f_c, fs=fs, output='sos')
+    filter = scp.signal.butter(order, f_c, fs=fs, output='sos')
 
     # copy the array
     gravity_data = acc_data.copy()
@@ -138,10 +89,133 @@ def _gravitational_filter(acc_data: np.ndarray, fs: int) -> np.ndarray:
             sig = acc_data[:, channel]
 
             # apply butterworth filter
-            gravity_data[:, channel] = sosfilt(filter, sig)
+            gravity_data[:, channel] = scp.signal.sosfilt(filter, sig)
 
     else:  # 1-D array
 
-        gravity_data = sosfilt(filter, acc_data)
+        gravity_data = scp.signal.sosfilt(filter, acc_data)
 
     return gravity_data
+
+
+def get_envelope(emg_series, envelope_type='lowpass', type_param=10):
+    """
+    Gets the envelope of the passed EMG signal. There are three types available
+    1. 'lowpass': uses a lowpass filter
+    2. 'ma': uses a moving average filter
+    3. 'rms': uses a root-mean-square filter
+    :param emg_series: the EMG data
+    :param envelope_type: the type of filter that should be used for getting the envelope as defined above
+    :param type_param: the parameter for the envelope_type. The following options are available (based on the envelope_type)
+                       'lowpass': type_param is the cutoff frequency of the lowpass filter
+                       'ma': type_param is the window size in samples
+                       'rms': type_param is the window size in samples
+    :return: pandas series containing the envelope of the EMG
+    """
+
+    # check for the passed type
+    if envelope_type == 'lowpass':
+        # apply lowpass filter
+        emg_series = _butter_lowpass_filter(emg_series, cutoff=10, fs=100)
+    elif envelope_type == 'ma':
+        # apply moving average
+        emg_series = _moving_average(emg_series, wind_size=type_param)
+    elif envelope_type == 'rms':
+        # apply rms
+        emg_series = _window_rms(emg_series, window_size=type_param)
+
+    else:
+        # undefined filter type passed
+        IOError('the type you chose is not defined.')
+
+    return pd.Series(emg_series)
+
+
+# ------------------------------------------------------------------------------------------------------------------- #
+# private functions
+# ------------------------------------------------------------------------------------------------------------------- #
+
+
+def _butter_lowpass_filter(data, cutoff, fs, order=4):
+    """
+    Filters a signal using a butterworth lowpass filter
+    :param data: the data that should be filtered
+    :param cutoff: frequency cutoff
+    :param fs: sampling frequency
+    :param order: order of the filter
+    :return:
+    """
+    b, a = _butter_lowpass(cutoff, fs, order=order)
+    y = signal.lfilter(b, a, data)
+    return y
+
+
+def _moving_average(data, wind_size=3):
+    """
+    -----
+    Brief
+    -----
+    Application of a moving average filter for signal smoothing.
+
+    -----------
+    Description
+    -----------
+    In certain situations it will be interesting to simplify a signal, particularly in cases where
+    some events with a random nature take place (the random nature of EMG activation periods is
+    a good example).
+
+    One possible simplification procedure consists in smoothing the signal in order to obtain
+    only an "envelope". With this methodology the analysis is mainly centered on seeing patterns
+    in data and excluding noise or rapid events [1].
+
+    The simplification can be achieved by segmenting the time series in multiple windows and
+    from each window an average value of all the samples that it contains will be determined
+    (dividing the sum of all sample values by the window size).
+
+    A quick and efficient implementation (chosen in biosignalsnotebooks package) of the moving window
+    methodology is through a cumulative sum array.
+
+    [1] https://en.wikipedia.org/wiki/Smoothing
+
+    ---------
+    Parameters
+    ----------
+    data : list
+        List of signal samples.
+    wind_size : int
+        Number of samples inside the moving average window (a bigger value implies a smoother
+        output signal).
+
+    Returns
+    -------
+    out : numpy array
+        Array that contains the samples of the smoothed signal.
+    """
+
+    wind_size = int(wind_size)
+    ret = np.cumsum(data, dtype=float)
+    ret[wind_size:] = ret[wind_size:] - ret[:-wind_size]
+    return np.concatenate((np.zeros(wind_size - 1), ret[wind_size - 1:] / wind_size))
+
+
+def _window_rms(data, window_size=3):
+    """
+    Passes a root-mean-square filter over the data.
+    :param data: the data for which the root-mean-square should be calculated
+    :param window_size: the window size
+    :return: the rms for the given window
+    """
+    data_squared = np.power(data, 2)
+    window = np.ones(window_size) / float(window_size)
+    return np.sqrt(np.convolve(data_squared, window, 'valid'))
+
+
+def _butter_lowpass(cutoff, fs, order=4):
+    """
+    Creates a butterworth lowpass filter
+    :param cutoff: frequency cutoff
+    :param fs: sampling rate
+    :param order: order of the filter
+    :return: butterworth lowpass filter
+    """
+    return signal.butter(order, cutoff, fs=fs, btype='low', analog=False)
