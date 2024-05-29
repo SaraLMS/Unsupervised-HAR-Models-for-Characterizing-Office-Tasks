@@ -169,7 +169,7 @@ def _generate_task_filenames(folder_name: str, filename: str) -> List[str]:
         suffixes = ['_sit']
 
     elif STAIRS in folder_name:
-        suffixes = ['_stairs_up', 'stairs_down']
+        suffixes = ['_stairs_up', '_stairs_down']
 
     else:
         raise ValueError(f"The activity: {folder_name} is not supported. "

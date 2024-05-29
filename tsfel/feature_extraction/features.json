@@ -112,6 +112,16 @@
       "n_features": 1,
       "use": "yes"
     },
+    "Max fft amplitude": {
+      "complexity": "log",
+      "description": "Computes the maximum amplitude of the FFT spectrum.",
+      "function": "tsfel.max_fft_amplitude",
+      "parameters": {
+        "fs": 100
+      },
+      "n_features": 1,
+      "use": "yes"
+    },
     "Power bandwidth": {
       "complexity": "log",
       "description": "Computes power spectrum density bandwidth of the signal.",

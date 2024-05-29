@@ -1114,6 +1114,30 @@ def std_frequency(signal, fs):
 
 
 @set_domain("domain", "spectral")
+def max_fft_amplitude(signal, fs):
+    """
+    Computes the maximum power of the FFT spectrum of the signal.
+
+    Parameters
+    ----------
+    signal : nd-array
+        Input signal from which the FFT spectrum is computed.
+
+    Returns
+    -------
+    float
+        Maximum power value in the FFT spectrum.
+    """
+    # Compute the FFT of the signal
+    fft_result = np.fft.fft(signal)
+
+    # Find the maximum value in the power spectrum
+    max_power = np.max(np.abs(fft_result))
+
+    return max_power
+
+
+@set_domain("domain", "spectral")
 @set_domain("tag", "audio")
 def spectral_centroid(signal, fs):
     """Barycenter of the spectrum.

@@ -4,18 +4,14 @@
 import json
 import os
 from typing import Dict, Any, List
-
 import numpy as np
 import pandas as pd
 
 from load.load_dataset import load_part_from_csv
+from parser.save_to_csv import save_data_to_csv
 from tsfel.feature_extraction.features_settings import get_features_by_domain
-
 from tsfel.feature_extraction.calc_features import time_series_features_extractor
-
-import tsfel
 from constants import SUPPORTED_ACTIVITIES, CABINETS, SITTING, STANDING, WALKING, WEAR_PREFIX, ACCELEROMETER_PREFIX
-from load.load_sync_data import load_data_from_csv
 from parser.check_create_directories import check_in_path
 
 COFFEE = "coffee"
@@ -33,10 +29,10 @@ SUPPORTED_SUBCLASSES = [COFFEE, FOLDERS, SIT, NO_GESTURES, GESTURES, FAST, MEDIU
 # public functions
 # ------------------------------------------------------------------------------------------------------------------- #
 
-def generate_cfg_file():
+def generate_cfg_file(path: str):
     # generate dictionary with all the features
     cfg = get_features_by_domain()
-    path = "C:/Users/srale/PycharmProjects/toolbox/feature_extraction"
+    # path = "C:/Users/srale/PycharmProjects/toolbox/feature_extraction"
     # specify the full path to save the file
     file_path = os.path.join(path, "cfg_file.json")
     # save to json file
@@ -46,7 +42,7 @@ def generate_cfg_file():
 
 def feature_extractor(data_main_path: str, output_path: str,
                       json_path: str = "C:/Users/srale/PycharmProjects/toolbox/feature_extraction",
-                      output_filename: str = "TEST_P001.csv",
+                      output_filename: str = "features_dataset_P001.csv",
                       total_acceleration: bool = False) -> None:
     # check directory
     check_in_path(data_main_path, '.csv')
@@ -75,9 +71,11 @@ def feature_extractor(data_main_path: str, output_path: str,
 
             elif WALKING in folder_name:
 
-                df = load_part_from_csv(folder_path, portion=100)
+                df = load_part_from_csv(file_path, portion=100)
+
             elif SITTING in folder_name:
-                df = load_part_from_csv(folder_path,portion=100)
+
+                df = load_part_from_csv(file_path, portion=100)
             else:
                 ValueError(f" The Activity in {folder_name} is not supported")
 
@@ -102,6 +100,8 @@ def feature_extractor(data_main_path: str, output_path: str,
                 if watch_acc_columns:
                     df['total_acc_wear'] = _calculate_total_acceleration(df, watch_acc_columns)
 
+            print(f"Extract features from {folder_name}")
+
             # extract the features
             df = _extract_features_from_signal(df, features_dict)
 
@@ -114,12 +114,14 @@ def feature_extractor(data_main_path: str, output_path: str,
     # concat all dataframes
     all_data_df = pd.concat(df_list, ignore_index=True)
 
+    # count the number of windows of each class
     class_counts = all_data_df['class'].value_counts()
 
     print(class_counts)
 
-    # save to csv file
     output_path = os.path.join(output_path, output_filename)
+
+    # save to csv file
     all_data_df.to_csv(output_path)
 
     # inform user
@@ -135,7 +137,7 @@ def _extract_features_from_signal(df: pd.DataFrame, features_dict: Dict[Any, Any
     df.drop(columns=['sec'], inplace=True)
 
     # extract the features
-    features_df = time_series_features_extractor(features_dict, df.to_numpy(), fs=100, window_size=150, overlap=0.5)
+    features_df = time_series_features_extractor(features_dict, df, fs=100, window_size=150, overlap=0.5)
 
     return features_df
 

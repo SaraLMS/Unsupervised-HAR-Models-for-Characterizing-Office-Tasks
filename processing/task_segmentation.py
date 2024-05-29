@@ -43,7 +43,7 @@ def segment_tasks(folder_name: str, data: pd.DataFrame) -> List[pd.DataFrame]:
         starts, stops = _detect_sitting_tasks(acc_series, fs=100, peak_height=11, min_distance=10000)
 
         # cut the task
-        tasks_sitting = _cut_segments(data, starts, stops, 1000)
+        tasks_sitting = _cut_segments(data, starts, stops, 1500)
 
         # store in tasks list
         tasks.extend(tasks_sitting)
