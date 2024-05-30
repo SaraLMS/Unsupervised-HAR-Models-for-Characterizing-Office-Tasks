@@ -6,15 +6,11 @@
   <component name="ChangeListManager">
     <list default="true" id="3466cb1d-2559-4122-9522-f23b0d0f6b0a" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/feature_extraction/cfg_file.json" beforeDir="false" afterPath="$PROJECT_DIR$/feature_extraction/cfg_file.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/constants.py" beforeDir="false" afterPath="$PROJECT_DIR$/constants.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/feature_extraction/feature_extractor.py" beforeDir="false" afterPath="$PROJECT_DIR$/feature_extraction/feature_extractor.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/load/load_raw_data.py" beforeDir="false" afterPath="$PROJECT_DIR$/load/load_raw_data.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/processing/processor.py" beforeDir="false" afterPath="$PROJECT_DIR$/processing/processor.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/processing/task_segmentation.py" beforeDir="false" afterPath="$PROJECT_DIR$/processing/task_segmentation.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/synchronization/synchronization.py" beforeDir="false" afterPath="$PROJECT_DIR$/synchronization/synchronization.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tsfel/feature_extraction/features.json" beforeDir="false" afterPath="$PROJECT_DIR$/tsfel/feature_extraction/features.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tsfel/feature_extraction/features.py" beforeDir="false" afterPath="$PROJECT_DIR$/tsfel/feature_extraction/features.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -283,7 +279,15 @@
       <option name="project" value="LOCAL" />
       <updated>1716565185823</updated>
     </task>
-    <option name="localTasksCounter" value="26" />
+    <task id="LOCAL-00026" summary="added features to tsfel">
+      <option name="closed" value="true" />
+      <created>1717000285658</created>
+      <option name="number" value="00026" />
+      <option name="presentableId" value="LOCAL-00026" />
+      <option name="project" value="LOCAL" />
+      <updated>1717000285659</updated>
+    </task>
+    <option name="localTasksCounter" value="27" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -321,6 +325,7 @@
     <MESSAGE value="cut first 200 samples after filtering" />
     <MESSAGE value="added tsfel" />
     <MESSAGE value="new segmentation implemented" />
-    <option name="LAST_COMMIT_MESSAGE" value="new segmentation implemented" />
+    <MESSAGE value="added features to tsfel" />
+    <option name="LAST_COMMIT_MESSAGE" value="added features to tsfel" />
   </component>
 </project>

@@ -118,18 +118,16 @@ def load_device_data(in_path: List[str], print_report: bool = False) -> Tuple[Li
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
 
-            # adicionar file de constantes
-            if ACCELEROMETER in file or "GYROSCOPE" in file or "MAGNETIC_FIELD" in file or "MAGNETOMETER" in file:
-                column_indices = [0, 1, 2, 3]
+            # load data to dataframe to remove nan columns and duplicates
+            data = pd.read_csv(file, delimiter="\t", header=None, skiprows=3)
 
-            elif "ROTATION_VECTOR" in file:
-                column_indices = [0, 1, 2, 3, 4]
+            # remove nan columns generated
+            data.dropna(axis=1, how="all", inplace=True)
 
-            elif "HEART_RATE" in file or "NOISERECORDER" in file:
-                column_indices = [0, 1]
-
-            data = pd.read_csv(file, delimiter="\t", header=None, skiprows=3)[column_indices]
+            # remove duplicates
             data = data.drop_duplicates(subset=[0])
+
+            # df back to numpy
             data = data.to_numpy()
 
             # check if data array has values

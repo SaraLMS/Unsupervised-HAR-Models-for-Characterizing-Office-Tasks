@@ -163,7 +163,7 @@ def _generate_task_filenames(folder_name: str, filename: str) -> List[str]:
         suffixes = ['_coffee', '_folders']
 
     elif STANDING in folder_name:
-        suffixes = ['_gestures', '_no_gestures']
+        suffixes = ['_gestures', '_stand_still']
 
     elif SITTING in folder_name:
         suffixes = ['_sit']

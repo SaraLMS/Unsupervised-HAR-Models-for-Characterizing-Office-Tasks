@@ -18,11 +18,11 @@ COFFEE = "coffee"
 FOLDERS = "folders"
 SIT = "sit"
 GESTURES = "gestures"
-NO_GESTURES = "no_gestures"
+STAND_STILL = "stand_still"
 FAST = "fast"
 MEDIUM = "medium"
 SLOW = "slow"
-SUPPORTED_SUBCLASSES = [COFFEE, FOLDERS, SIT, NO_GESTURES, GESTURES, FAST, MEDIUM, SLOW]
+SUPPORTED_SUBCLASSES = [COFFEE, FOLDERS, SIT, STAND_STILL, GESTURES, FAST, MEDIUM, SLOW]
 
 
 # ------------------------------------------------------------------------------------------------------------------- #
@@ -187,8 +187,8 @@ def _check_subclass(filename: str) -> str:
     elif GESTURES in filename:
         subclass_str = "standing_gestures"
 
-    elif NO_GESTURES in filename:
-        subclass_str = "standing_no_gestures"
+    elif STAND_STILL in filename:
+        subclass_str = "standing_still"
 
     elif SLOW in filename:
         subclass_str = "walk_slow"
