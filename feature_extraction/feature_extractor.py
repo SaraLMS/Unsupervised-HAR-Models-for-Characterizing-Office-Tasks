@@ -7,8 +7,7 @@ from typing import Dict, Any, List
 import numpy as np
 import pandas as pd
 
-from load.load_dataset import load_part_from_csv
-from parser.save_to_csv import save_data_to_csv
+from load.load_sync_data import load_data_from_csv
 from tsfel.feature_extraction.features_settings import get_features_by_domain
 from tsfel.feature_extraction.calc_features import time_series_features_extractor
 from constants import SUPPORTED_ACTIVITIES, CABINETS, SITTING, STANDING, WALKING, WEAR_PREFIX, ACCELEROMETER_PREFIX
@@ -22,7 +21,9 @@ STAND_STILL = "stand_still"
 FAST = "fast"
 MEDIUM = "medium"
 SLOW = "slow"
-SUPPORTED_SUBCLASSES = [COFFEE, FOLDERS, SIT, STAND_STILL, GESTURES, FAST, MEDIUM, SLOW]
+STAIRS_UP = "stairsup"
+STAIRS_DOWN = "stairsdown"
+SUPPORTED_SUBCLASSES = [COFFEE, FOLDERS, SIT, STAND_STILL, GESTURES, FAST, MEDIUM, SLOW, STAIRS_UP, STAIRS_DOWN]
 
 
 # ------------------------------------------------------------------------------------------------------------------- #
@@ -42,7 +43,7 @@ def generate_cfg_file(path: str):
 
 def feature_extractor(data_main_path: str, output_path: str,
                       json_path: str = "C:/Users/srale/PycharmProjects/toolbox/feature_extraction",
-                      output_filename: str = "features_dataset_P001.csv",
+                      output_filename: str = "balanced_features_dataset_P001.csv",
                       total_acceleration: bool = False) -> None:
     # check directory
     check_in_path(data_main_path, '.csv')
@@ -63,21 +64,7 @@ def feature_extractor(data_main_path: str, output_path: str,
 
             file_path = os.path.join(folder_path, filename)
 
-            if STANDING in folder_name:
-                df = load_part_from_csv(file_path, portion=50)
-
-            elif CABINETS in folder_name:
-                df = load_part_from_csv(file_path, portion=50)
-
-            elif WALKING in folder_name:
-
-                df = load_part_from_csv(file_path, portion=100)
-
-            elif SITTING in folder_name:
-
-                df = load_part_from_csv(file_path, portion=100)
-            else:
-                ValueError(f" The Activity in {folder_name} is not supported")
+            df = load_data_from_csv(file_path)
 
             if total_acceleration:
                 # check if there's phone accelerometer or watch accelerometer
@@ -113,6 +100,9 @@ def feature_extractor(data_main_path: str, output_path: str,
 
     # concat all dataframes
     all_data_df = pd.concat(df_list, ignore_index=True)
+
+    # here guarantee that there's the same number of samples for each subclass
+    all_data_df = _balance_dataset(all_data_df, 'class', 'subclass')
 
     # count the number of windows of each class
     class_counts = all_data_df['class'].value_counts()
@@ -199,7 +189,48 @@ def _check_subclass(filename: str) -> str:
     elif FAST in filename:
         subclass_str = "walk_fast"
 
+    elif STAIRS_UP in filename:
+        subclass_str = "stairs_up"
+
+    elif STAIRS_DOWN in filename:
+        subclass_str = "stairs_down"
+
     else:
         raise ValueError(f"Subclass not supported. Supported subclasses are: ")
 
     return subclass_str
+
+
+def _balance_dataset(df, class_col, subclass_col):
+    # Find the minimum class size
+    class_counts = df[class_col].value_counts()
+    min_class_size = class_counts.min()
+
+    balanced_data = []
+
+    # Loop through each class to process subclasses
+    for class_label in class_counts.index:
+        class_subset = df[df[class_col] == class_label]
+        subclass_counts = class_subset[subclass_col].value_counts()
+
+        # Calculate the target number of samples per subclass to balance subclasses within the class
+        num_subclasses = len(subclass_counts)
+        target_subclass_size = min(min_class_size // num_subclasses, subclass_counts.min())
+
+        # Sample each subclass within the class
+        subclass_samples = []
+        for subclass_label in subclass_counts.index:
+            subclass_subset = class_subset[class_subset[subclass_col] == subclass_label]
+            subclass_sample = subclass_subset.sample(n=target_subclass_size, replace=True)
+            subclass_samples.append(subclass_sample)
+
+        # Concatenate samples from all subclasses within the class
+        balanced_class_data = pd.concat(subclass_samples)
+
+        # Randomly sample from the balanced class data to ensure it matches the minimum class size
+        balanced_class_data = balanced_class_data.sample(n=min_class_size, replace=True)
+        balanced_data.append(balanced_class_data)
+
+    # Concatenate all class data into a single DataFrame
+    balanced_df = pd.concat(balanced_data)
+    return balanced_df
