@@ -7,8 +7,8 @@
     <list default="true" id="3466cb1d-2559-4122-9522-f23b0d0f6b0a" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/feature_extraction/feature_extractor.py" beforeDir="false" afterPath="$PROJECT_DIR$/feature_extraction/feature_extractor.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/load/load_dataset.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/processing/processor.py" beforeDir="false" afterPath="$PROJECT_DIR$/processing/processor.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/synchronization/synchronization.py" beforeDir="false" afterPath="$PROJECT_DIR$/synchronization/synchronization.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -293,7 +293,15 @@
       <option name="project" value="LOCAL" />
       <updated>1717089987262</updated>
     </task>
-    <option name="localTasksCounter" value="28" />
+    <task id="LOCAL-00028" summary="added stairs to features. Balance datasets">
+      <option name="closed" value="true" />
+      <created>1717095832796</created>
+      <option name="number" value="00028" />
+      <option name="presentableId" value="LOCAL-00028" />
+      <option name="project" value="LOCAL" />
+      <updated>1717095832796</updated>
+    </task>
+    <option name="localTasksCounter" value="29" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -308,7 +316,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Load data to list of numpy arrays. Added the column names to the report to later load dataframe with the correct column names." />
     <MESSAGE value="add synchronization" />
     <MESSAGE value="Added corrected loading and synchronization of sensors in the same device. Saves to csv with correct column names" />
     <MESSAGE value="Synchronization based on cross corr and timestamps done.&#10;Working on searching the log for starting times (_get_start_times_from_logger) in Phillip's way." />
@@ -333,6 +340,7 @@
     <MESSAGE value="new segmentation implemented" />
     <MESSAGE value="added features to tsfel" />
     <MESSAGE value="corrected subclass name" />
-    <option name="LAST_COMMIT_MESSAGE" value="corrected subclass name" />
+    <MESSAGE value="added stairs to features. Balance datasets" />
+    <option name="LAST_COMMIT_MESSAGE" value="added stairs to features. Balance datasets" />
   </component>
 </project>

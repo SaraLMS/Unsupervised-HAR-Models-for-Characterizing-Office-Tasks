@@ -10,7 +10,8 @@ import pandas as pd
 from load.load_sync_data import load_data_from_csv
 from tsfel.feature_extraction.features_settings import get_features_by_domain
 from tsfel.feature_extraction.calc_features import time_series_features_extractor
-from constants import SUPPORTED_ACTIVITIES, CABINETS, SITTING, STANDING, WALKING, WEAR_PREFIX, ACCELEROMETER_PREFIX
+from constants import SUPPORTED_ACTIVITIES, CABINETS, SITTING, STANDING, WALKING, WEAR_PREFIX, ACCELEROMETER_PREFIX, \
+    STAIRS
 from parser.check_create_directories import check_in_path
 
 COFFEE = "coffee"
@@ -43,7 +44,7 @@ def generate_cfg_file(path: str):
 
 def feature_extractor(data_main_path: str, output_path: str,
                       json_path: str = "C:/Users/srale/PycharmProjects/toolbox/feature_extraction",
-                      output_filename: str = "balanced_features_dataset_P001.csv",
+                      output_filename: str = "balanced_features_dataset_40_P001.csv",
                       total_acceleration: bool = False) -> None:
     # check directory
     check_in_path(data_main_path, '.csv')
@@ -54,7 +55,7 @@ def feature_extractor(data_main_path: str, output_path: str,
         features_dict = json.load(file)
 
     # list to hold the dataframes
-    df_list = []
+    df_dict = {}
 
     for folder_name in os.listdir(data_main_path):
 
@@ -66,26 +67,26 @@ def feature_extractor(data_main_path: str, output_path: str,
 
             df = load_data_from_csv(file_path)
 
-            if total_acceleration:
-                # check if there's phone accelerometer or watch accelerometer
-                phone_acc_columns = []
-                watch_acc_columns = []
-
-                # Separate the columns by device
-                for col in df.columns:
-                    if ACCELEROMETER_PREFIX in col:
-                        if WEAR_PREFIX in col:
-                            watch_acc_columns.append(col)
-                        else:
-                            phone_acc_columns.append(col)
-
-                # Check if accelerometer data is available for phone and calculate total acceleration
-                if phone_acc_columns:
-                    df['total_acc_phone'] = _calculate_total_acceleration(df, phone_acc_columns)
-
-                # Check if accelerometer data is available for smartwatch and calculate total acceleration
-                if watch_acc_columns:
-                    df['total_acc_wear'] = _calculate_total_acceleration(df, watch_acc_columns)
+            # if total_acceleration:
+            #     # check if there's phone accelerometer or watch accelerometer
+            #     phone_acc_columns = []
+            #     watch_acc_columns = []
+            #
+            #     # Separate the columns by device
+            #     for col in df.columns:
+            #         if ACCELEROMETER_PREFIX in col:
+            #             if WEAR_PREFIX in col:
+            #                 watch_acc_columns.append(col)
+            #             else:
+            #                 phone_acc_columns.append(col)
+            #
+            #     # Check if accelerometer data is available for phone and calculate total acceleration
+            #     if phone_acc_columns:
+            #         df['total_acc_phone'] = _calculate_total_acceleration(df, phone_acc_columns)
+            #
+            #     # Check if accelerometer data is available for smartwatch and calculate total acceleration
+            #     if watch_acc_columns:
+            #         df['total_acc_wear'] = _calculate_total_acceleration(df, watch_acc_columns)
 
             print(f"Extract features from {folder_name}")
 
@@ -95,14 +96,66 @@ def feature_extractor(data_main_path: str, output_path: str,
             # add class and subclass columns
             df = _add_class_and_subclass_column(df, folder_name, filename)
 
+            # get subclass name
+            subclass_name = _check_subclass(filename)
+            print(subclass_name)
+
             # save in list
-            df_list.append(df)
+            df_dict[subclass_name] = df
 
-    # concat all dataframes
-    all_data_df = pd.concat(df_list, ignore_index=True)
+    # signals_class_1 = [df_dict['standing_still'], df_dict['standing_gestures'], df_dict['standing_coffee'], df_dict['standing_folders']]
+    # signals_class_2 = [df_dict['sit']]
+    #
+    # signals_class_3 = [df_dict['walk_slow'], df_dict['walk_medium'], df_dict['walk_fast'], df_dict['stairs_up'], df_dict['stairs_down']]
+    #
+    # len_class1 = 0
+    # len_class2 = 0
+    # len_class3 = 0
+    #
+    #
+    # for df in signals_class_1:
+    #     len_class1 += len(df)
+    #     print(len(df))
+    #
+    # for df in signals_class_2:
+    #     len_class2 += len(df)
+    #     print(len(df))
+    #
+    # for df in signals_class_3:
+    #     len_class3 += len(df)
+    #     print(len(df))
+    #
+    # print(len_class1)
+    # print(len_class2)
+    # print(len_class3)
+    # min_class_size = min(len_class1,len_class2, len_class3)
+    # print("min class size", min_class_size)
+    # all_data_list = []
+    #
+    # # class 1
+    # class_1_subclass_size = min_class_size//(len(signals_class_1))
+    # print("class1 subclass size", class_1_subclass_size)
+    # for df in signals_class_1:
+    #     df_balanced = df.iloc[:class_1_subclass_size]
+    #     all_data_list.append(df_balanced)
+    #
+    # class_2_subclass_size = min_class_size // (len(signals_class_2))
+    # print("class2 subclass size", class_2_subclass_size)
+    # for df in signals_class_2:
+    #     df_balanced = df.iloc[:class_2_subclass_size]
+    #     all_data_list.append(df_balanced)
+    # class_3_subclass_size = (min_class_size // (len(signals_class_3)-1)) - 20
+    # print("class3 subclass size", class_3_subclass_size)
+    # for df in signals_class_3:
+    #     df_balanced = df.iloc[:class_3_subclass_size]
+    #     all_data_list.append(df_balanced)
 
-    # here guarantee that there's the same number of samples for each subclass
-    all_data_df = _balance_dataset(all_data_df, 'class', 'subclass')
+
+    # # concat all dataframes
+    # all_data_df = pd.concat(all_data_list, ignore_index=True)
+
+    # # here guarantee that there's the same number of samples for each subclass
+    all_data_df = _balance_dataset(df_dict)
 
     # count the number of windows of each class
     class_counts = all_data_df['class'].value_counts()
@@ -146,7 +199,7 @@ def _add_class_and_subclass_column(df: pd.DataFrame, folder_name: str, filename:
         class_number = 2
         subclass_str = _check_subclass(filename)
 
-    elif WALKING in folder_name:
+    elif STAIRS in folder_name or WALKING in folder_name:
         class_number = 3
         subclass_str = _check_subclass(filename)
 
@@ -201,36 +254,51 @@ def _check_subclass(filename: str) -> str:
     return subclass_str
 
 
-def _balance_dataset(df, class_col, subclass_col):
-    # Find the minimum class size
-    class_counts = df[class_col].value_counts()
-    min_class_size = class_counts.min()
+def _calculate_class_lengths(signals_classes):
+    class_lengths = []
+    for signals in signals_classes:
+        class_length = sum(len(df) for df in signals)
+        class_lengths.append(class_length)
+    return class_lengths
 
-    balanced_data = []
 
-    # Loop through each class to process subclasses
-    for class_label in class_counts.index:
-        class_subset = df[df[class_col] == class_label]
-        subclass_counts = class_subset[subclass_col].value_counts()
+def _balance_subclasses(signals, subclass_size):
+    balanced_class = [df.iloc[:subclass_size] for df in signals]
+    return balanced_class
 
-        # Calculate the target number of samples per subclass to balance subclasses within the class
-        num_subclasses = len(subclass_counts)
-        target_subclass_size = min(min_class_size // num_subclasses, subclass_counts.min())
 
-        # Sample each subclass within the class
-        subclass_samples = []
-        for subclass_label in subclass_counts.index:
-            subclass_subset = class_subset[class_subset[subclass_col] == subclass_label]
-            subclass_sample = subclass_subset.sample(n=target_subclass_size, replace=True)
-            subclass_samples.append(subclass_sample)
+def _balance_dataset(df_dict):
+    # Define signals for each class
+    signals_class_1 = [df_dict['standing_still'], df_dict['standing_gestures'], df_dict['standing_coffee'],
+                       df_dict['standing_folders']]
+    signals_class_2 = [df_dict['sit']]
+    signals_class_3 = [df_dict['walk_slow'], df_dict['walk_medium'], df_dict['walk_fast'], df_dict['stairs_up'],
+                       df_dict['stairs_down']]
 
-        # Concatenate samples from all subclasses within the class
-        balanced_class_data = pd.concat(subclass_samples)
+    signals_classes = [signals_class_1, signals_class_2, signals_class_3]
 
-        # Randomly sample from the balanced class data to ensure it matches the minimum class size
-        balanced_class_data = balanced_class_data.sample(n=min_class_size, replace=True)
-        balanced_data.append(balanced_class_data)
+    # Calculate the lengths of each class
+    class_lengths = _calculate_class_lengths(signals_classes)
+    print("Class lengths:", class_lengths)
 
-    # Concatenate all class data into a single DataFrame
-    balanced_df = pd.concat(balanced_data)
-    return balanced_df
+    # Determine the minimum class size
+    min_class_size = min(class_lengths)
+    print("Min class size:", min_class_size)
+
+    # Balance each class
+    all_data_list = []
+
+    for i, signals in enumerate(signals_classes):
+        if i == 2:  # Special case for class 3
+            subclass_size = (min_class_size // (len(signals) - 1)) - 20
+        else:
+            subclass_size = min_class_size // len(signals)
+
+        print(f"Subclass size for class {i + 1}: {subclass_size}")
+        balanced_class = _balance_subclasses(signals, subclass_size)
+        all_data_list.extend(balanced_class)
+
+    # Concatenate all balanced dataframes
+    all_data_df = pd.concat(all_data_list, ignore_index=True)
+
+    return all_data_df
