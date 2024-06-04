@@ -43,7 +43,7 @@ def segment_tasks(folder_name: str, data: pd.DataFrame) -> List[pd.DataFrame]:
         starts, stops = _detect_sitting_tasks(acc_series, fs=100, peak_height=11, min_distance=10000)
 
         # cut the task
-        tasks_sitting = _cut_segments(data, starts, stops, 1500)
+        tasks_sitting = _cut_segments(data, starts, stops, 3000)
 
         # store in tasks list
         tasks.extend(tasks_sitting)
@@ -51,10 +51,10 @@ def segment_tasks(folder_name: str, data: pd.DataFrame) -> List[pd.DataFrame]:
     elif CABINETS in folder_name:
 
         # cut cabinets tasks and store in a list
-        starts, stops = _detect_cabinets_tasks(acc_series, fs=100, peak_height=7, min_distance=10000)
+        starts, stops = _detect_cabinets_tasks(acc_series, fs=100, peak_height=7, min_distance=20000)
 
         # cut the tasks
-        tasks_cabinets = _cut_segments(data, starts, stops, 500)
+        tasks_cabinets = _cut_segments(data, starts, stops, 1000)
 
         # store in tasks list
         tasks.extend(tasks_cabinets)
@@ -285,7 +285,7 @@ def _detect_cabinets_tasks(yacc, fs, peak_height, min_distance):
     start_1 = peaks[0] + 1500
     end_1 = peaks[1] - 500
     start_2 = peaks[1] + 500
-    end_2 = (peaks[2] - 500) if len(peaks) > 3 else len(yacc)
+    end_2 = (peaks[2] - 500) if len(peaks) > 2 else len(yacc)
 
     # Define the starts and stops
     starts = []

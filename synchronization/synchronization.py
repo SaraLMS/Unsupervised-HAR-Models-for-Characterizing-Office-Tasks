@@ -22,7 +22,7 @@ from synchronization.sync_evaluation import sync_evaluation
 
 def synchronization(raw_data_in_path: str, sync_android_out_path: str, selected_sensors: Dict[str, List[str]],
                     output_path: str, sync_type: str, evaluation_output_path: str,
-                    evaluation_filename: str = "evaluation_report_imu.csv", save_intermediate_files: bool = True,
+                    evaluation_filename: str = "evaluation_report_acc_gyr_phone.csv", save_intermediate_files: bool = True,
                     prefix: str = "P005") -> None:
     """
     Synchronizes android sensor data and between two different devices. Two different synchronization methods are
@@ -35,7 +35,7 @@ def synchronization(raw_data_in_path: str, sync_android_out_path: str, selected_
     containing the jumps should be correctly defined in _get_axis_from_acc in synchronization.sync_devices_crosscorr.
     Without the correct window_size the results might be incorrect.
 
-    The synchronization based on time stamps extracts the start times of the sensors from the logger .txt file. If
+    Synchronization based on time stamps extracts the start times of the sensors from the logger .txt file. If
     this file does not exist or does not contain the needed start times, the start times in the raw data filenames will
     be used.
 
@@ -82,8 +82,8 @@ def synchronization(raw_data_in_path: str, sync_android_out_path: str, selected_
         Name of the file containing the sync evaluation report.
 
         save_intermediate_files (bool): Default = True.
-        Keep the csv files generated when synchronizing android
-        sensors. False to delete. If there's only one device, these files are not deleted.
+        Keep the csv files generated after synchronizing android
+        sensors. False to delete. If there's only signals from one device, these files are not deleted.
     """
     # check if in path is valid
     check_in_path(raw_data_in_path, '.txt')
@@ -95,14 +95,13 @@ def synchronization(raw_data_in_path: str, sync_android_out_path: str, selected_
 
     # TODO check if mban was selected - raise exception
     # synchronize android sensors
-
-    # if there's only one device, sync android sensors and save csv
+    # if there's only one device, sync android sensors and save csv files
     sync_all_classes(prefix, raw_data_in_path, sync_android_out_path, selected_sensors)
 
     # synchronize in pairs of devices
     if len(selected_sensors) == 2:
 
-        # array for holding the dataframes containing the sync evaluation
+        # array for holding the dataframes containing the synchronization results
         evaluation_df_array = []
 
         # synchronize data from different devices

@@ -8,12 +8,14 @@ import numpy as np
 import pandas as pd
 
 from load.load_sync_data import load_data_from_csv
+from parser.save_to_csv import save_data_to_csv
 from tsfel.feature_extraction.features_settings import get_features_by_domain
 from tsfel.feature_extraction.calc_features import time_series_features_extractor
 from constants import SUPPORTED_ACTIVITIES, CABINETS, SITTING, STANDING, WALKING, WEAR_PREFIX, ACCELEROMETER_PREFIX, \
     STAIRS
 from parser.check_create_directories import check_in_path
 
+# constants supported from filenames
 COFFEE = "coffee"
 FOLDERS = "folders"
 SIT = "sit"
@@ -42,10 +44,12 @@ def generate_cfg_file(path: str):
         json.dump(cfg, fp, indent=4)
 
 
-def feature_extractor(data_main_path: str, output_path: str,
+def feature_extractor(data_main_path: str, output_path: str,subclasses: list[str],
                       json_path: str = "C:/Users/srale/PycharmProjects/toolbox/feature_extraction",
-                      output_filename: str = "balanced_features_dataset_40_P001.csv",
+                      output_filename: str = "balanced_features_dataset_P001.csv", output_folder_name: str = "features",
                       total_acceleration: bool = False) -> None:
+
+    # TODO - DOCSTRING THIS SHIT
     # check directory
     check_in_path(data_main_path, '.csv')
 
@@ -98,74 +102,27 @@ def feature_extractor(data_main_path: str, output_path: str,
 
             # get subclass name
             subclass_name = _check_subclass(filename)
-            print(subclass_name)
 
-            # save in list
+            # save in dict
             df_dict[subclass_name] = df
 
-    # signals_class_1 = [df_dict['standing_still'], df_dict['standing_gestures'], df_dict['standing_coffee'], df_dict['standing_folders']]
-    # signals_class_2 = [df_dict['sit']]
-    #
-    # signals_class_3 = [df_dict['walk_slow'], df_dict['walk_medium'], df_dict['walk_fast'], df_dict['stairs_up'], df_dict['stairs_down']]
-    #
-    # len_class1 = 0
-    # len_class2 = 0
-    # len_class3 = 0
-    #
-    #
-    # for df in signals_class_1:
-    #     len_class1 += len(df)
-    #     print(len(df))
-    #
-    # for df in signals_class_2:
-    #     len_class2 += len(df)
-    #     print(len(df))
-    #
-    # for df in signals_class_3:
-    #     len_class3 += len(df)
-    #     print(len(df))
-    #
-    # print(len_class1)
-    # print(len_class2)
-    # print(len_class3)
-    # min_class_size = min(len_class1,len_class2, len_class3)
-    # print("min class size", min_class_size)
-    # all_data_list = []
-    #
-    # # class 1
-    # class_1_subclass_size = min_class_size//(len(signals_class_1))
-    # print("class1 subclass size", class_1_subclass_size)
-    # for df in signals_class_1:
-    #     df_balanced = df.iloc[:class_1_subclass_size]
-    #     all_data_list.append(df_balanced)
-    #
-    # class_2_subclass_size = min_class_size // (len(signals_class_2))
-    # print("class2 subclass size", class_2_subclass_size)
-    # for df in signals_class_2:
-    #     df_balanced = df.iloc[:class_2_subclass_size]
-    #     all_data_list.append(df_balanced)
-    # class_3_subclass_size = (min_class_size // (len(signals_class_3)-1)) - 20
-    # print("class3 subclass size", class_3_subclass_size)
-    # for df in signals_class_3:
-    #     df_balanced = df.iloc[:class_3_subclass_size]
-    #     all_data_list.append(df_balanced)
+    # Collect keys to be removed
+    keys_to_remove = [key for key in df_dict.keys() if key not in subclasses]
 
+    # drop the signals/ subclasses that weren't chosen
+    for key in keys_to_remove:
+        df_dict.pop(key)
 
-    # # concat all dataframes
-    # all_data_df = pd.concat(all_data_list, ignore_index=True)
-
-    # # here guarantee that there's the same number of samples for each subclass
+    # here guarantee that there's the same number of samples for each subclass
     all_data_df = _balance_dataset(df_dict)
 
-    # count the number of windows of each class
-    class_counts = all_data_df['class'].value_counts()
+    # count the number of windows of each class and subclass
+    # inform user
+    print(all_data_df['class'].value_counts())
+    print(all_data_df['subclass'].value_counts())
 
-    print(class_counts)
-
-    output_path = os.path.join(output_path, output_filename)
-
-    # save to csv file
-    all_data_df.to_csv(output_path)
+    # save data to csv file
+    save_data_to_csv(output_filename, all_data_df, output_path, output_folder_name)
 
     # inform user
     print(f"Data saved to {output_path}")
@@ -268,13 +225,31 @@ def _balance_subclasses(signals, subclass_size):
 
 
 def _balance_dataset(df_dict):
-    # Define signals for each class
-    signals_class_1 = [df_dict['standing_still'], df_dict['standing_gestures'], df_dict['standing_coffee'],
-                       df_dict['standing_folders']]
-    signals_class_2 = [df_dict['sit']]
-    signals_class_3 = [df_dict['walk_slow'], df_dict['walk_medium'], df_dict['walk_fast'], df_dict['stairs_up'],
-                       df_dict['stairs_down']]
+    # TODO - PUT THIS IN A FUCNTION MAYBE ?
+    # lists to store dataframes from the same class
+    signals_class_1 = []
+    signals_class_2 = []
+    signals_class_3 = []
 
+    # get list of signals (dataframes) from each class
+    for subclass_key, df in df_dict.items():
+
+        # df containing data from one subclass only
+        # check first value of the class column since all values are the same
+        if df['class'].iloc[0] == 1:
+            signals_class_1.append(df)
+
+        elif df['class'].iloc[0] == 2:
+            signals_class_2.append(df)
+
+        elif df['class'].iloc[0] == 3:
+            signals_class_3.append(df)
+
+        else:
+            raise ValueError(f"Class number not supported:", df['class'].iloc[0])
+
+
+    # list containing the lists of dataframes from each class of movement
     signals_classes = [signals_class_1, signals_class_2, signals_class_3]
 
     # Calculate the lengths of each class
@@ -288,8 +263,13 @@ def _balance_dataset(df_dict):
     # Balance each class
     all_data_list = []
 
+    # Check if "stairs" is in any of the keys
+    stairs_present = any("stairs" in key for key in df_dict.keys())
+
     for i, signals in enumerate(signals_classes):
-        if i == 2:  # Special case for class 3
+
+        # Special case for class 3 if stairs are present, subclass size needs adjustments
+        if stairs_present and i == 2:
             subclass_size = (min_class_size // (len(signals) - 1)) - 20
         else:
             subclass_size = min_class_size // len(signals)

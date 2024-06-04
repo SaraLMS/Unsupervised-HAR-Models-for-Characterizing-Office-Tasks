@@ -70,7 +70,7 @@
                 "fs": 100
             },
             "n_features": 1,
-            "use": "yes"
+            "use": "no"
         },
         "Maximum frequency": {
             "complexity": "log",
@@ -110,7 +110,7 @@
                 "fs": 100
             },
             "n_features": 1,
-            "use": "no"
+            "use": "yes"
         },
         "Max fft amplitude": {
             "complexity": "log",
@@ -120,7 +120,7 @@
                 "fs": 100
             },
             "n_features": 1,
-            "use": "yes"
+            "use": "no"
         },
         "Power bandwidth": {
             "complexity": "log",
@@ -130,7 +130,7 @@
                 "fs": 100
             },
             "n_features": 1,
-            "use": "yes"
+            "use": "no"
         },
         "Spectral centroid": {
             "complexity": "linear",
@@ -140,7 +140,7 @@
                 "fs": 100
             },
             "n_features": 1,
-            "use": "yes",
+            "use": "no",
             "tag": "audio"
         },
         "Spectral decrease": {
@@ -223,7 +223,7 @@
                 "fs": 100
             },
             "n_features": 1,
-            "use": "yes"
+            "use": "no"
         },
         "Spectral slope": {
             "complexity": "log",
@@ -243,7 +243,7 @@
                 "fs": 100
             },
             "n_features": 1,
-            "use": "yes"
+            "use": "no"
         },
         "Spectral variation": {
             "complexity": "log",
@@ -253,7 +253,7 @@
                 "fs": 100
             },
             "n_features": 1,
-            "use": "yes"
+            "use": "no"
         },
         "Wavelet absolute mean": {
             "complexity": "linear",
@@ -326,7 +326,7 @@
             "function": "tsfel.abs_energy",
             "parameters": "",
             "n_features": 1,
-            "use": "yes",
+            "use": "no",
             "tag": "audio"
         },
         "Average power": {
@@ -337,7 +337,7 @@
                 "fs": 100
             },
             "n_features": 1,
-            "use": "yes",
+            "use": "no",
             "tag": "audio"
         },
         "ECDF": {
@@ -398,7 +398,7 @@
             "function": "tsfel.interq_range",
             "parameters": "",
             "n_features": 1,
-            "use": "yes"
+            "use": "no"
         },
         "Kurtosis": {
             "complexity": "constant",
@@ -414,7 +414,7 @@
             "function": "tsfel.calc_max",
             "parameters": "",
             "n_features": 1,
-            "use": "yes"
+            "use": "no"
         },
         "Mean": {
             "complexity": "constant",
@@ -455,7 +455,7 @@
             "function": "tsfel.calc_min",
             "parameters": "",
             "n_features": 1,
-            "use": "yes"
+            "use": "no"
         },
         "Peak to peak distance": {
             "complexity": "constant",
@@ -499,7 +499,7 @@
             "function": "tsfel.calc_var",
             "parameters": "",
             "n_features": 1,
-            "use": "yes"
+            "use": "no"
         }
     },
     "temporal": {
@@ -511,7 +511,7 @@
                 "fs": 100
             },
             "n_features": 1,
-            "use": "yes"
+            "use": "no"
         },
         "Autocorrelation": {
             "complexity": "linear",
@@ -608,7 +608,7 @@
             "function": "tsfel.distance",
             "parameters": "",
             "n_features": 1,
-            "use": "yes"
+            "use": "no"
         },
         "Slope": {
             "complexity": "log",
