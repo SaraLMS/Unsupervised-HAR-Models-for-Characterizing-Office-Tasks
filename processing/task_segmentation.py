@@ -32,6 +32,7 @@ def segment_tasks(folder_name: str, data: pd.DataFrame) -> List[pd.DataFrame]:
     # # get time back to column named 'sec'
     # data = _reset_index_to_column(data)
     # get the y axis from the acc
+    # TODO ADD CHECK ACC NEEDS TO BE CHOSEN
     acc_series = data['yAcc'].to_numpy()
     # dataframes array
     tasks = []

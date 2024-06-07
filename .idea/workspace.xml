@@ -5,6 +5,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="3466cb1d-2559-4122-9522-f23b0d0f6b0a" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/clustering/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/clustering/feature_selection.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/clustering/metrics.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/clustering/models.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/feature_extraction/cfg_file.json" beforeDir="false" afterPath="$PROJECT_DIR$/feature_extraction/cfg_file.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/feature_extraction/feature_extractor.py" beforeDir="false" afterPath="$PROJECT_DIR$/feature_extraction/feature_extractor.py" afterDir="false" />
@@ -40,20 +44,22 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;Python tests.Python tests in test_supported_sensors.py.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.Python tests in test_sync.py.executor&quot;: &quot;Run&quot;,
-    &quot;Python.feature_extractor.executor&quot;: &quot;Run&quot;,
-    &quot;Python.main.executor&quot;: &quot;Run&quot;,
-    &quot;Python.sync_devices_timestamps.executor&quot;: &quot;Run&quot;,
-    &quot;Python.synchronization.executor&quot;: &quot;Run&quot;,
-    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
-    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Python tests.Python tests in test_supported_sensors.py.executor": "Run",
+    "Python tests.Python tests in test_sync.py.executor": "Run",
+    "Python.feature_extractor.executor": "Run",
+    "Python.feature_selection.executor": "Run",
+    "Python.main.executor": "Run",
+    "Python.models.executor": "Run",
+    "Python.sync_devices_timestamps.executor": "Run",
+    "Python.synchronization.executor": "Run",
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "git-widget-placeholder": "master",
+    "ignore.virus.scanning.warn.message": "true"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
       <recent name="C:\Users\srale\PycharmProjects\toolbox\tsfel" />
@@ -311,7 +317,15 @@
       <option name="project" value="LOCAL" />
       <updated>1717430105174</updated>
     </task>
-    <option name="localTasksCounter" value="30" />
+    <task id="LOCAL-00030" summary="improved balancing dataset and removal of subclasses">
+      <option name="closed" value="true" />
+      <created>1717517227145</created>
+      <option name="number" value="00030" />
+      <option name="presentableId" value="LOCAL-00030" />
+      <option name="project" value="LOCAL" />
+      <updated>1717517227146</updated>
+    </task>
+    <option name="localTasksCounter" value="31" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -326,7 +340,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Added corrected loading and synchronization of sensors in the same device. Saves to csv with correct column names" />
     <MESSAGE value="Synchronization based on cross corr and timestamps done.&#10;Working on searching the log for starting times (_get_start_times_from_logger) in Phillip's way." />
     <MESSAGE value="Added new functions to filter the logger df - remove Sensor data: .... string and Noiserecorder.&#10;Changed the _get_logger_start_times function - this function now gets all starting times from the 3 devices.&#10;Added a new function _get_used_devices_start_times that gets the start times from the previous function, but only for the used devices." />
     <MESSAGE value="Finished syncronization based on logger timestamps and the wrapper function.&#10;Created a new python package 'visualization' - no code here yet&#10;Code works but haven't checked if it's cutting the signals correctly" />
@@ -351,6 +364,7 @@
     <MESSAGE value="corrected subclass name" />
     <MESSAGE value="added stairs to features. Balance datasets" />
     <MESSAGE value="new balancing implemented" />
-    <option name="LAST_COMMIT_MESSAGE" value="new balancing implemented" />
+    <MESSAGE value="improved balancing dataset and removal of subclasses" />
+    <option name="LAST_COMMIT_MESSAGE" value="improved balancing dataset and removal of subclasses" />
   </component>
 </project>

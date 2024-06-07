@@ -22,7 +22,7 @@ from synchronization.sync_evaluation import sync_evaluation
 
 def synchronization(raw_data_in_path: str, sync_android_out_path: str, selected_sensors: Dict[str, List[str]],
                     output_path: str, sync_type: str, evaluation_output_path: str,
-                    evaluation_filename: str = "evaluation_report_acc_gyr_phone.csv", save_intermediate_files: bool = True,
+                    evaluation_filename: str = "evaluation_report_mag_phone.csv", save_intermediate_files: bool = True,
                     prefix: str = "P005") -> None:
     """
     Synchronizes android sensor data and between two different devices. Two different synchronization methods are

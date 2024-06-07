@@ -11,8 +11,7 @@ from load.load_sync_data import load_data_from_csv
 from parser.save_to_csv import save_data_to_csv
 from tsfel.feature_extraction.features_settings import get_features_by_domain
 from tsfel.feature_extraction.calc_features import time_series_features_extractor
-from constants import SUPPORTED_ACTIVITIES, CABINETS, SITTING, STANDING, WALKING, WEAR_PREFIX, ACCELEROMETER_PREFIX, \
-    STAIRS
+from constants import SUPPORTED_ACTIVITIES, CABINETS, SITTING, STANDING, WALKING, STAIRS
 from parser.check_create_directories import check_in_path
 
 # constants supported from filenames
@@ -44,9 +43,9 @@ def generate_cfg_file(path: str):
         json.dump(cfg, fp, indent=4)
 
 
-def feature_extractor(data_main_path: str, output_path: str,subclasses: list[str],
+def feature_extractor(data_main_path: str, output_path: str, subclasses: list[str],
                       json_path: str = "C:/Users/srale/PycharmProjects/toolbox/feature_extraction",
-                      output_filename: str = "balanced_features_dataset_P001.csv", output_folder_name: str = "features",
+                      output_filename: str = "mag_phone_watch_plus_spectralP005.csv", output_folder_name: str = "features",
                       total_acceleration: bool = False) -> None:
 
     # TODO - DOCSTRING THIS SHIT

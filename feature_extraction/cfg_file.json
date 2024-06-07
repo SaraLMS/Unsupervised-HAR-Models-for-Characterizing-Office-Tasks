@@ -90,7 +90,7 @@
                 "fs": 100
             },
             "n_features": 1,
-            "use": "no"
+            "use": "yes"
         },
         "Mean frequency": {
             "complexity": "log",
@@ -100,7 +100,7 @@
                 "fs": 100
             },
             "n_features": 1,
-            "use": "yes"
+            "use": "no"
         },
         "Std frequency": {
             "complexity": "log",
@@ -110,7 +110,7 @@
                 "fs": 100
             },
             "n_features": 1,
-            "use": "yes"
+            "use": "no"
         },
         "Max fft amplitude": {
             "complexity": "log",
@@ -140,7 +140,7 @@
                 "fs": 100
             },
             "n_features": 1,
-            "use": "no",
+            "use": "yes",
             "tag": "audio"
         },
         "Spectral decrease": {
@@ -171,7 +171,7 @@
                 "fs": 100
             },
             "n_features": 1,
-            "use": "no",
+            "use": "yes",
             "tag": "eeg"
         },
         "Spectral kurtosis": {
@@ -398,7 +398,7 @@
             "function": "tsfel.interq_range",
             "parameters": "",
             "n_features": 1,
-            "use": "no"
+            "use": "yes"
         },
         "Kurtosis": {
             "complexity": "constant",
@@ -414,7 +414,7 @@
             "function": "tsfel.calc_max",
             "parameters": "",
             "n_features": 1,
-            "use": "no"
+            "use": "yes"
         },
         "Mean": {
             "complexity": "constant",
@@ -439,7 +439,7 @@
             "function": "tsfel.calc_median",
             "parameters": "",
             "n_features": 1,
-            "use": "no"
+            "use": "yes"
         },
         "Median absolute deviation": {
             "complexity": "constant",
@@ -455,7 +455,7 @@
             "function": "tsfel.calc_min",
             "parameters": "",
             "n_features": 1,
-            "use": "no"
+            "use": "yes"
         },
         "Peak to peak distance": {
             "complexity": "constant",
@@ -499,7 +499,7 @@
             "function": "tsfel.calc_var",
             "parameters": "",
             "n_features": 1,
-            "use": "no"
+            "use": "yes"
         }
     },
     "temporal": {
