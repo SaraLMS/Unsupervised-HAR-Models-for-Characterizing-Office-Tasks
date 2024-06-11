@@ -5,16 +5,12 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="3466cb1d-2559-4122-9522-f23b0d0f6b0a" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/clustering/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/clustering/feature_selection.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/clustering/metrics.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/clustering/models.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/clustering/split_train_test.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/feature_extraction/cfg_file.json" beforeDir="false" afterPath="$PROJECT_DIR$/feature_extraction/cfg_file.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/feature_extraction/feature_extractor.py" beforeDir="false" afterPath="$PROJECT_DIR$/feature_extraction/feature_extractor.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clustering/feature_selection.py" beforeDir="false" afterPath="$PROJECT_DIR$/clustering/feature_selection.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clustering/metrics.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/clustering/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/clustering/models.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/processing/task_segmentation.py" beforeDir="false" afterPath="$PROJECT_DIR$/processing/task_segmentation.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/synchronization/synchronization.py" beforeDir="false" afterPath="$PROJECT_DIR$/synchronization/synchronization.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -50,7 +46,7 @@
     "Python tests.Python tests in test_sync.py.executor": "Run",
     "Python.feature_extractor.executor": "Run",
     "Python.feature_selection.executor": "Run",
-    "Python.main.executor": "Run",
+    "Python.main.executor": "Debug",
     "Python.models.executor": "Run",
     "Python.sync_devices_timestamps.executor": "Run",
     "Python.synchronization.executor": "Run",
@@ -325,7 +321,15 @@
       <option name="project" value="LOCAL" />
       <updated>1717517227146</updated>
     </task>
-    <option name="localTasksCounter" value="31" />
+    <task id="LOCAL-00031" summary="Added clustering">
+      <option name="closed" value="true" />
+      <created>1717772096107</created>
+      <option name="number" value="00031" />
+      <option name="presentableId" value="LOCAL-00031" />
+      <option name="project" value="LOCAL" />
+      <updated>1717772096107</updated>
+    </task>
+    <option name="localTasksCounter" value="32" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -340,7 +344,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Synchronization based on cross corr and timestamps done.&#10;Working on searching the log for starting times (_get_start_times_from_logger) in Phillip's way." />
     <MESSAGE value="Added new functions to filter the logger df - remove Sensor data: .... string and Noiserecorder.&#10;Changed the _get_logger_start_times function - this function now gets all starting times from the 3 devices.&#10;Added a new function _get_used_devices_start_times that gets the start times from the previous function, but only for the used devices." />
     <MESSAGE value="Finished syncronization based on logger timestamps and the wrapper function.&#10;Created a new python package 'visualization' - no code here yet&#10;Code works but haven't checked if it's cutting the signals correctly" />
     <MESSAGE value="added visualize_sync.py to visualize the synchronization" />
@@ -365,6 +368,7 @@
     <MESSAGE value="added stairs to features. Balance datasets" />
     <MESSAGE value="new balancing implemented" />
     <MESSAGE value="improved balancing dataset and removal of subclasses" />
-    <option name="LAST_COMMIT_MESSAGE" value="improved balancing dataset and removal of subclasses" />
+    <MESSAGE value="Added clustering" />
+    <option name="LAST_COMMIT_MESSAGE" value="Added clustering" />
   </component>
 </project>

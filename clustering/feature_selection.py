@@ -5,105 +5,143 @@ from typing import List
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+import random
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.feature_selection import VarianceThreshold
+from sklearn.metrics import rand_score, adjusted_rand_score, normalized_mutual_info_score, silhouette_score
 
-from clustering.metrics import evaluate_clustering
 from clustering.models import kmeans_model, agglomerative_clustering_model, gaussian_mixture_model, dbscan_model, \
     birch_model
+from clustering.split_train_test import train_test_split
+from parser.check_create_directories import create_dir
+
+KMEANS = "kmeans"
+AGGLOMERATIVE = "agglomerative"
+GAUSSIAN_MIXTURE_MODEL = "gmm"
+DBSCAN = "dbscan"
+BIRCH = "birch"
+SUPPORTED_MODELS = [KMEANS, AGGLOMERATIVE, GAUSSIAN_MIXTURE_MODEL, DBSCAN, BIRCH]
 
 
 # ------------------------------------------------------------------------------------------------------------------- #
 # Public functions
 # ------------------------------------------------------------------------------------------------------------------- #
 
-def feature_selector(df: pd.DataFrame):
+def feature_selector(df: pd.DataFrame, n_iterations: int, clustering_model: str, output_path: str,
+                     folder_name: str = "feature_selection_plots"):
+    # generate output path to save the plots
+    output_path = create_dir(output_path, folder_name)
+
+    # train test split
+    train_set, test_set = train_test_split(df, 0.8, 0.2)
+
     # get the true (class) labels
-    true_labels = df['class']
+    true_labels = train_set['class']
+
+    # drop class and subclass column
+    train_set = train_set.drop(['class', 'subclass'], axis=1)
 
     # remove class and subclass column and standardize features
-    x = _standardize_features(df)
+    train_set = _standardize_features(train_set)
 
-    # drop low variance features
-    x = _drop_low_variance_features(x, variance_threshold=0.1)
+    # drop features with variance lower than variance_threshold
+    train_set = _drop_low_variance_features(train_set, variance_threshold=0.1)
+    print(f"Columns after dropping low variance features: {train_set.columns.tolist()}")
 
-    # list for holding the features in each iteration of the for loop
-    feature_list = []
+    feature_sets = []
 
-    # list for holding the lists of features
-    best_features = []
+    for i in range(1, n_iterations + 1):
+        # Reset the best accuracy for each iteration
+        best_ri = 0
 
-    # variable fo holding the best accuracy for each iteration
-    best_ri_kmeans=0
+        # Shuffle the column names at the beginning of each iteration
+        shuffled_features = _shuffle_column_names(train_set)
+        print(f"Shuffled Features (Iteration {i}): {shuffled_features}")
 
-    # lists for holding the accuracy of each model
-    accur_kmeans = []
-    accur_agg = []
-    accur_gmm = []
-    accur_dbscan = []
-    accur_birch = []
+        # Reset the feature list for each iteration
+        iter_feature_list = []
 
-    # cycle over the columns of the dataframe
-    for feature in x.columns:
-        # add the feature to the feature list
-        feature_list.append(feature)
+        # Temporary lists for storing the best features and metrics of the current iteration
+        best_features = []
+        accur_ri = []
+        adj_rand_scores = []
+        norm_mutual_infos = []
 
-        # get the features for clustering
-        features = x[feature_list]
+        # Cycle over the shuffled columns of the dataframe
+        for feature in shuffled_features:
+            # Add the feature to the feature list
+            iter_feature_list.append(feature)
 
-        # # add feature set to teh feature set list
-        # feature_set_list.append(len(feature_list))
+            # Get the features for clustering
+            features_train = train_set[iter_feature_list]
 
-        # kmeans clustering
-        labels_kmeans = kmeans_model(features, n_clusters=3)
+            if clustering_model == KMEANS:
+                # kmeans clustering
+                labels = kmeans_model(features_train, n_clusters=3)
+            elif clustering_model == AGGLOMERATIVE:
+                # agglomerative clustering
+                labels = agglomerative_clustering_model(features_train, n_clusters=3)
+            elif clustering_model == GAUSSIAN_MIXTURE_MODEL:
+                # gaussian mixture model
+                labels = gaussian_mixture_model(features_train, n_components=3)
+            elif clustering_model == DBSCAN:
+                # DBSCAN clustering
+                labels = dbscan_model(features_train, 0.4, 10)
+            elif clustering_model == BIRCH:
+                # Birch clustering
+                labels = birch_model(features_train, n_clusters=3)
+            else:
+                raise ValueError(f"The model {clustering_model} is not supported. "
+                                 f"Supported models are: {SUPPORTED_MODELS}")
 
-        # agglomerative clustering
-        labels_agg = agglomerative_clustering_model(features, n_clusters=3)
+            # Evaluate clustering
+            ri, ari, nmi = _evaluate_clustering(true_labels, labels)
 
-        # gaussian mixture model
-        labels_gmm = gaussian_mixture_model(features, n_components=3)
+            if ri <= best_ri:
+                iter_feature_list.remove(feature)
+            else:
+                best_ri = ri
 
-        # DBSCAN - NEEDS PARAMETER SEARCH!!!!!!!!!!!!!!!!!!!!!!!!!
-        labels_dbscan = dbscan_model(features, epsilon=0.4, min_points=10)
+                best_features.append(iter_feature_list.copy())
 
-        # Birch clustering
-        labels_birch = birch_model(features, n_clusters=3)
+                # Add results to the respective lists
+                accur_ri.append(ri)
+                adj_rand_scores.append(ari)
+                norm_mutual_infos.append(nmi)
 
-        # evaluate clustering
-        ri_kmeans, ari_kmeans, nmi_kmeans = evaluate_clustering(features, true_labels, labels_kmeans)
-        ri_agg, ari_agg, nmi_agg = evaluate_clustering(features, true_labels, labels_agg)
-        ri_gmm, ari_gmm, nmi_gmm = evaluate_clustering(features, true_labels, labels_gmm)
-        ri_dbscan, ari_dbscan, nmi_dbscan = evaluate_clustering(features, true_labels, labels_dbscan)
-        ri_birch, ari_birch, nmi_birch = evaluate_clustering(features, true_labels, labels_birch)
+        print(f"Iteration {i}: Best Features - {best_features}")
 
-        if ri_kmeans < best_ri_kmeans:
-            feature_list.remove(feature)
+        # X-axis will show the feature sets
+        feature_names = ['\n'.join(features) for features in best_features]
+        best_features_list = best_features[-1]
+
+        print(best_features_list)
+
+        if best_features_list not in feature_sets:
+
+            best_features_str = '_'.join(best_features_list).replace(' ', '')
+            print(best_features_str)
+            feature_sets.append(best_features_list)
+            # feature_names_str = '_'.join(features)
+            filename = f"{output_path}/{best_features_str}.png"
+            plt.figure(figsize=(14, 7))
+            plt.plot(feature_names, accur_ri, marker='o', linestyle='-', color='#D36135', label='Rand Index')
+            plt.plot(feature_names, adj_rand_scores, marker='x', linestyle='-', color='#386FA4',
+                     label='Adjusted Rand Index')
+            plt.plot(feature_names, norm_mutual_infos, marker='s', linestyle='-', color='#4D9078',
+                     label='Normalized Mutual Info')
+            plt.xlabel('Feature Sets')
+            plt.ylabel('Scores')
+            plt.title('Clustering Metrics vs. Feature Sets')
+            plt.xticks(rotation=0)  # Set rotation to 0 to keep the labels horizontal
+            plt.legend()
+            plt.grid(False)
+            plt.tight_layout()
+            plt.savefig(filename)
+            plt.close()
+            print(f"Plot saved with the following features: {best_features_list}")
         else:
-            best_ri_kmeans=ri_kmeans
-
-            best_features.append(feature_list.copy())
-            # add accuracy to the accuracy list
-            accur_kmeans.append(ri_kmeans)
-
-        accur_gmm.append(ri_gmm)
-        accur_agg.append(ri_agg)
-        accur_dbscan.append(ri_dbscan)
-        accur_birch.append(ri_birch)
-
-    return best_features, accur_kmeans
-
-
-def plot_results(best_features: List[str], accuracy_list: List[float]):
-    print(best_features)
-    num_features = [len(features) for features in best_features]
-    plt.figure(figsize=(10, 6))
-    plt.plot(num_features, accuracy_list, marker='o', linestyle='-', color='b', label='KMeans')
-    plt.xlabel('Number of Features')
-    plt.ylabel('Rand Index')
-    plt.title('Clustering Accuracy vs. Number of Features')
-    plt.legend()
-    plt.grid(True)
-    plt.show()
+            print("Feature set already saved")
 
 
 # ------------------------------------------------------------------------------------------------------------------- #
@@ -111,10 +149,7 @@ def plot_results(best_features: List[str], accuracy_list: List[float]):
 # ------------------------------------------------------------------------------------------------------------------- #
 
 
-def _standardize_features(df: pd.DataFrame):
-    # drop class and subclass column
-    x = df.drop(['class', 'subclass'], axis=1)
-
+def _standardize_features(x: pd.DataFrame):
     # get new column names
     x_column_names = x.columns
 
@@ -127,35 +162,21 @@ def _standardize_features(df: pd.DataFrame):
     return x
 
 
-def _correlated_features(corr_matrix, threshold: float = 0.99):
-    # Absolute value
-    corr_matrix = corr_matrix.abs()
+def _evaluate_clustering(true_labels: pd.Series, predicted_labels: pd.Series):
+    # calculate clustering accuracy
+    rand_index = np.round(rand_score(true_labels, predicted_labels), 2)
 
-    # Select upper triangle of correlation matrix
-    upper = corr_matrix.where(np.triu(np.ones(corr_matrix.shape), k=1).astype(bool))
+    # rand index adjusted for chance
+    adjusted_rand_index = np.round(adjusted_rand_score(true_labels, predicted_labels), 2)
 
-    # Find index and column name of features with correlation greater than threshold
-    corr_features = [column for column in upper.columns if any(upper[column] > threshold)]
+    # mutual information
+    normalized_mutual_info = np.round(normalized_mutual_info_score(true_labels, predicted_labels), 2)
 
-    return corr_features
-
-
-def _drop_correlated_features(x: pd.DataFrame):
-    # compute pairwise correlation of columns/features
-    corr_pearson = x.corr()
-
-    # get correlated features
-    corr_features = _correlated_features(corr_pearson)
-
-    # drop correlated features
-    x = x.drop(corr_features, axis=1)
-
-    return x
+    return rand_index, adjusted_rand_index, normalized_mutual_info
 
 
 def _drop_low_variance_features(x: pd.DataFrame, variance_threshold: float):
     # check low variance features
-    # keep the features that have atleast 90% variance
     var_thr = VarianceThreshold(threshold=variance_threshold)
     var_thr.fit(x)
 
@@ -167,3 +188,9 @@ def _drop_low_variance_features(x: pd.DataFrame, variance_threshold: float):
     x = x.drop(concol, axis=1)
 
     return x
+
+
+def _shuffle_column_names(x: pd.DataFrame):
+    column_names = list(x.columns)
+    random.shuffle(column_names)
+    return column_names

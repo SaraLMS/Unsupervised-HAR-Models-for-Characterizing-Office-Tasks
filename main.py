@@ -1,6 +1,6 @@
 from typing import Dict, List
 
-from clustering.feature_selection import feature_selector, plot_results
+from clustering.feature_selection import feature_selector
 from feature_extraction.feature_extractor import feature_extractor, generate_cfg_file
 from load.load_sync_data import load_data_from_csv
 from processing.processor import processing
@@ -39,8 +39,9 @@ from visualization.visualize_sync import visualize_sync_signals
 # feature_extractor(main_path, output_path, subclasses)
 path = "C:/Users/srale/OneDrive - FCT NOVA/Tese/P005/acc_gyr_mag_phone/features/acc_mag_gyr_phone_P005.csv"
 df = load_data_from_csv(path)
-feature_set_list, accur_kmeans = feature_selector(df)
-plot_results(feature_set_list, accur_kmeans)
+output_path_plots = "C:/Users/srale/OneDrive - FCT NOVA/Tese/P005/acc_gyr_mag_phone"
+feature_selector(df, 8, "kmeans", output_path_plots)
+
 
 
 

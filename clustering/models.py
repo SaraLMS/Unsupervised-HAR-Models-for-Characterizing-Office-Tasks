@@ -10,9 +10,9 @@ from sklearn.cluster import KMeans, Birch, AgglomerativeClustering, DBSCAN
 # Public functions
 # ------------------------------------------------------------------------------------------------------------------- #
 
-def kmeans_model(df: pd.DataFrame, n_clusters: int):
+def kmeans_model(train_set: pd.DataFrame, n_clusters: int):
     kmeans = KMeans(n_clusters=n_clusters)
-    labels_kmeans = kmeans.fit_predict(df)
+    labels_kmeans = kmeans.fit_predict(train_set)
 
     return labels_kmeans
 
