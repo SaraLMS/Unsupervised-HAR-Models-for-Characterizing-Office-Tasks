@@ -5,12 +5,16 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="3466cb1d-2559-4122-9522-f23b0d0f6b0a" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/clustering/split_train_test.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/clustering/feature_selection.py" beforeDir="false" afterPath="$PROJECT_DIR$/clustering/feature_selection.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/clustering/metrics.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/clustering/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/clustering/models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clustering/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/feature_engineering/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clustering/feature_selection.py" beforeDir="false" afterPath="$PROJECT_DIR$/feature_engineering/feature_selection.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clustering/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/feature_engineering/models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clustering/split_train_test.py" beforeDir="false" afterPath="$PROJECT_DIR$/feature_engineering/split_train_test.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/feature_extraction/feature_extractor.py" beforeDir="false" afterPath="$PROJECT_DIR$/feature_extraction/feature_extraction.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/processing/processor.py" beforeDir="false" afterPath="$PROJECT_DIR$/processing/processor.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/processing/task_segmentation.py" beforeDir="false" afterPath="$PROJECT_DIR$/processing/task_segmentation.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/synchronization/synchronization.py" beforeDir="false" afterPath="$PROJECT_DIR$/synchronization/synchronization.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -40,22 +44,22 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "Python tests.Python tests in test_supported_sensors.py.executor": "Run",
-    "Python tests.Python tests in test_sync.py.executor": "Run",
-    "Python.feature_extractor.executor": "Run",
-    "Python.feature_selection.executor": "Run",
-    "Python.main.executor": "Debug",
-    "Python.models.executor": "Run",
-    "Python.sync_devices_timestamps.executor": "Run",
-    "Python.synchronization.executor": "Run",
-    "RunOnceActivity.OpenProjectViewOnStart": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "git-widget-placeholder": "master",
-    "ignore.virus.scanning.warn.message": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Python tests.Python tests in test_supported_sensors.py.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.Python tests in test_sync.py.executor&quot;: &quot;Run&quot;,
+    &quot;Python.feature_extractor.executor&quot;: &quot;Run&quot;,
+    &quot;Python.feature_selection.executor&quot;: &quot;Run&quot;,
+    &quot;Python.main.executor&quot;: &quot;Run&quot;,
+    &quot;Python.models.executor&quot;: &quot;Run&quot;,
+    &quot;Python.sync_devices_timestamps.executor&quot;: &quot;Run&quot;,
+    &quot;Python.synchronization.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
+    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
       <recent name="C:\Users\srale\PycharmProjects\toolbox\tsfel" />
@@ -329,7 +333,15 @@
       <option name="project" value="LOCAL" />
       <updated>1717772096107</updated>
     </task>
-    <option name="localTasksCounter" value="32" />
+    <task id="LOCAL-00032" summary="plots for feature selection">
+      <option name="closed" value="true" />
+      <created>1718122536347</created>
+      <option name="number" value="00032" />
+      <option name="presentableId" value="LOCAL-00032" />
+      <option name="project" value="LOCAL" />
+      <updated>1718122536347</updated>
+    </task>
+    <option name="localTasksCounter" value="33" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -344,7 +356,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Added new functions to filter the logger df - remove Sensor data: .... string and Noiserecorder.&#10;Changed the _get_logger_start_times function - this function now gets all starting times from the 3 devices.&#10;Added a new function _get_used_devices_start_times that gets the start times from the previous function, but only for the used devices." />
     <MESSAGE value="Finished syncronization based on logger timestamps and the wrapper function.&#10;Created a new python package 'visualization' - no code here yet&#10;Code works but haven't checked if it's cutting the signals correctly" />
     <MESSAGE value="added visualize_sync.py to visualize the synchronization" />
     <MESSAGE value="Implemented sync_evaluation.py and added to the synchronization function, saving a csv file with the evaluation report.&#10;Added _check functions in synchronization.py to check for selected_sensors validity, presence of accelerometer sensor and in_path validity.&#10;Implemented unittests to test these &quot;checks&quot;.&#10;Added missing docstrings.&#10;Removed buffer size from watch timestamp in the logger file." />
@@ -369,6 +380,7 @@
     <MESSAGE value="new balancing implemented" />
     <MESSAGE value="improved balancing dataset and removal of subclasses" />
     <MESSAGE value="Added clustering" />
-    <option name="LAST_COMMIT_MESSAGE" value="Added clustering" />
+    <MESSAGE value="plots for feature selection" />
+    <option name="LAST_COMMIT_MESSAGE" value="plots for feature selection" />
   </component>
 </project>

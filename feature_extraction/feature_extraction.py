@@ -19,13 +19,23 @@ COFFEE = "coffee"
 FOLDERS = "folders"
 SIT = "sit"
 GESTURES = "gestures"
-STAND_STILL = "stand_still"
+STAND_STILL1 = "stand_still1"
+STAND_STILL2 = "stand_still2"
 FAST = "fast"
 MEDIUM = "medium"
 SLOW = "slow"
-STAIRS_UP = "stairsup"
-STAIRS_DOWN = "stairsdown"
-SUPPORTED_SUBCLASSES = [COFFEE, FOLDERS, SIT, STAND_STILL, GESTURES, FAST, MEDIUM, SLOW, STAIRS_UP, STAIRS_DOWN]
+STAIRS_UP1 = "stairsup1"
+STAIRS_DOWN1 = "stairsdown1"
+STAIRS_UP2 = "stairsup2"
+STAIRS_DOWN2 = "stairsdown2"
+STAIRS_UP3 = "stairsup3"
+STAIRS_DOWN3 = "stairsdown3"
+STAIRS_UP4 = "stairsup4"
+STAIRS_DOWN4 = "stairsdown4"
+
+SUPPORTED_SUBCLASSES = [COFFEE, FOLDERS, SIT, STAND_STILL1, GESTURES, FAST,
+                        MEDIUM, SLOW, STAIRS_UP1, STAIRS_DOWN1, STAIRS_UP2, STAIRS_DOWN2, STAIRS_UP3,
+                        STAIRS_DOWN3, STAIRS_UP4, STAIRS_DOWN4]
 
 
 # ------------------------------------------------------------------------------------------------------------------- #
@@ -43,19 +53,25 @@ def generate_cfg_file(path: str):
         json.dump(cfg, fp, indent=4)
 
 
-def feature_extractor(data_main_path: str, output_path: str, subclasses: list[str],
-                      json_path: str = "C:/Users/srale/PycharmProjects/toolbox/feature_extraction",
-                      output_filename: str = "mag_phone_watch_plus_spectralP005.csv", output_folder_name: str = "features",
-                      total_acceleration: bool = False) -> None:
-
-    # TODO - DOCSTRING THIS SHIT
-    # check directory
-    check_in_path(data_main_path, '.csv')
-
+def load_json_file(json_path: str) -> Dict[Any, Any]:
     json_file_path = os.path.join(json_path, "cfg_file.json")
     # read json file to a features dict
     with open(json_file_path, "r") as file:
         features_dict = json.load(file)
+
+    return features_dict
+
+
+def feature_extractor(data_main_path: str, output_path: str, subclasses: list[str],
+                      json_path: str = "C:/Users/srale/PycharmProjects/toolbox/feature_extraction",
+                      output_filename: str = "mag_phone_watch_plus_spectralP006.csv",
+                      output_folder_name: str = "features") -> None:
+    # TODO - DOCSTRING THIS SHIT
+    # check directory
+    check_in_path(data_main_path, '.csv')
+
+    # load dictionary with chosen features
+    features_dict = load_json_file(json_path)
 
     # list to hold the dataframes
     df_dict = {}
@@ -65,7 +81,6 @@ def feature_extractor(data_main_path: str, output_path: str, subclasses: list[st
         folder_path = os.path.join(data_main_path, folder_name)
 
         for filename in os.listdir(folder_path):
-
             file_path = os.path.join(folder_path, filename)
 
             df = load_data_from_csv(file_path)
@@ -105,12 +120,8 @@ def feature_extractor(data_main_path: str, output_path: str, subclasses: list[st
             # save in dict
             df_dict[subclass_name] = df
 
-    # Collect keys to be removed
-    keys_to_remove = [key for key in df_dict.keys() if key not in subclasses]
-
-    # drop the signals/ subclasses that weren't chosen
-    for key in keys_to_remove:
-        df_dict.pop(key)
+    # remove unwanted subclasses
+    df_dict = _remove_keys_from_dict(df_dict, subclasses)
 
     # here guarantee that there's the same number of samples for each subclass
     all_data_df = _balance_dataset(df_dict)
@@ -130,6 +141,19 @@ def feature_extractor(data_main_path: str, output_path: str, subclasses: list[st
 # ------------------------------------------------------------------------------------------------------------------- #
 # private functions
 # ------------------------------------------------------------------------------------------------------------------- #
+
+
+def _remove_keys_from_dict(df_dict: Dict[str, pd.DataFrame], subclasses: List[str]) -> Dict[str, pd.DataFrame]:
+    # Collect keys to be removed
+    keys_to_remove = [key for key in df_dict.keys() if not any(key.startswith(subclass) for subclass in subclasses)]
+    print(keys_to_remove)
+
+    # Drop the keys/subclasses that weren't chosen
+    for key in keys_to_remove:
+        df_dict.pop(key)
+
+    return df_dict
+
 
 def _extract_features_from_signal(df: pd.DataFrame, features_dict: Dict[Any, Any]) -> pd.DataFrame:
     # drop time column
@@ -186,8 +210,11 @@ def _check_subclass(filename: str) -> str:
     elif GESTURES in filename:
         subclass_str = "standing_gestures"
 
-    elif STAND_STILL in filename:
-        subclass_str = "standing_still"
+    elif STAND_STILL1 in filename:
+        subclass_str = "standing_still1"
+
+    elif STAND_STILL2 in filename:
+        subclass_str = "standing_still2"
 
     elif SLOW in filename:
         subclass_str = "walk_slow"
@@ -198,16 +225,36 @@ def _check_subclass(filename: str) -> str:
     elif FAST in filename:
         subclass_str = "walk_fast"
 
-    elif STAIRS_UP in filename:
-        subclass_str = "stairs_up"
+    elif STAIRS_UP1 in filename:
+        subclass_str = "stairs_up1"
 
-    elif STAIRS_DOWN in filename:
-        subclass_str = "stairs_down"
+    elif STAIRS_DOWN1 in filename:
+        subclass_str = "stairs_down1"
+
+    elif STAIRS_UP2 in filename:
+        subclass_str = "stairs_up2"
+
+    elif STAIRS_DOWN2 in filename:
+        subclass_str = "stairs_down2"
+
+    elif STAIRS_UP3 in filename:
+        subclass_str = "stairs_up3"
+
+    elif STAIRS_DOWN3 in filename:
+        subclass_str = "stairs_down3"
+
+    elif STAIRS_DOWN4 in filename:
+        subclass_str = "stairs_down4"
 
     else:
         raise ValueError(f"Subclass not supported. Supported subclasses are: ")
 
     return subclass_str
+
+
+def _balance_subclasses(signals, subclass_size):
+    balanced_class = [df.iloc[:subclass_size] for df in signals]
+    return balanced_class
 
 
 def _calculate_class_lengths(signals_classes):
@@ -218,13 +265,9 @@ def _calculate_class_lengths(signals_classes):
     return class_lengths
 
 
-def _balance_subclasses(signals, subclass_size):
-    balanced_class = [df.iloc[:subclass_size] for df in signals]
-    return balanced_class
-
-
 def _balance_dataset(df_dict):
     # TODO - PUT THIS IN A FUCNTION MAYBE ?
+    # TODO - SUBCLASS SIZES WHEN THERE'S STAIRS MIGHT NEED TO BE ADJUSTED BY THE USER
     # lists to store dataframes from the same class
     signals_class_1 = []
     signals_class_2 = []
@@ -247,7 +290,6 @@ def _balance_dataset(df_dict):
         else:
             raise ValueError(f"Class number not supported:", df['class'].iloc[0])
 
-
     # list containing the lists of dataframes from each class of movement
     signals_classes = [signals_class_1, signals_class_2, signals_class_3]
 
@@ -269,7 +311,7 @@ def _balance_dataset(df_dict):
 
         # Special case for class 3 if stairs are present, subclass size needs adjustments
         if stairs_present and i == 2:
-            subclass_size = (min_class_size // (len(signals) - 1)) - 20
+            subclass_size = min_class_size // (len(signals)-2)
         else:
             subclass_size = min_class_size // len(signals)
 

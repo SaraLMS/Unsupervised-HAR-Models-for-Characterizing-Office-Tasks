@@ -80,11 +80,11 @@ def segment_tasks(folder_name: str, data: pd.DataFrame) -> List[pd.DataFrame]:
         # cut the tasks
         tasks_standing = _cut_segments(data, starts, stops, 1000)
 
-        # first and last segments are the same task
-        # join the separated task into one df
-        task_standing_no_gestures = pd.concat([tasks_standing[0], tasks_standing[2]], ignore_index=True)
+        # # first and last segments are the same task
+        # # join the separated task into one df
+        # task_standing_no_gestures = pd.concat([tasks_standing[0], tasks_standing[2]], ignore_index=True)
 
-        tasks += [tasks_standing[1], task_standing_no_gestures]
+        tasks.extend(tasks_standing)
 
     elif STAIRS in folder_name:
         # cut walking tasks and store in a list
@@ -96,11 +96,11 @@ def segment_tasks(folder_name: str, data: pd.DataFrame) -> List[pd.DataFrame]:
         # cut segments
         tasks_stairs = _cut_segments(data, valid_starts, valid_stops, 250)
 
-        # join the separated tasks into one df
-        stairs_up = pd.concat([tasks_stairs[0], tasks_stairs[2]], ignore_index=True)
-        stairs_down = pd.concat([tasks_stairs[1], tasks_stairs[3]], ignore_index=True)
+        # # join the separated tasks into one df
+        # stairs_up = pd.concat([tasks_stairs[0], tasks_stairs[2]], ignore_index=True)
+        # stairs_down = pd.concat([tasks_stairs[1], tasks_stairs[3]], ignore_index=True)
 
-        tasks += [stairs_up, stairs_down]
+        tasks.extend(tasks_stairs)
 
     if not any(activity in folder_name for activity in SUPPORTED_ACTIVITIES):
         # If no supported activity is found, raise a ValueError

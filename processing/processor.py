@@ -20,7 +20,8 @@ from constants import ACCELEROMETER_PREFIX, SUPPORTED_PREFIXES
 # public functions
 # ------------------------------------------------------------------------------------------------------------------- #
 
-def processing(sync_data_path: str, output_path: str, raw_folder_name: str, filtered_folder_name: str, save_raw_tasks:bool = True, fs: int = 100) -> None:
+def processing(sync_data_path: str, output_path: str, raw_folder_name: str, filtered_folder_name: str,
+               save_raw_tasks: bool = True, fs: int = 100) -> None:
     """
     Processes and filters signal data from csv files in a directory structure,
      storing the results in a dictionary.
@@ -45,12 +46,9 @@ def processing(sync_data_path: str, output_path: str, raw_folder_name: str, filt
     raw_output_path = create_dir(output_path, raw_folder_name)
     filtered_output_path = create_dir(output_path, filtered_folder_name)
 
-
     for folder_name in os.listdir(sync_data_path):
 
         folder_path = os.path.join(sync_data_path, folder_name)
-
-        # removed - folder_name = get_folder_name_from_path(folder_path)
 
         for filename in os.listdir(folder_path):
             # get the path to the signals
@@ -81,8 +79,13 @@ def processing(sync_data_path: str, output_path: str, raw_folder_name: str, filt
                 filtered_data = filtered_data.iloc[200:]
                 filtered_tasks.append(filtered_data)
 
-            # generate output filenames
-            output_filenames = _generate_task_filenames(folder_name, filename)
+            if STAIRS in folder_name:
+                nr_stairs_segments = len(filtered_tasks)
+                # generate output filenames
+                output_filenames = _generate_task_filenames(folder_name, filename, nr_stairs_segments)
+
+            else:
+                output_filenames = _generate_task_filenames(folder_name, filename)
 
             for df, output_filename in zip(filtered_tasks, output_filenames):
                 # save data to csv
@@ -137,7 +140,7 @@ def _apply_filters(data: pd.DataFrame, fs: int) -> pd.DataFrame:
     return filtered_data
 
 
-def _generate_task_filenames(folder_name: str, filename: str) -> List[str]:
+def _generate_task_filenames(folder_name: str, filename: str, nr_stairs_segments: int = 4) -> List[str]:
     """
     Generates a list of new filenames based on the activity type specified in the folder name by appending relevant
     suffixes to the original filename.
@@ -163,13 +166,24 @@ def _generate_task_filenames(folder_name: str, filename: str) -> List[str]:
         suffixes = ['_coffee', '_folders']
 
     elif STANDING in folder_name:
-        suffixes = ['_gestures', '_stand_still']
+        suffixes = ['_stand_still1', '_gestures', '_stand_still2']
 
     elif SITTING in folder_name:
         suffixes = ['_sit']
 
     elif STAIRS in folder_name:
-        suffixes = ['_stairsup', '_stairsdown']
+
+        if nr_stairs_segments == 4:
+            # 2 segments going up and 2 segments going down
+            suffixes = ['_stairsup1', '_stairsdown1', '_stairsup2', '_stairsdown2']
+
+        elif nr_stairs_segments == 8:
+            # 4 segments going up and 4 segments going down
+            suffixes = ['_stairsup1', '_stairsdown1', '_stairsup2', '_stairsdown2',
+                        '_stairsup3', '_stairsdown3', '_stairsup4', '_stairsdown4']
+
+        else:
+            raise ValueError(f"Incorrect number of stairs segments: Can only be 4 or 8.")
 
     else:
         raise ValueError(f"The activity: {folder_name} is not supported. "
