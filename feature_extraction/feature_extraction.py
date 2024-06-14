@@ -12,7 +12,7 @@ from parser.save_to_csv import save_data_to_csv
 from tsfel.feature_extraction.features_settings import get_features_by_domain
 from tsfel.feature_extraction.calc_features import time_series_features_extractor
 from constants import SUPPORTED_ACTIVITIES, CABINETS, SITTING, STANDING, WALKING, STAIRS
-from parser.check_create_directories import check_in_path
+from parser.check_create_directories import check_in_path, create_dir
 
 # constants supported from filenames
 COFFEE = "coffee"
@@ -64,8 +64,8 @@ def load_json_file(json_path: str) -> Dict[Any, Any]:
 
 def feature_extractor(data_main_path: str, output_path: str, subclasses: list[str],
                       json_path: str = "C:/Users/srale/PycharmProjects/toolbox/feature_extraction",
-                      output_filename: str = "mag_phone_watch_plus_spectralP006.csv",
-                      output_folder_name: str = "features") -> None:
+                      output_filename: str = "acc_gyr_mag_phone_features_P007.csv",
+                      output_folder_name: str = "features_basic_activities") -> None:
     # TODO - DOCSTRING THIS SHIT
     # check directory
     check_in_path(data_main_path, '.csv')
@@ -131,11 +131,14 @@ def feature_extractor(data_main_path: str, output_path: str, subclasses: list[st
     print(all_data_df['class'].value_counts())
     print(all_data_df['subclass'].value_counts())
 
+    output_path = create_dir(output_path, output_folder_name)
+    file_path = os.path.join(output_path, output_filename)
+
     # save data to csv file
-    save_data_to_csv(output_filename, all_data_df, output_path, output_folder_name)
+    all_data_df.to_csv(file_path)
 
     # inform user
-    print(f"Data saved to {output_path}")
+    print(f"Data saved to {file_path}")
 
 
 # ------------------------------------------------------------------------------------------------------------------- #
@@ -185,7 +188,7 @@ def _add_class_and_subclass_column(df: pd.DataFrame, folder_name: str, filename:
 
     else:
         raise ValueError(
-            f"The activity: {folder_name} is not supported. Supported activities are: {SUPPORTED_ACTIVITIES}")
+            f"The activity: {folder_name} is not supported. \n Supported activities are: {SUPPORTED_ACTIVITIES}")
 
     # add class column
     df['class'] = class_number
@@ -240,6 +243,9 @@ def _check_subclass(filename: str) -> str:
     elif STAIRS_UP3 in filename:
         subclass_str = "stairs_up3"
 
+    elif STAIRS_UP4 in filename:
+        subclass_str = "stairs_up4"
+
     elif STAIRS_DOWN3 in filename:
         subclass_str = "stairs_down3"
 
@@ -247,7 +253,8 @@ def _check_subclass(filename: str) -> str:
         subclass_str = "stairs_down4"
 
     else:
-        raise ValueError(f"Subclass not supported. Supported subclasses are: ")
+        raise ValueError(f"Subclass not supported. Check filename: {filename}"
+                         f" \n Supported subclasses are: {SUPPORTED_SUBCLASSES}")
 
     return subclass_str
 

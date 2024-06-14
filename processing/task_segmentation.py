@@ -91,7 +91,7 @@ def segment_tasks(folder_name: str, data: pd.DataFrame) -> List[pd.DataFrame]:
         envelope, starts, stops = _detect_walking_onset(acc_series, 100, 0.01)
 
         # validate the starts and stops
-        valid_starts, valid_stops = _validate_walking_starts_stops(acc_series, folder_name, starts, stops, 6000, 10000)
+        valid_starts, valid_stops = _validate_walking_starts_stops(acc_series, folder_name, starts, stops, 4500, 7000)
 
         # cut segments
         tasks_stairs = _cut_segments(data, valid_starts, valid_stops, 250)

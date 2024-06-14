@@ -62,7 +62,7 @@ def processing(sync_data_path: str, output_path: str, raw_folder_name: str, filt
 
             if save_raw_tasks:
                 # generate output filenames
-                output_filenames = _generate_task_filenames(folder_name, filename)
+                output_filenames = _generate_task_filenames(folder_name, filename, 4)
 
                 for df, output_filename in zip(tasks_array, output_filenames):
                     # save data to csv
@@ -85,7 +85,7 @@ def processing(sync_data_path: str, output_path: str, raw_folder_name: str, filt
                 output_filenames = _generate_task_filenames(folder_name, filename, nr_stairs_segments)
 
             else:
-                output_filenames = _generate_task_filenames(folder_name, filename)
+                output_filenames = _generate_task_filenames(folder_name, filename, 4)
 
             for df, output_filename in zip(filtered_tasks, output_filenames):
                 # save data to csv
@@ -140,7 +140,7 @@ def _apply_filters(data: pd.DataFrame, fs: int) -> pd.DataFrame:
     return filtered_data
 
 
-def _generate_task_filenames(folder_name: str, filename: str, nr_stairs_segments: int = 4) -> List[str]:
+def _generate_task_filenames(folder_name: str, filename: str, nr_stairs_segments: int) -> List[str]:
     """
     Generates a list of new filenames based on the activity type specified in the folder name by appending relevant
     suffixes to the original filename.
