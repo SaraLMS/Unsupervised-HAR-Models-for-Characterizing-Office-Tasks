@@ -91,7 +91,7 @@ def segment_tasks(folder_name: str, data: pd.DataFrame) -> List[pd.DataFrame]:
         envelope, starts, stops = _detect_walking_onset(acc_series, 100, 0.01)
 
         # validate the starts and stops
-        valid_starts, valid_stops = _validate_walking_starts_stops(acc_series, folder_name, starts, stops, 4500, 7000)
+        valid_starts, valid_stops = _validate_walking_starts_stops(acc_series, folder_name, starts, stops, 4500, 10000)
 
         # cut segments
         tasks_stairs = _cut_segments(data, valid_starts, valid_stops, 250)
@@ -219,25 +219,32 @@ def _detect_sitting_tasks(yacc, fs, peak_height, min_distance) -> Tuple[List[int
     return starts, stops
 
 
-def _validate_walking_starts_stops(yacc, folder_name, starts, stops, min_value_between_starts: int,
+def _validate_walking_starts_stops(yacc, folder_name, starts, stops, min_value_between_starts_stops: int,
                                    min_stop_value: int):
-    # validade the start indices to get only the starts of the tasks
+    # validate the start indices to get only the starts of the tasks
     # Initialize an empty list to hold valid indices
     valid_starts = []
 
     # Iterate through the array, stopping at the second-to-last element
     for i in range(len(starts) - 1):
         # Check if the difference to the next element is less than 12000
-        if starts[i + 1] - starts[i] >= min_value_between_starts:
+        if starts[i + 1] - starts[i] >= min_value_between_starts_stops:
             valid_starts.append(starts[i])
 
     # append the last element since it has no next element to compare
     valid_starts.append(starts[-1])
 
-    # validade the stop indices
+    # Validate the stop indices
+    # Initialize an empty list to hold valid stop indices
+    valid_stops = []
 
-    # Find indices of elements that are below 30000
-    valid_stops = stops[stops >= min_stop_value].tolist()
+    # Iterate through the array, stopping at the second-to-last element
+    for i in range(len(stops) - 1):
+
+        # Check if the stop value is above min_stop_value
+        # check if the difference to the next element is greater than or equal to min_value_between_starts_stops
+        if stops[i] >= min_stop_value and stops[i + 1] - stops[i] >= min_value_between_starts_stops:
+            valid_stops.append(stops[i])
 
     # if the signal was cut early the last stop is the last value of the signal
     if len(valid_starts) != len(valid_stops):

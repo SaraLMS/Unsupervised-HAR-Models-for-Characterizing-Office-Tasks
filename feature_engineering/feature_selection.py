@@ -131,24 +131,20 @@ def feature_selector(dataset_path: str, n_iterations: int, clustering_model: str
 
         print(best_features_list)
 
-        if best_features_list not in feature_sets:
+        feature_sets.append(best_features_list)
+        file_path = f"{output_path}/feature_set{i}_results.png"
 
-            feature_sets.append(best_features_list)
-            file_path = f"{output_path}/feature_set{i}_results.png"
-
-            # save plots if save_plots == True
-            if save_plots:
-                _save_plot_clustering_results(feature_names, accur_ri, adj_rand_scores, norm_mutual_infos, file_path,
-                                              clustering_model)
-                print(f"Plot saved with the following features: {best_features_list}")
-
-        else:
-            print("Feature set already saved")
+        # save plots if save_plots == True
+        if save_plots:
+            _save_plot_clustering_results(feature_names, accur_ri, adj_rand_scores, norm_mutual_infos, file_path,
+                                          clustering_model)
+            print(f"Plot saved with the following features: {best_features_list}")
 
     return feature_sets
 
 
-def find_most_common_feature_pair(main_path: str, features_folder_name: str, n_iterations, clustering_model, output_path):
+def find_most_common_feature_pair(main_path: str, features_folder_name: str, n_iterations, clustering_model,
+                                  output_path):
     # list for holding the most common pair of features of each subject
     most_common_features = []
     for subject_folder in os.listdir(main_path):
@@ -174,6 +170,7 @@ def find_most_common_feature_pair(main_path: str, features_folder_name: str, n_i
     most_common_features_all = _get_most_common_feature_set(most_common_features)
 
     return most_common_features_all
+
 
 # ------------------------------------------------------------------------------------------------------------------- #
 # Private functions

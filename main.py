@@ -46,26 +46,27 @@ from visualization.visualize_sync import visualize_sync_signals
 def main():
     # Set these booleans to True or False depending on which steps you want to run
     do_synchronization = False
-    do_processing = False
+    do_processing = True
     do_generate_cfg_file = False
-    do_feature_extraction = False
+    do_feature_extraction = True
     do_feature_selection = True
 
     if do_synchronization:
-        raw_data_in_path = "D:/tese_backups/raw_signals_backups/acquisitions/P007"
-        sync_android_out_path = "C:/Users/srale/OneDrive - FCT NOVA/Tese/P007/acc_gyr_mag_phone/sync_android_P007"
-        output_path = "C:/Users/srale/OneDrive - FCT NOVA/Tese/P007/acc_gyr_mag_phone/synchronized_P007"
+        raw_data_in_path = "D:/tese_backups/raw_signals_backups/acquisitions/P004"
+        sync_android_out_path = ("C:/Users/srale/OneDrive - FCT "
+                                 "NOVA/Tese/subjects/P004/acc_gyr_mag_phone/sync_android_P004")
+        output_path = "C:/Users/srale/OneDrive - FCT NOVA/Tese/subjects/P004/acc_gyr_mag_phone/synchronized_P004"
         selected_sensors = {'phone': ['acc', 'gyr', 'mag']}
         sync_type = 'crosscorr'
-        evaluation_path = "C:/Users/srale/OneDrive - FCT NOVA/Tese/P007/acc_gyr_mag_phone/sync_evaluation_P007"
+        evaluation_path = "C:/Users/srale/OneDrive - FCT NOVA/Tese/subjects/P004/acc_gyr_mag_phone/sync_evaluation_P004"
         synchronization(raw_data_in_path, sync_android_out_path, selected_sensors, output_path, sync_type,
                         evaluation_path)
 
     if do_processing:
-        output_path = "C:/Users/srale/OneDrive - FCT NOVA/Tese/P007/acc_gyr_mag_phone"
-        filtered_folder_name = "filtered_tasks_P007"
-        raw_folder_name = "raw_tasks_P007"
-        sync_data_path = "C:/Users/srale/OneDrive - FCT NOVA/Tese/P007/acc_gyr_mag_phone/sync_android_P007"
+        output_path = "C:/Users/srale/OneDrive - FCT NOVA/Tese/subjects/P004/acc_gyr_mag_phone"
+        filtered_folder_name = "filtered_tasks_P004"
+        raw_folder_name = "raw_tasks_P004"
+        sync_data_path = "C:/Users/srale/OneDrive - FCT NOVA/Tese/subjects/P004/acc_gyr_mag_phone/sync_android_P004"
         processing(sync_data_path, output_path, raw_folder_name, filtered_folder_name)
 
     if do_generate_cfg_file:
@@ -74,14 +75,14 @@ def main():
 
     if do_feature_extraction:
         subclasses = ['standing_still', 'walk_medium', 'sit']
-        main_path = "C:/Users/srale/OneDrive - FCT NOVA/Tese/P007/acc_gyr_mag_phone/filtered_tasks_P007"
-        output_path = "C:/Users/srale/OneDrive - FCT NOVA/Tese/P007/acc_gyr_mag_phone"
+        main_path = "C:/Users/srale/OneDrive - FCT NOVA/Tese/subjects/P004/acc_gyr_mag_phone/filtered_tasks_P004"
+        output_path = "C:/Users/srale/OneDrive - FCT NOVA/Tese/subjects/P004/acc_gyr_mag_phone"
         feature_extractor(main_path, output_path, subclasses)
 
     if do_feature_selection:
-        dataset_path = ("C:/Users/srale/OneDrive - FCT NOVA/Tese/P005/acc_gyr_mag_phone/features_basic_activities"
-                        "/acc_mag_gyr_phone_P005.csv")
-        output_path_plots = "C:/Users/srale/OneDrive - FCT NOVA/Tese/P005/acc_gyr_mag_phone"
+        dataset_path = ("C:/Users/srale/OneDrive - FCT NOVA/Tese/subjects/P004/acc_gyr_mag_phone/features_basic_activities"
+                        "/acc_gyr_mag_phone_features_P004.csv")
+        output_path_plots = "C:/Users/srale/OneDrive - FCT NOVA/Tese/subjects/P004/acc_gyr_mag_phone"
         clustering_model = "KMeans"
         nr_iterations = 20
         feature_sets = feature_selector(dataset_path, nr_iterations, clustering_model, output_path_plots)
