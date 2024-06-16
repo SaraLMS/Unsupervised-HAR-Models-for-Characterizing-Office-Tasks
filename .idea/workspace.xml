@@ -10,7 +10,6 @@
       <change beforePath="$PROJECT_DIR$/feature_extraction/feature_extraction.py" beforeDir="false" afterPath="$PROJECT_DIR$/feature_extraction/feature_extraction.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/processing/task_segmentation.py" beforeDir="false" afterPath="$PROJECT_DIR$/processing/task_segmentation.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/synchronization/synchronization.py" beforeDir="false" afterPath="$PROJECT_DIR$/synchronization/synchronization.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -353,7 +352,15 @@
       <option name="project" value="LOCAL" />
       <updated>1718381137460</updated>
     </task>
-    <option name="localTasksCounter" value="35" />
+    <task id="LOCAL-00035" summary="corrected task segmentation - stops validation">
+      <option name="closed" value="true" />
+      <created>1718473175816</created>
+      <option name="number" value="00035" />
+      <option name="presentableId" value="LOCAL-00035" />
+      <option name="project" value="LOCAL" />
+      <updated>1718473175816</updated>
+    </task>
+    <option name="localTasksCounter" value="36" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -368,7 +375,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Implemented sync_evaluation.py and added to the synchronization function, saving a csv file with the evaluation report.&#10;Added _check functions in synchronization.py to check for selected_sensors validity, presence of accelerometer sensor and in_path validity.&#10;Implemented unittests to test these &quot;checks&quot;.&#10;Added missing docstrings.&#10;Removed buffer size from watch timestamp in the logger file." />
     <MESSAGE value="Added some constants (only changed this in synchronization.py). &#10;Corrected an error in sync_evaluation.py (in the precedes and lags part).&#10;Added another layer of checks for synchronization to check for acc files and if acc is present for every device if cross corr is chosen. Synchronization in pair is assured with len(selected_sensors)." />
     <MESSAGE value="added checks for timestamps in the logger file" />
     <MESSAGE value="Corrected sync_evaluation (when logger file can't be used). Added prefix parameter in synchronization.py" />
@@ -393,6 +399,7 @@
     <MESSAGE value="plots for feature selection" />
     <MESSAGE value="Changes in segmentation and balancing. Added extra subclasses for stairs up, stairs down and standing still. Improved main file" />
     <MESSAGE value="corrected errors in task_segmentation and processor. Added search for most common combination of features in feature_selection.py" />
-    <option name="LAST_COMMIT_MESSAGE" value="corrected errors in task_segmentation and processor. Added search for most common combination of features in feature_selection.py" />
+    <MESSAGE value="corrected task segmentation - stops validation" />
+    <option name="LAST_COMMIT_MESSAGE" value="corrected task segmentation - stops validation" />
   </component>
 </project>

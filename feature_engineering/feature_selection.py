@@ -32,7 +32,7 @@ SUPPORTED_MODELS = [KMEANS, AGGLOMERATIVE, GAUSSIAN_MIXTURE_MODEL, DBSCAN, BIRCH
 # ------------------------------------------------------------------------------------------------------------------- #
 
 def feature_selector(dataset_path: str, n_iterations: int, clustering_model: str, output_path: str,
-                     folder_name: str = "features_kmeans_plots", save_plots: bool = True):
+                     folder_name: str = "features_kmeans_plots", save_plots: bool = False):
     # load dataset from csv file
     df = load_data_from_csv(dataset_path)
 
@@ -56,6 +56,7 @@ def feature_selector(dataset_path: str, n_iterations: int, clustering_model: str
     print(f"Columns after dropping low variance features: {train_set.columns.tolist()}")
 
     feature_sets = []
+    feature_sets_accur = []
 
     for i in range(1, n_iterations + 1):
         # Reset the best accuracy for each iteration
@@ -128,44 +129,61 @@ def feature_selector(dataset_path: str, n_iterations: int, clustering_model: str
         # X-axis will show the feature sets
         feature_names = ['\n'.join(features) for features in best_features]
         best_features_list = best_features[-1]
+        highest_accuracy = accur_ri[-1]
 
         print(best_features_list)
 
-        feature_sets.append(best_features_list)
-        file_path = f"{output_path}/feature_set{i}_results.png"
+        if best_features_list not in feature_sets:
 
-        # save plots if save_plots == True
-        if save_plots:
-            _save_plot_clustering_results(feature_names, accur_ri, adj_rand_scores, norm_mutual_infos, file_path,
-                                          clustering_model)
-            print(f"Plot saved with the following features: {best_features_list}")
+            feature_sets.append(best_features_list)
+            feature_sets_accur.append(highest_accuracy)
+            file_path = f"{output_path}/feature_set{i}_results.png"
 
-    return feature_sets
+            # save plots if save_plots == True
+            if save_plots:
+                # plot clustering results for that feature set
+                _save_plot_clustering_results(feature_names, accur_ri, adj_rand_scores, norm_mutual_infos, file_path,
+                                              clustering_model)
+                # inform user
+                print(f"Plot saved with the following features: {best_features_list}")
+        else:
+            # inform user
+            print(f"Feature combination already tested.")
+
+    return feature_sets, feature_sets_accur
 
 
-def find_most_common_feature_pair(main_path: str, features_folder_name: str, n_iterations, clustering_model,
-                                  output_path):
-    # list for holding the most common pair of features of each subject
+
+def get_all_subjects_best_features(main_path: str, features_folder_name: str, n_iterations, clustering_model,
+                                   output_path):
+    # List to hold the best feature sets of each subject
     most_common_features = []
+
     for subject_folder in os.listdir(main_path):
         subject_folder_path = os.path.join(main_path, subject_folder)
+        # inform user
+        print(f"Selecting best features for subject: {subject_folder}")
+        # progress bar for this part of the code
+        for sub_folder in os.listdir(subject_folder_path):
+            sub_folder_path = os.path.join(subject_folder_path, sub_folder)
+            if os.path.isdir(sub_folder_path):
 
-        for folder in os.listdir(subject_folder_path):
+                features_folder_path = os.path.join(sub_folder_path, features_folder_name)
+                if os.path.isdir(features_folder_path):
+                    feature_files = os.listdir(features_folder_path)
 
-            if folder == features_folder_name:
-                features_folder_path = os.path.join(subject_folder_path, folder)
-                feature_files = os.listdir(features_folder_path)
+                    if len(feature_files) == 1:
+                        dataset_path = os.path.join(features_folder_path, feature_files[0])
 
-                if len(feature_files) == 1:
-                    dataset_path = feature_files[0]
-                    # get the best feature sets for the subject
-                    feature_sets = feature_selector(dataset_path, n_iterations, clustering_model, output_path,
-                                                    save_plots=False)
-                    most_common_pair = _get_most_common_feature_set(feature_sets)
-                    most_common_features.append(most_common_pair)
-
+                        # Get the best feature sets for the subject
+                        feature_sets = feature_selector(dataset_path, n_iterations, clustering_model, output_path,
+                                                        save_plots=True)
+                        most_common_pair = _get_most_common_feature_set(feature_sets)
+                        most_common_features.append(most_common_pair)
+                    else:
+                        raise ValueError(f"Too many files: {len(feature_files)} files. Only one dataset per folder.")
                 else:
-                    raise ValueError(f"Too many files: {len(feature_files)} files. \nOnly one dataset for folder")
+                    print(f"No features folder found in: {sub_folder_path}")
     # get most common pair for all subjects
     most_common_features_all = _get_most_common_feature_set(most_common_features)
 
@@ -235,6 +253,47 @@ def _drop_low_variance_features(x: pd.DataFrame, variance_threshold: float):
     # drop columns
     x = x.drop(concol, axis=1)
 
+    return x
+
+
+def _remove_collinear_features(x, threshold):
+    '''
+    Objective:
+        Remove collinear features in a dataframe with a correlation coefficient
+        greater than the threshold. Removing collinear features can help a model
+        to generalize and improves the interpretability of the model.
+
+    Inputs:
+        x: features dataframe
+        threshold: features with correlations greater than this value are removed
+
+    Output:
+        dataframe that contains only the non-highly-collinear features
+    '''
+
+    # Calculate the correlation matrix
+    corr_matrix = x.corr()
+    iters = range(len(corr_matrix.columns) - 1)
+    drop_cols = []
+
+    # Iterate through the correlation matrix and compare correlations
+    for i in iters:
+        for j in range(i+1):
+            item = corr_matrix.iloc[j:(j+1), (i+1):(i+2)]
+            col = item.columns
+            row = item.index
+            val = abs(item.values)
+
+            # If correlation exceeds the threshold
+            if val >= threshold:
+                # Print the correlated features and the correlation value
+                #print(col.values[0], "|", row.values[0], "|", round(val[0][0], 2))
+                drop_cols.append(col.values[0])
+
+    # Drop one of each pair of correlated columns
+    drops = set(drop_cols)
+    x = x.drop(columns=drops)
+    print('Removed Columns {}'.format(drops))
     return x
 
 
