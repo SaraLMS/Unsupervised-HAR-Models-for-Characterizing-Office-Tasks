@@ -4,7 +4,7 @@
 import os
 from collections import Counter
 from itertools import combinations
-from typing import List
+from typing import List, Tuple
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -19,11 +19,11 @@ from feature_engineering.split_train_test import train_test_split
 from load.load_sync_data import load_data_from_csv
 from parser.check_create_directories import create_dir
 
-KMEANS = "KMeans"
-AGGLOMERATIVE = "Agglomerative_Clustering"
-GAUSSIAN_MIXTURE_MODEL = "Gaussian_Mixture_Model"
-DBSCAN = "DBSCAN"
-BIRCH = "Birch"
+KMEANS = "kmeans"
+AGGLOMERATIVE = "agglomerative"
+GAUSSIAN_MIXTURE_MODEL = "gmm"
+DBSCAN = "dbscan"
+BIRCH = "birch"
 SUPPORTED_MODELS = [KMEANS, AGGLOMERATIVE, GAUSSIAN_MIXTURE_MODEL, DBSCAN, BIRCH]
 
 
@@ -31,12 +31,52 @@ SUPPORTED_MODELS = [KMEANS, AGGLOMERATIVE, GAUSSIAN_MIXTURE_MODEL, DBSCAN, BIRCH
 # Public functions
 # ------------------------------------------------------------------------------------------------------------------- #
 
-def feature_selector(dataset_path: str, n_iterations: int, clustering_model: str, output_path: str,
-                     folder_name: str = "features_kmeans_plots", save_plots: bool = False):
+def feature_selector(dataset_path: str, variance_threshold: float, n_iterations: int, clustering_model: str, output_path: str,
+                     folder_name: str = "features_kmeans_plots", save_plots: bool = True) -> Tuple[List[str], List[float]]:
+    """
+    Splits the dataset into train and test and returns the features sets that give the best clustering results
+    for the train set as well as the rand index of the respective feature set.
+
+    The first step of the feature selection is removing the low variance features. Drops the features with variance
+    lower than variance_threshold. Then, shuffles the remaining features and iteratively adds features. The feature is
+    removed if the accuracy (rand index) doesn't improve. This process generated a plot with the x-axis being the features
+    added in each iteration and the y-axis the scores for the rand index, adjusted rand index and normalized mutual info.
+    The plot is generated and saved if save_plots is set to True.
+
+    This process is repeated n_iterations times and with every iteration, the features are shuffled so that different
+    combinations of features can be tested.
+
+    :param dataset_path: str
+    Path to the file containing the features extrated (columns) and data instances (rows).
+
+    :param variance_threshold: float
+    Minimum variance value. Features with a training-set variance lower than this threshold will be removed.
+
+    :param n_iterations: int
+    Number of times the feature selection method is repeated.
+
+    :param clustering_model: str
+    Unsupervised learning model used to select the best features. Supported models are:
+        "kmeans" - KMeans clustering
+        "agglomerative": Agglomerative clustering model
+        "gmm": Gaussian Mixture Model
+        "dbscan": DBSCAN. Needs parameter search - not implemented
+        "birch": Birch clustering algorithm
+
+    :param output_path: str
+    Path to the main folder in which the plots should be saved
+
+    :param folder_name: str
+    Name of the folder in which to store the plots
+
+    :param save_plots: bool (default = True)
+    If True, Save the plots of each iteration of the feature selection process. Don't save if False.
+    :return:
+    """
     # load dataset from csv file
     df = load_data_from_csv(dataset_path)
 
-    # generate output path to save the plots
+    # generate output path to save the plots if it doesn't exist
     output_path = create_dir(output_path, folder_name)
 
     # train test split
@@ -52,7 +92,7 @@ def feature_selector(dataset_path: str, n_iterations: int, clustering_model: str
     train_set = _standardize_features(train_set)
 
     # drop features with variance lower than variance_threshold
-    train_set = _drop_low_variance_features(train_set, variance_threshold=0.1)
+    train_set = _drop_low_variance_features(train_set, variance_threshold)
     print(f"Columns after dropping low variance features: {train_set.columns.tolist()}")
 
     feature_sets = []
@@ -153,17 +193,14 @@ def feature_selector(dataset_path: str, n_iterations: int, clustering_model: str
     return feature_sets, feature_sets_accur
 
 
-
-def get_all_subjects_best_features(main_path: str, features_folder_name: str, n_iterations, clustering_model,
-                                   output_path):
-    # List to hold the best feature sets of each subject
-    most_common_features = []
+def get_all_subjects_best_features(main_path: str, features_folder_name: str, variance_threshold: float,
+                                   n_iterations: int, clustering_model: str, save_plots: bool = False):
+    subjects_dict = {}
 
     for subject_folder in os.listdir(main_path):
         subject_folder_path = os.path.join(main_path, subject_folder)
-        # inform user
         print(f"Selecting best features for subject: {subject_folder}")
-        # progress bar for this part of the code
+
         for sub_folder in os.listdir(subject_folder_path):
             sub_folder_path = os.path.join(subject_folder_path, sub_folder)
             if os.path.isdir(sub_folder_path):
@@ -176,19 +213,47 @@ def get_all_subjects_best_features(main_path: str, features_folder_name: str, n_
                         dataset_path = os.path.join(features_folder_path, feature_files[0])
 
                         # Get the best feature sets for the subject
-                        feature_sets = feature_selector(dataset_path, n_iterations, clustering_model, output_path,
-                                                        save_plots=True)
-                        most_common_pair = _get_most_common_feature_set(feature_sets)
-                        most_common_features.append(most_common_pair)
+                        feature_sets, accuracies = feature_selector(dataset_path, variance_threshold,n_iterations,
+                                                                    clustering_model,sub_folder_path, save_plots)
+
+                        # Filter for the best feature sets and their accuracies
+                        best_feature_sets, best_acc = _filter_best_feature_sets(feature_sets, accuracies)
+                        subjects_dict[subject_folder] = best_feature_sets, best_acc
+
+                        print("#########################################################################")
+                        print(f"SUBJECT: {subject_folder}")
+                        print("#########################################################################")
+                        print(f"Feature sets with the highest accuracies:")
+                        for feat, acc in zip(best_feature_sets, best_acc):
+                            print(f"Features: {feat} \n Rand Index: {acc}")
+                        print(
+                            f"Feature frequency in best feature sets: {_find_most_common_features_in_best_sets(best_feature_sets)} \n")
+
                     else:
                         raise ValueError(f"Too many files: {len(feature_files)} files. Only one dataset per folder.")
                 else:
                     print(f"No features folder found in: {sub_folder_path}")
-    # get most common pair for all subjects
-    most_common_features_all = _get_most_common_feature_set(most_common_features)
 
-    return most_common_features_all
+    return subjects_dict
 
+
+def get_top_features_across_all_subjects(subjects_dict, top_n):
+    # get the list containing the the most common features for each subject
+    feature_list = _aggregate_most_common_features(subjects_dict)
+
+    # Count the frequency of each feature
+    feature_counter = Counter(feature_list)
+    print("Feature Counter:")
+    for feature, count in feature_counter.items():
+        print(f"{feature}: {count}")
+
+    # Get the most common features and their counts
+    most_common_features = feature_counter.most_common(top_n)
+    print("\nTop Features:")
+    for feature, count in most_common_features:
+        print(f"{feature}: {count}")
+
+    return most_common_features
 
 # ------------------------------------------------------------------------------------------------------------------- #
 # Private functions
@@ -230,13 +295,13 @@ def _standardize_features(x: pd.DataFrame):
 
 def _evaluate_clustering(true_labels: pd.Series, predicted_labels: pd.Series):
     # calculate feature_engineering accuracy
-    rand_index = np.round(rand_score(true_labels, predicted_labels), 2)
+    rand_index = np.round(rand_score(true_labels, predicted_labels), 4)
 
     # rand index adjusted for chance
-    adjusted_rand_index = np.round(adjusted_rand_score(true_labels, predicted_labels), 2)
+    adjusted_rand_index = np.round(adjusted_rand_score(true_labels, predicted_labels), 4)
 
     # mutual information
-    normalized_mutual_info = np.round(normalized_mutual_info_score(true_labels, predicted_labels), 2)
+    normalized_mutual_info = np.round(normalized_mutual_info_score(true_labels, predicted_labels), 4)
 
     return rand_index, adjusted_rand_index, normalized_mutual_info
 
@@ -256,46 +321,46 @@ def _drop_low_variance_features(x: pd.DataFrame, variance_threshold: float):
     return x
 
 
-def _remove_collinear_features(x, threshold):
-    '''
-    Objective:
-        Remove collinear features in a dataframe with a correlation coefficient
-        greater than the threshold. Removing collinear features can help a model
-        to generalize and improves the interpretability of the model.
-
-    Inputs:
-        x: features dataframe
-        threshold: features with correlations greater than this value are removed
-
-    Output:
-        dataframe that contains only the non-highly-collinear features
-    '''
-
-    # Calculate the correlation matrix
-    corr_matrix = x.corr()
-    iters = range(len(corr_matrix.columns) - 1)
-    drop_cols = []
-
-    # Iterate through the correlation matrix and compare correlations
-    for i in iters:
-        for j in range(i+1):
-            item = corr_matrix.iloc[j:(j+1), (i+1):(i+2)]
-            col = item.columns
-            row = item.index
-            val = abs(item.values)
-
-            # If correlation exceeds the threshold
-            if val >= threshold:
-                # Print the correlated features and the correlation value
-                #print(col.values[0], "|", row.values[0], "|", round(val[0][0], 2))
-                drop_cols.append(col.values[0])
-
-    # Drop one of each pair of correlated columns
-    drops = set(drop_cols)
-    x = x.drop(columns=drops)
-    print('Removed Columns {}'.format(drops))
-    return x
-
+# def _remove_collinear_features(x, threshold):
+#     '''
+#     Objective:
+#         Remove collinear features in a dataframe with a correlation coefficient
+#         greater than the threshold. Removing collinear features can help a model
+#         to generalize and improves the interpretability of the model.
+#
+#     Inputs:
+#         x: features dataframe
+#         threshold: features with correlations greater than this value are removed
+#
+#     Output:
+#         dataframe that contains only the non-highly-collinear features
+#     '''
+#
+#     # Calculate the correlation matrix
+#     corr_matrix = x.corr()
+#     iters = range(len(corr_matrix.columns) - 1)
+#     drop_cols = []
+#
+#     # Iterate through the correlation matrix and compare correlations
+#     for i in iters:
+#         for j in range(i + 1):
+#             item = corr_matrix.iloc[j:(j + 1), (i + 1):(i + 2)]
+#             col = item.columns
+#             row = item.index
+#             val = abs(item.values)
+#
+#             # If correlation exceeds the threshold
+#             if val >= threshold:
+#                 # Print the correlated features and the correlation value
+#                 # print(col.values[0], "|", row.values[0], "|", round(val[0][0], 2))
+#                 drop_cols.append(col.values[0])
+#
+#     # Drop one of each pair of correlated columns
+#     drops = set(drop_cols)
+#     x = x.drop(columns=drops)
+#     print('Removed Columns {}'.format(drops))
+#     return x
+#
 
 def _shuffle_column_names(x: pd.DataFrame):
     column_names = list(x.columns)
@@ -307,32 +372,33 @@ def _remove_first_letter(feature_sets: List[List[str]]) -> List[List[str]]:
     return [[feature[1:] for feature in feature_set] for feature_set in feature_sets]
 
 
-def _get_most_common_pair(feature_sets: List[List[str]]) -> List[str]:
-    feature_sets = _remove_first_letter(feature_sets)
+def _filter_best_feature_sets(feature_sets, feature_sets_accur):
+    # Find the highest accuracy
+    highest_accuracy = max(feature_sets_accur)
 
-    # Filter out the feature sets that contain exactly two features
-    two_feature_sets = [frozenset(feature_set) for feature_set in feature_sets if len(feature_set) == 2]
+    # Filter feature sets and accuracies that have the highest accuracy
+    best_feature_sets = [feature_sets[i] for i, accur in enumerate(feature_sets_accur) if accur == highest_accuracy]
+    best_accuracies = [accur for accur in feature_sets_accur if accur == highest_accuracy]
 
-    most_common_pair = Counter(two_feature_sets).most_common(1)
-
-    # Return the most common pair as a list
-    if most_common_pair:
-        return list(most_common_pair[0][0])
-    return []
+    return best_feature_sets, best_accuracies
 
 
-def _get_most_common_feature_set(feature_sets: List[List[str]]) -> List[str]:
-    # Find the most common pair among sets with exactly two features
-    most_common_pair = _get_most_common_pair(feature_sets)
-    if not most_common_pair:
-        return []
+def _find_most_common_features_in_best_sets(best_feature_sets, n=4):
+    # Flatten the list of lists
+    flat_feature_sets = [feature for feature_set in best_feature_sets for feature in feature_set]
+    # Count the frequency of each feature
+    feature_counter = Counter(flat_feature_sets)
+    # Get the most common features and their counts
+    most_common_features = feature_counter.most_common(n)
+    return most_common_features
 
-    # Count how often this pair appears in all feature sets
-    pair_count = 0
-    pair_set = frozenset(most_common_pair)
-    for feature_set in feature_sets:
-        feature_set_no_axis = [feature[1:] for feature in feature_set]
-        if pair_set.issubset(feature_set_no_axis):
-            pair_count += 1
 
-    return most_common_pair if pair_count > 0 else []
+def _aggregate_most_common_features(subjects_dict):
+    all_most_common_features = []
+    for best_feature_sets, _ in subjects_dict.values():
+        most_common_features = _find_most_common_features_in_best_sets(best_feature_sets)
+        all_most_common_features.extend([feature for feature, count in most_common_features])
+    return all_most_common_features
+
+
+

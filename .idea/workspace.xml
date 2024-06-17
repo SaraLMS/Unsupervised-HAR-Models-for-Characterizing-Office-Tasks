@@ -10,6 +10,7 @@
       <change beforePath="$PROJECT_DIR$/feature_extraction/feature_extraction.py" beforeDir="false" afterPath="$PROJECT_DIR$/feature_extraction/feature_extraction.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/processing/task_segmentation.py" beforeDir="false" afterPath="$PROJECT_DIR$/processing/task_segmentation.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/synchronization/synchronization.py" beforeDir="false" afterPath="$PROJECT_DIR$/synchronization/synchronization.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -360,7 +361,15 @@
       <option name="project" value="LOCAL" />
       <updated>1718473175816</updated>
     </task>
-    <option name="localTasksCounter" value="36" />
+    <task id="LOCAL-00036" summary="testing feature selection over all subjects in main file">
+      <option name="closed" value="true" />
+      <created>1718564665704</created>
+      <option name="number" value="00036" />
+      <option name="presentableId" value="LOCAL-00036" />
+      <option name="project" value="LOCAL" />
+      <updated>1718564665704</updated>
+    </task>
+    <option name="localTasksCounter" value="37" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -375,7 +384,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Added some constants (only changed this in synchronization.py). &#10;Corrected an error in sync_evaluation.py (in the precedes and lags part).&#10;Added another layer of checks for synchronization to check for acc files and if acc is present for every device if cross corr is chosen. Synchronization in pair is assured with len(selected_sensors)." />
     <MESSAGE value="added checks for timestamps in the logger file" />
     <MESSAGE value="Corrected sync_evaluation (when logger file can't be used). Added prefix parameter in synchronization.py" />
     <MESSAGE value="started filters" />
@@ -400,6 +408,7 @@
     <MESSAGE value="Changes in segmentation and balancing. Added extra subclasses for stairs up, stairs down and standing still. Improved main file" />
     <MESSAGE value="corrected errors in task_segmentation and processor. Added search for most common combination of features in feature_selection.py" />
     <MESSAGE value="corrected task segmentation - stops validation" />
-    <option name="LAST_COMMIT_MESSAGE" value="corrected task segmentation - stops validation" />
+    <MESSAGE value="testing feature selection over all subjects in main file" />
+    <option name="LAST_COMMIT_MESSAGE" value="testing feature selection over all subjects in main file" />
   </component>
 </project>

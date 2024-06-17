@@ -64,7 +64,7 @@ def load_json_file(json_path: str) -> Dict[Any, Any]:
 
 def feature_extractor(data_main_path: str, output_path: str, subclasses: list[str],
                       json_path: str = "C:/Users/srale/PycharmProjects/toolbox/feature_extraction",
-                      output_filename: str = "acc_gyr_mag_phone_features_P004.csv",
+                      output_filename: str = "acc_gyr_mag_phone_features_P002.csv",
                       output_folder_name: str = "features_basic_activities") -> None:
     # TODO - DOCSTRING THIS SHIT
     # check directory
