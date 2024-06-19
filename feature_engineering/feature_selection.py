@@ -79,9 +79,6 @@ def feature_selector(dataset_path: str, variance_threshold: float, n_iterations:
     # load dataset from csv file
     df = load_data_from_csv(dataset_path)
 
-    # generate output path to save the plots if it doesn't exist
-    output_path = create_dir(output_path, folder_name)
-
     # train test split
     train_set, _ = train_test_split(df, 0.8, 0.2)
 
@@ -99,8 +96,12 @@ def feature_selector(dataset_path: str, variance_threshold: float, n_iterations:
     print(f"Columns after dropping low variance features: {train_set.columns.tolist()}")
 
     # drop correlated features
-    train_set = _remove_collinear_features(train_set, 0.97)
-    print(f"Columns after dropping low variance features: {train_set.columns.tolist()}")
+    train_set = _remove_collinear_features(train_set, 0.99)
+    print(f"\nColumns after dropping highly correlated features: {train_set.columns.tolist()}")
+
+    if save_plots:
+        # generate output path to save the plots if it doesn't exist
+        output_path = create_dir(output_path, folder_name)
 
     feature_sets = []
     feature_sets_accur = []
@@ -190,10 +191,11 @@ def feature_selector(dataset_path: str, variance_threshold: float, n_iterations:
             # save the rand index of this feature set
             feature_sets_accur.append(highest_accuracy)
 
-            # generate filepath to store the plot
-            file_path = f"{output_path}/feature_set{i}_results.png"
-
             if save_plots:
+
+                # generate filepath to store the plot
+                file_path = f"{output_path}/feature_set{i}_results.png"
+
                 # plot clustering results for that feature set
                 _save_plot_clustering_results(feature_names, accur_ri, adj_rand_scores, norm_mutual_infos, file_path,
                                               clustering_model)
@@ -214,7 +216,7 @@ def get_all_subjects_best_features(main_path: str, features_folder_name: str, va
     and the lists with the n most common features in the best feature sets.
 
     The subjects diretories must be organized the following way:
-    main_path/subjects_folders/subfolder (one only)/subfolders (features_folder_name)/csv_file(one only)
+    main_path/subjects_folders/features_folder (features_folder_name)/csv_file(one only)
 
     The output path to the plots is main_path/subjects_folders/subfolder, and the output folder name is set in feature
     selector as well as save_plots parameter, to save or not the plots.
@@ -250,49 +252,53 @@ def get_all_subjects_best_features(main_path: str, features_folder_name: str, va
         subject_folder_path = os.path.join(main_path, subject_folder)
         print(f"Selecting best features for subject: {subject_folder}")
 
-        # iterate through the subfolder TODO DOESN'T ALLOW MORE FOLDERS HERE, CHANGE THIS
+        # iterate through the sub folders
         for sub_folder in os.listdir(subject_folder_path):
-            sub_folder_path = os.path.join(subject_folder_path, sub_folder)
-            if os.path.isdir(sub_folder_path):
 
-                # get the folder containing the features to be tested
-                features_folder_path = os.path.join(sub_folder_path, features_folder_name)
+            if sub_folder == features_folder_name:
 
-                if os.path.isdir(features_folder_path):
+                features_folder_path = os.path.join(subject_folder_path, sub_folder)
 
-                    # list with the path to the csv file
-                    feature_files = os.listdir(features_folder_path)
+                # list with the path to the csv file
+                feature_files = os.listdir(features_folder_path)
 
-                    if len(feature_files) == 1:
-                        # only one csv file for the features folder
-                        dataset_path = os.path.join(features_folder_path, feature_files[0])
+                if len(feature_files) == 1:
+                    # only one csv file for the features folder
+                    dataset_path = os.path.join(features_folder_path, feature_files[0])
 
-                        # Get the best feature sets for the subject
-                        feature_sets, accuracies = feature_selector(dataset_path, variance_threshold, n_iterations,
-                                                                    clustering_model, sub_folder_path)
+                    # Get the best feature sets for the subject
+                    feature_sets, accuracies = feature_selector(dataset_path, variance_threshold, n_iterations,
+                                                                clustering_model, sub_folder)
 
-                        # Filter for the best feature sets and their accuracies
-                        best_feature_sets, best_acc = _filter_best_feature_sets(feature_sets, accuracies)
+                    # Filter for the best feature sets and their accuracies
+                    best_feature_sets, best_acc = _filter_best_feature_sets(feature_sets, accuracies)
 
-                        print("#########################################################################")
-                        print(f"SUBJECT: {subject_folder}")
-                        print("#########################################################################")
-                        print(f"Feature sets with the highest accuracies:")
-                        for feat, acc in zip(best_feature_sets, best_acc):
-                            print(f"Features: {feat} \n Rand Index: {acc}")
+                    print("#########################################################################")
+                    print(f"SUBJECT: {subject_folder}")
+                    print("#########################################################################")
+                    print(f"Feature sets with the highest accuracies:")
+                    for feat, acc in zip(best_feature_sets, best_acc):
+                        print(f"Features: {feat} \n Rand Index: {acc}")
 
-                        # get the most common features in the feature sets with the highest rand index
-                        most_common_n_features = _find_most_common_features_in_best_sets(best_feature_sets)
-                        print(f"Feature frequency in best feature sets: {most_common_n_features} \n")
+                    # # get the most common features in the feature sets with the highest rand index
+                    # most_common_n_features = _find_most_common_features_in_best_sets(best_feature_sets)
+                    # print(f"Feature frequency in best feature sets: {most_common_n_features} \n")
+                    #
+                    # # store only the feature names without the counter
+                    # most_common_n_features = [feature for feature, count in most_common_n_features]
+                    # subjects_dict[subject_folder] = most_common_n_features
 
-                        # store only the feature names without the counter
-                        most_common_n_features = [feature for feature, count in most_common_n_features]
-                        subjects_dict[subject_folder] = most_common_n_features
+                    # Randomly select one of the best feature sets
+                    selected_feature_set = _randomly_select_feature_set(best_feature_sets)
+                    print(f"Randomly selected feature set: {selected_feature_set} \n")
 
-                    else:
-                        raise ValueError(f"Too many files: {len(feature_files)} files. Only one dataset per folder.")
+                    subjects_dict[subject_folder] = selected_feature_set
+
                 else:
-                    print(f"No features folder found in: {sub_folder_path}")
+                    raise ValueError(f"Too many files: {len(feature_files)} files. Only one dataset per folder.")
+
+            else:
+                ValueError(f"Folder name {features_folder_name} not found.")
 
     return subjects_dict
 
@@ -326,6 +332,96 @@ def get_top_features_across_all_subjects(subjects_dict: Dict[str, List[str]]) ->
     print(f"Final feature set for all subjects: {most_common_features}")
     return most_common_features
 
+
+def test_feature_set(feature_set: List[str], file_path: str, clustering_model: str):
+    # load dataset
+    df = load_data_from_csv(file_path)
+
+    # train test split
+    # train_set, _ = train_test_split(df, 0.8, 0.2)
+    train_set = df
+
+    # get the true (class) labels
+    true_labels = train_set['class']
+
+    # drop class and subclass column
+    train_set = train_set.drop(['class', 'subclass'], axis=1)
+
+    # remove class and subclass column and standardize features
+    train_set = _standardize_features(train_set)
+
+    # get only the wanted features
+    train_set = train_set[feature_set]
+
+    if clustering_model == KMEANS:
+        # kmeans feature_engineering
+        labels = kmeans_model(train_set, n_clusters=3)
+
+    elif clustering_model == AGGLOMERATIVE:
+        # agglomerative feature_engineering
+        labels = agglomerative_clustering_model(train_set, n_clusters=3)
+
+    elif clustering_model == GAUSSIAN_MIXTURE_MODEL:
+        # gaussian mixture model
+        labels = gaussian_mixture_model(train_set, n_components=3)
+
+    elif clustering_model == DBSCAN:
+        # DBSCAN feature_engineering
+        labels = dbscan_model(train_set, 0.4, 10)
+
+    elif clustering_model == BIRCH:
+        # Birch feature_engineering
+        labels = birch_model(train_set, n_clusters=3)
+
+    else:
+        raise ValueError(f"The model {clustering_model} is not supported. "
+                         f"Supported models are: {SUPPORTED_MODELS}")
+
+    # Evaluate clustering with this feature set
+    ri, ari, nmi = _evaluate_clustering(true_labels, labels)
+
+    return ri, ari, nmi
+
+
+def test_feature_set_each_subject(main_path, features_folder_name, clustering_model, feature_set):
+    ri_list = []
+    ari_list = []
+    nmi_list = []
+
+    # iterate through the folders of each subject
+    for subject_folder in os.listdir(main_path):
+        subject_folder_path = os.path.join(main_path, subject_folder)
+        print(f"Testing final feature set for subject: {subject_folder}")
+
+        # iterate through the sub folders
+        for sub_folder in os.listdir(subject_folder_path):
+
+            if sub_folder == features_folder_name:
+
+                features_folder_path = os.path.join(subject_folder_path, sub_folder)
+
+                # list with the path to the csv file
+                feature_files = os.listdir(features_folder_path)
+
+                if len(feature_files) == 1:
+                    # only one csv file for the features folder
+                    dataset_path = os.path.join(features_folder_path, feature_files[0])
+
+                    ri, ari, nmi = test_feature_set(feature_set, dataset_path, clustering_model)
+                    print(f"RI: {ri}; ARI: {ari}; NMI: {nmi}")
+
+                    # Append the results to the lists
+                    ri_list.append(ri)
+                    ari_list.append(ari)
+                    nmi_list.append(nmi)
+
+                else:
+                    ValueError(f"Too many files: {len(feature_files)}")
+
+            else:
+                ValueError(f"Folder name {features_folder_name} not found.")
+
+    return np.mean(ri_list), np.mean(ari_list), np.mean(nmi_list)
 
 # ------------------------------------------------------------------------------------------------------------------- #
 # Private functions
@@ -386,7 +482,7 @@ def _save_plot_clustering_results(feature_names: List[str], accur_ri: List[float
 
 def _standardize_features(x: pd.DataFrame) -> pd.DataFrame:
     """
-    Standardizes the features of a DataFrame using MinMaxscaler() from sklearn.
+    Standardizes the features of a DataFrame using MinMaxscaler from sklearn.
 
     This function applies Min-Max scaling to the features of the input DataFrame, transforming the values to a range
     between 0 and 1.
@@ -529,14 +625,32 @@ def _filter_best_feature_sets(feature_sets, feature_sets_accur):
     return best_feature_sets, best_accuracies
 
 
-def _find_most_common_features_in_best_sets(best_feature_sets, n=4):
-    # Flatten the list of lists
-    flat_feature_sets = [feature for feature_set in best_feature_sets for feature in feature_set]
-    # Count the frequency of each feature
-    feature_counter = Counter(flat_feature_sets)
-    # Get the most common features and their counts
-    most_common_features = feature_counter.most_common(n)
-    return most_common_features
+# def _find_most_common_features_in_best_sets(best_feature_sets, n=5):
+#     # Flatten the list of lists
+#     flat_feature_sets = [feature for feature_set in best_feature_sets for feature in feature_set]
+#     # Count the frequency of each feature
+#     feature_counter = Counter(flat_feature_sets)
+#     # Get the most common features and their counts
+#     most_common_features = feature_counter.most_common(n)
+#     return most_common_features
+
+import random
+
+def _randomly_select_feature_set(best_feature_sets: List[List[str]]) -> List[str]:
+    """
+    Randomly selects one of the best feature sets.
+
+    This function takes a list of the best feature sets and returns one randomly chosen feature set from the list.
+
+    Parameters:
+    best_feature_sets (List[List[str]]):
+        A list of the best feature sets.
+
+    Returns:
+    List[str]:
+        A randomly selected feature set.
+    """
+    return random.choice(best_feature_sets)
 
 
 def _aggregate_most_common_features(subjects_dict):

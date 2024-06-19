@@ -1,5 +1,5 @@
 from feature_engineering.feature_selection import feature_selector, get_top_features_across_all_subjects, \
-    get_all_subjects_best_features
+    get_all_subjects_best_features, test_feature_set_each_subject
 from feature_extraction.feature_extraction import feature_extractor, generate_cfg_file
 from processing.processor import processing
 from synchronization.synchronization import synchronization
@@ -40,28 +40,35 @@ def main():
 
     if do_feature_extraction:
         subclasses = ['standing_still', 'walk_medium', 'sit']
-        main_path = "C:/Users/srale/OneDrive - FCT NOVA/Tese/subjects/P010/acc_gyr_mag_phone/filtered_tasks_P010"
-        output_path = "C:/Users/srale/OneDrive - FCT NOVA/Tese/subjects/P010/acc_gyr_mag_phone"
+        main_path = "C:/Users/srale/OneDrive - FCT NOVA/Tese/subjects_datasets/P010"
+        output_path = "C:/Users/srale/OneDrive - FCT NOVA/Tese/subjects_datasets"
         feature_extractor(main_path, output_path, subclasses)
 
     if do_one_subject_feature_selection:
-        dataset_path = ("C:/Users/srale/OneDrive - FCT NOVA/Tese/subjects/P010/acc_gyr_mag_phone/features_basic_activities"
-                        "/acc_gyr_mag_phone_features_P010.csv")
+        dataset_path = (
+            "C:/Users/srale/OneDrive - FCT NOVA/Tese/subjects/P010/acc_gyr_mag_phone/features_basic_activities"
+            "/acc_gyr_mag_phone_features_P010.csv")
         output_path_plots = "C:/Users/srale/OneDrive - FCT NOVA/Tese/subjects/P010/acc_gyr_mag_phone"
         feature_sets, best_acc = feature_selector(dataset_path, 0.05, 20, "kmeans", output_path_plots)
         print(feature_sets)
 
     if do_all_subjects_feature_selection:
-        subject_path = "C:/Users/srale/OneDrive - FCT NOVA/Tese/subjects"
+        subject_path = "C:/Users/srale/OneDrive - FCT NOVA/Tese/subjects_datasets"
         features_folder_name = "features_basic_activities"
         clustering_model = "kmeans"
-        nr_iterations = 20
+        nr_iterations = 10
 
         subjects_dict = get_all_subjects_best_features(subject_path, features_folder_name, 0.05, nr_iterations,
                                                        clustering_model)
-        all_subjects_most_common_features = get_top_features_across_all_subjects(subjects_dict)
+        final_feature_set = get_top_features_across_all_subjects(subjects_dict)
+        # final_feature_set = ["yAcc_Max", "zMag_Median", "yAcc_Interquartile range"]
+
+        mean_ri, mean_ari, mean_nmi = test_feature_set_each_subject(subject_path, features_folder_name,
+                                                                    clustering_model, final_feature_set)
+
+        print(f"Mean rand index: {mean_ri} \nMean adjusted rand index: {mean_ari}\n"
+              f"Mean normalized mutual information: {mean_nmi}")
 
 
 if __name__ == "__main__":
     main()
-

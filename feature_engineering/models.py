@@ -11,7 +11,7 @@ from sklearn.cluster import KMeans, Birch, AgglomerativeClustering, DBSCAN
 # ------------------------------------------------------------------------------------------------------------------- #
 
 def kmeans_model(train_set: pd.DataFrame, n_clusters: int):
-    kmeans = KMeans(n_clusters=n_clusters)
+    kmeans = KMeans(n_clusters=n_clusters, random_state=42)
     labels_kmeans = kmeans.fit_predict(train_set)
 
     return labels_kmeans
