@@ -7,9 +7,7 @@
     <list default="true" id="3466cb1d-2559-4122-9522-f23b0d0f6b0a" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/feature_engineering/feature_selection.py" beforeDir="false" afterPath="$PROJECT_DIR$/feature_engineering/feature_selection.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/feature_extraction/feature_extraction.py" beforeDir="false" afterPath="$PROJECT_DIR$/feature_extraction/feature_extraction.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/synchronization/synchronization.py" beforeDir="false" afterPath="$PROJECT_DIR$/synchronization/synchronization.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -376,7 +374,15 @@
       <option name="project" value="LOCAL" />
       <updated>1718640275184</updated>
     </task>
-    <option name="localTasksCounter" value="38" />
+    <task id="LOCAL-00038" summary="added drop correlated features. Changed the search for the best feature set for all subjects">
+      <option name="closed" value="true" />
+      <created>1718725129459</created>
+      <option name="number" value="00038" />
+      <option name="presentableId" value="LOCAL-00038" />
+      <option name="project" value="LOCAL" />
+      <updated>1718725129459</updated>
+    </task>
+    <option name="localTasksCounter" value="39" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -391,7 +397,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Corrected sync_evaluation (when logger file can't be used). Added prefix parameter in synchronization.py" />
     <MESSAGE value="started filters" />
     <MESSAGE value="Filtering implemented and visualization of filtering results." />
     <MESSAGE value="Implementing the task_segmentation. Not working, it's not cropping the actuall signal?" />
@@ -416,6 +421,7 @@
     <MESSAGE value="corrected task segmentation - stops validation" />
     <MESSAGE value="testing feature selection over all subjects in main file" />
     <MESSAGE value="added best features count from main to feature selection. Not tested in feature selection (but worked on main)" />
-    <option name="LAST_COMMIT_MESSAGE" value="added best features count from main to feature selection. Not tested in feature selection (but worked on main)" />
+    <MESSAGE value="added drop correlated features. Changed the search for the best feature set for all subjects" />
+    <option name="LAST_COMMIT_MESSAGE" value="added drop correlated features. Changed the search for the best feature set for all subjects" />
   </component>
 </project>

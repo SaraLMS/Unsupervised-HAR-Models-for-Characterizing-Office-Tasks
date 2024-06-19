@@ -4,7 +4,7 @@
 import os
 from collections import Counter
 from itertools import combinations
-from typing import List, Tuple
+from typing import List, Tuple, Dict
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -32,17 +32,16 @@ SUPPORTED_MODELS = [KMEANS, AGGLOMERATIVE, GAUSSIAN_MIXTURE_MODEL, DBSCAN, BIRCH
 # ------------------------------------------------------------------------------------------------------------------- #
 
 def feature_selector(dataset_path: str, variance_threshold: float, n_iterations: int, clustering_model: str,
-                     output_path: str,
-                     folder_name: str = "features_kmeans_plots", save_plots: bool = False) -> Tuple[
-    List[str], List[float]]:
+                     output_path: str, folder_name: str = "features_kmeans_plots",
+                     save_plots: bool = False) -> Tuple[List[List[str]], List[float]]:
     """
     Splits the dataset into train and test and returns the features sets that give the best clustering results
     for the train set as well as the rand index of the respective feature set.
 
-    The first step of the feature selection is removing the low variance features. Drops the features with variance
-    lower than variance_threshold. Then, shuffles the remaining features and iteratively adds features. The feature is
-    removed if the accuracy (rand index) doesn't improve. This process generated a plot with the x-axis being the features
-    added in each iteration and the y-axis the scores for the rand index, adjusted rand index and normalized mutual info.
+    The first step of the feature selection is removing the low variance and highly correlated features.
+    Then, shuffles the remaining features and iteratively adds features. The feature is removed if the accuracy
+    (rand index) doesn't improve. This process generated a plot with the x-axis being the features added in each
+    iteration and the y-axis the scores for the rand index, adjusted rand index and normalized mutual information.
     The plot is generated and saved if save_plots is set to True.
 
     This process is repeated n_iterations times and with every iteration, the features are shuffled so that different
@@ -73,7 +72,9 @@ def feature_selector(dataset_path: str, variance_threshold: float, n_iterations:
 
     :param save_plots: bool (default = True)
     If True, Save the plots of each iteration of the feature selection process. Don't save if False.
+
     :return:
+
     """
     # load dataset from csv file
     df = load_data_from_csv(dataset_path)
@@ -96,6 +97,8 @@ def feature_selector(dataset_path: str, variance_threshold: float, n_iterations:
     # drop features with variance lower than variance_threshold
     train_set = _drop_low_variance_features(train_set, variance_threshold)
     print(f"Columns after dropping low variance features: {train_set.columns.tolist()}")
+
+    # drop correlated features
     train_set = _remove_collinear_features(train_set, 0.97)
     print(f"Columns after dropping low variance features: {train_set.columns.tolist()}")
 
@@ -170,8 +173,10 @@ def feature_selector(dataset_path: str, variance_threshold: float, n_iterations:
 
         print(f"Iteration {i}: Best Features - {best_features}")
 
-        # X-axis will show the feature sets
+        # X-axis of the plot will show the features
         feature_names = ['\n'.join(features) for features in best_features]
+
+        # last position of the list has the final feature set and its rand index
         best_features_list = best_features[-1]
         highest_accuracy = accur_ri[-1]
 
@@ -179,11 +184,15 @@ def feature_selector(dataset_path: str, variance_threshold: float, n_iterations:
 
         if best_features_list not in feature_sets:
 
+            # save the feature set
             feature_sets.append(best_features_list)
+
+            # save the rand index of this feature set
             feature_sets_accur.append(highest_accuracy)
+
+            # generate filepath to store the plot
             file_path = f"{output_path}/feature_set{i}_results.png"
 
-            # save plots if save_plots == True
             if save_plots:
                 # plot clustering results for that feature set
                 _save_plot_clustering_results(feature_names, accur_ri, adj_rand_scores, norm_mutual_infos, file_path,
@@ -198,22 +207,64 @@ def feature_selector(dataset_path: str, variance_threshold: float, n_iterations:
 
 
 def get_all_subjects_best_features(main_path: str, features_folder_name: str, variance_threshold: float,
-                                   n_iterations: int, clustering_model: str):
+                                   n_iterations: int, clustering_model: str) -> Dict[str, List[str]]:
+    """
+    Apply the feature selection method in feature_selector for every subject. Filters the feature sets to get only
+    the ones with the highest accuracy, then counts the n most common features. Returns a dictionary with the subjects
+    and the lists with the n most common features in the best feature sets.
+
+    The subjects diretories must be organized the following way:
+    main_path/subjects_folders/subfolder (one only)/subfolders (features_folder_name)/csv_file(one only)
+
+    The output path to the plots is main_path/subjects_folders/subfolder, and the output folder name is set in feature
+    selector as well as save_plots parameter, to save or not the plots.
+
+    :param main_path: str
+    Path to the main folder containing the subfolders of each subject
+
+    :param features_folder_name: str
+    Name of the folder containing the csv file with the extracted features
+
+    :param variance_threshold: float
+    Minimum variance value. Features with a training-set variance lower than this threshold will be removed.
+
+    :param n_iterations: int
+    Number of times the feature selection method is repeated.
+
+    :param clustering_model: str
+    Unsupervised learning model used to select the best features. Supported models are:
+        "kmeans" - KMeans clustering
+        "agglomerative": Agglomerative clustering model
+        "gmm": Gaussian Mixture Model
+        "dbscan": DBSCAN. Needs parameter search - not implemented
+        "birch": Birch clustering algorithm
+
+    :return: dict[str, List[str]]
+    Dictionary where keys are the subject folder names and values are the Lists of the n most common features in the
+    best feature sets.
+    """
     subjects_dict = {}
 
+    # iterate through the folders of each subject
     for subject_folder in os.listdir(main_path):
         subject_folder_path = os.path.join(main_path, subject_folder)
         print(f"Selecting best features for subject: {subject_folder}")
 
+        # iterate through the subfolder TODO DOESN'T ALLOW MORE FOLDERS HERE, CHANGE THIS
         for sub_folder in os.listdir(subject_folder_path):
             sub_folder_path = os.path.join(subject_folder_path, sub_folder)
             if os.path.isdir(sub_folder_path):
 
+                # get the folder containing the features to be tested
                 features_folder_path = os.path.join(sub_folder_path, features_folder_name)
+
                 if os.path.isdir(features_folder_path):
+
+                    # list with the path to the csv file
                     feature_files = os.listdir(features_folder_path)
 
                     if len(feature_files) == 1:
+                        # only one csv file for the features folder
                         dataset_path = os.path.join(features_folder_path, feature_files[0])
 
                         # Get the best feature sets for the subject
@@ -230,6 +281,7 @@ def get_all_subjects_best_features(main_path: str, features_folder_name: str, va
                         for feat, acc in zip(best_feature_sets, best_acc):
                             print(f"Features: {feat} \n Rand Index: {acc}")
 
+                        # get the most common features in the feature sets with the highest rand index
                         most_common_n_features = _find_most_common_features_in_best_sets(best_feature_sets)
                         print(f"Feature frequency in best feature sets: {most_common_n_features} \n")
 
@@ -245,7 +297,21 @@ def get_all_subjects_best_features(main_path: str, features_folder_name: str, va
     return subjects_dict
 
 
-def get_top_features_across_all_subjects(subjects_dict):
+def get_top_features_across_all_subjects(subjects_dict: Dict[str, List[str]]) -> List[str]:
+    """
+    Aggregates and identifies the most common best features across all subjects.
+
+    This function takes a dictionary where the keys are subject folder names and the values are lists of the n most
+    common features from the best feature sets of each subject. It then aggregates these features, counts their
+    occurrences across all subjects, prints the feature occurrence counts, and returns a list of the most common features.
+
+    :param subjects_dict: Dict[str, List[str]]
+    Dictionary where keys are the subject folder names and values are the Lists of the n most common features in the
+    best feature sets.
+
+    :return: List[str]
+    List of the most common features across all subjects.
+    """
     # Aggregate the most common features across all subjects
     feature_list = _aggregate_most_common_features(subjects_dict)
 
@@ -268,6 +334,38 @@ def get_top_features_across_all_subjects(subjects_dict):
 
 def _save_plot_clustering_results(feature_names: List[str], accur_ri: List[float], adj_rand_scores: List[float],
                                   norm_mutual_infos: List[float], file_path: str, clustering_model: str) -> None:
+    """
+    Generates and saves a plot of clustering results.
+
+    This function creates a plot that visualizes the Rand Index, Adjusted Rand Index, and Normalized Mutual Information
+    scores when adding feature by feature until the highest accuracy is reached.
+    The plot is saved to the specified file path.
+
+    :param feature_names: List[str]
+    A list of feature set names corresponding to the x-axis labels of the plot.
+
+    :param accur_ri: List[float]
+    A list of Rand Index scores corresponding to the feature sets.
+
+    :param adj_rand_scores: List[float]
+    A list of Adjusted Rand Index scores corresponding to the feature sets.
+
+    :param norm_mutual_infos: List[float]
+    A list of Normalized Mutual Information scores corresponding to the feature sets.
+
+    :param file_path: str
+    The file path where the plot image will be saved.
+
+    :param clustering_model: str
+    Unsupervised learning model used to select the best features. Supported models are:
+        "kmeans" - KMeans clustering
+        "agglomerative": Agglomerative clustering model
+        "gmm": Gaussian Mixture Model
+        "dbscan": DBSCAN. Needs parameter search - not implemented
+        "birch": Birch clustering algorithm
+
+    :return:
+    """
     # generate plot
     plt.figure(figsize=(14, 7))
     plt.plot(feature_names, accur_ri, marker='o', linestyle='-', color='#D36135', label='Rand Index')
@@ -286,7 +384,19 @@ def _save_plot_clustering_results(feature_names: List[str], accur_ri: List[float
     plt.close()
 
 
-def _standardize_features(x: pd.DataFrame):
+def _standardize_features(x: pd.DataFrame) -> pd.DataFrame:
+    """
+    Standardizes the features of a DataFrame using MinMaxscaler() from sklearn.
+
+    This function applies Min-Max scaling to the features of the input DataFrame, transforming the values to a range
+    between 0 and 1.
+
+    :param x: pd.DataFrame
+    The input DataFrame containing the features to be standardized.
+
+    :return: pd.DataFrame
+    A DataFrame with the standardized feature values
+    """
     # get new column names
     x_column_names = x.columns
 
@@ -299,7 +409,22 @@ def _standardize_features(x: pd.DataFrame):
     return x
 
 
-def _evaluate_clustering(true_labels: pd.Series, predicted_labels: pd.Series):
+def _evaluate_clustering(true_labels: pd.Series, predicted_labels: pd.Series) -> Tuple[float, float, float]:
+    """
+    Evaluates clustering performance using multiple metrics.
+
+    This function computes the Rand Index, Adjusted Rand Index, and Normalized Mutual Information
+    to evaluate the performance of a clustering algorithm based on the true and predicted labels.
+
+    :param true_labels: pd.Series
+    The ground truth labels for the data points.
+
+    :param predicted_labels: pd.Series
+    The labels predicted by the clustering algorithm.
+
+    :return: Tuple[float, float, float]
+    Rand Index, Adjusted Rand Index, and Normalized Mutual Information scores.
+    """
     # calculate feature_engineering accuracy
     rand_index = np.round(rand_score(true_labels, predicted_labels), 4)
 
@@ -312,7 +437,22 @@ def _evaluate_clustering(true_labels: pd.Series, predicted_labels: pd.Series):
     return rand_index, adjusted_rand_index, normalized_mutual_info
 
 
-def _drop_low_variance_features(x: pd.DataFrame, variance_threshold: float):
+def _drop_low_variance_features(x: pd.DataFrame, variance_threshold: float) -> pd.DataFrame:
+    """
+    Removes features with low variance from a DataFrame.
+
+    This function drops features (columns) from the input DataFrame that have a variance below the specified threshold.
+    It uses the VarianceThreshold from sklearn to identify and remove these low-variance features.
+
+    :param x: pd.DataFrame
+    The input DataFrame containing the features to be filtered.
+
+    :param variance_threshold: float
+    The threshold below which features will be considered low variance and removed.
+
+    :return: pd.DataFrame
+    A dataframe with low-variance features removed
+    """
     # check low variance features
     var_thr = VarianceThreshold(threshold=variance_threshold)
     var_thr.fit(x)
