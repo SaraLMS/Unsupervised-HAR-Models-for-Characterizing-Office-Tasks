@@ -59,9 +59,9 @@ def main():
         nr_iterations = 10
 
         subjects_dict = get_all_subjects_best_features(subject_path, features_folder_name, 0.05, nr_iterations,
-                                                       clustering_model)
-        final_feature_set = get_top_features_across_all_subjects(subjects_dict)
-        # final_feature_set = ["yAcc_Max", "zMag_Median", "yAcc_Interquartile range"]
+                                                       clustering_model, 1)
+
+        final_feature_set = get_top_features_across_all_subjects(subjects_dict, 6)
 
         mean_ri, mean_ari, mean_nmi = test_feature_set_each_subject(subject_path, features_folder_name,
                                                                     clustering_model, final_feature_set)
