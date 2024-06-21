@@ -208,7 +208,7 @@ def feature_selector(dataset_path: str, variance_threshold: float, n_iterations:
 
 
 def get_all_subjects_best_features(main_path: str, features_folder_name: str, variance_threshold: float,
-                                   n_iterations: int, clustering_model: str, n_features: int) -> Dict[str, Set[Tuple]]:
+                                   n_iterations: int, clustering_model: str) -> Dict[str, Dict[str, Set[str]]]:
     """
     Apply the feature selection method in feature_selector for every subject. Filters the feature sets to get only
     the ones with the highest accuracy, then counts the n most common features. Returns a dictionary with the subjects
@@ -279,24 +279,17 @@ def get_all_subjects_best_features(main_path: str, features_folder_name: str, va
                     for feat, acc in zip(best_feature_sets, best_acc):
                         print(f"Features: {feat} \n Rand Index: {acc}")
 
-                    # # get the most common features in the feature sets with the highest rand index
-                    # most_common_n_features = _find_most_common_features_in_best_sets(best_feature_sets, n_features)
-                    # print(f"Feature frequency in best feature sets: {most_common_n_features} \n")
-                    #
-                    # # store only the feature names without the counter
-                    # most_common_n_features = [feature for feature, count in most_common_n_features]
-                    # subjects_dict[subject_folder] = most_common_n_features
-
-                    # # Randomly select one of the best feature sets
-                    # selected_feature_set = _randomly_select_feature_set(best_feature_sets)
-                    # print(f"Randomly selected feature set: {selected_feature_set} \n")
-                    #
-                    # subjects_dict[subject_folder] = selected_feature_set
                     # Store the unique features in a set to avoid repetitions
                     unique_features = set()
+                    unique_features_no_axis = set()
                     for feat_set in best_feature_sets:
                         unique_features.update(feat_set)
-                    subjects_dict[subject_folder] = unique_features
+                        unique_features_no_axis.update([feature[1:] for feature in feat_set])
+
+                    subjects_dict[subject_folder] = {
+                        'unique_features': unique_features,
+                        'unique_features_no_axis': unique_features_no_axis
+                    }
 
                 else:
                     raise ValueError(f"Too many files: {len(feature_files)} files. Only one dataset per folder.")
@@ -307,65 +300,60 @@ def get_all_subjects_best_features(main_path: str, features_folder_name: str, va
     return subjects_dict
 
 
-def get_top_features_across_all_subjects(subjects_dict: Dict[str, Set[str]], top_n: int) -> List[str]:
+def get_top_features_across_all_subjects(subjects_dict: Dict[str, Dict[str, Set[str]]], top_n: int) -> Dict[
+    str, List[str]]:
     """
     Aggregates and identifies the most common best features across all subjects.
 
-    This function takes a dictionary where the keys are subject folder names and the values are sets of unique features
-    from the best feature sets of each subject. It then aggregates these features, counts their occurrences across all subjects,
-    prints the feature occurrence counts, and returns a list of the top n most common features.
+    This function takes a dictionary where the keys are subject folder names and the values are dictionaries containing
+    sets of unique features from the best feature sets of each subject (with and without axis). It then aggregates these
+    features, counts their occurrences across all subjects, prints the feature occurrence counts, and returns a dictionary
+    with two lists: the top n most common features with axis and the top n most common features without axis.
 
-    :param subjects_dict: Dict[str, Set[str]]
-    Dictionary where keys are the subject folder names and values are sets of unique features from the best feature sets.
+    :param subjects_dict: Dict[str, Dict[str, Set[str]]]
+    Dictionary where keys are the subject folder names and values are dictionaries containing sets of unique features
+    from the best feature sets.
 
     :param top_n: int
     Number of top features to return.
 
-    :return: List[str]
-    List of the top n most common features across all subjects.
+    :return: Dict[str, List[str]]
+    Dictionary with keys 'features_with_axis' and 'features_without_axis', each mapping to a list of the top n most
+    common features across all subjects.
     """
-    # Aggregate the features from all subjects
-    feature_list = _aggregate_features(subjects_dict)
+    features_with_axis = []
+    features_without_axis = []
+
+    for features in subjects_dict.values():
+        features_with_axis.extend(features['unique_features'])
+        features_without_axis.extend(features['unique_features_no_axis'])
 
     # Count the frequency of each feature
-    feature_counter = Counter(feature_list)
-    print("Best feature occurrence across all subjects:")
-    for feature, count in feature_counter.items():
+    feature_counter_with_axis = Counter(features_with_axis)
+    feature_counter_without_axis = Counter(features_without_axis)
+
+    print("Best feature occurrence across all subjects (with axis):")
+    for feature, count in feature_counter_with_axis.items():
+        print(f"{feature}: {count} occurrences")
+
+    print("\nBest feature occurrence across all subjects (without axis):")
+    for feature, count in feature_counter_without_axis.items():
         print(f"{feature}: {count} occurrences")
 
     # Select the top n most common features
-    most_common_features = [feature for feature, count in feature_counter.most_common(top_n)]
-    print(f"\nTop {top_n} features across all subjects: {most_common_features}")
-    return most_common_features
-# def get_top_features_across_all_subjects(subjects_dict: Dict[str, List[str]]) -> List[str]:
-#     """
-#     Aggregates and identifies the most common best features across all subjects.
-#
-#     This function takes a dictionary where the keys are subject folder names and the values are lists of the n most
-#     common features from the best feature sets of each subject. It then aggregates these features, counts their
-#     occurrences across all subjects, prints the feature occurrence counts, and returns a list of the most common features.
-#
-#     :param subjects_dict: Dict[str, List[str]]
-#     Dictionary where keys are the subject folder names and values are the Lists of the n most common features in the
-#     best feature sets.
-#
-#     :return: List[str]
-#     List of the most common features across all subjects.
-#     """
-#     # Aggregate the most common features across all subjects
-#     feature_list = _aggregate_most_common_features(subjects_dict)
-#
-#     # Count the frequency of each feature
-#     feature_counter = Counter(feature_list)
-#     print("Best feature occurrence across all subjects:")
-#     for feature, count in feature_counter.items():
-#         print(f"{feature}: {count} subjects")
-#
-#     # Return a list of the most common features
-#     most_common_features = [feature for feature, count in feature_counter.most_common()]
-#     print(f"\nFinal feature set for all subjects: {most_common_features}")
-#     return most_common_features
-#
+    # most_common_features_with_axis = [feature for feature, count in feature_counter_with_axis.most_common(top_n)]
+    # most_common_features_without_axis = [feature for feature, count in feature_counter_without_axis.most_common(top_n)]
+    # Select the top n most common features with tie-breaking
+    most_common_features_with_axis = _select_top_n_features_with_tie_breaking(feature_counter_with_axis, top_n)
+    most_common_features_without_axis = _select_top_n_features_with_tie_breaking(feature_counter_without_axis, top_n)
+    print(f"\nTop {top_n} features across all subjects (with axis): {most_common_features_with_axis}")
+    print(f"\nTop {top_n} features across all subjects (without axis): {most_common_features_without_axis}")
+
+    return {
+        'features_with_axis': most_common_features_with_axis,
+        'features_without_axis': most_common_features_without_axis
+    }
+
 
 def test_feature_set(feature_set: List[str], file_path: str, clustering_model: str) -> Tuple[float, float, float]:
     """
@@ -453,7 +441,7 @@ def test_feature_set_each_subject(main_path: str, features_folder_name: str, clu
     # iterate through the folders of each subject
     for subject_folder in os.listdir(main_path):
         subject_folder_path = os.path.join(main_path, subject_folder)
-        print(f"Testing final feature set for subject: {subject_folder}\n")
+        print(f"\nTesting final feature set for subject: {subject_folder}")
 
         # iterate through the sub folders
         for sub_folder in os.listdir(subject_folder_path):
@@ -483,7 +471,53 @@ def test_feature_set_each_subject(main_path: str, features_folder_name: str, clu
             else:
                 ValueError(f"Folder name {features_folder_name} not found.")
 
-    return np.round(np.mean(ri_list), 4), np.round(np.mean(ari_list), 4), np.round(np.mean(nmi_list), 4)
+    return np.round(np.mean(ri_list), 2), np.round(np.mean(ari_list), 2), np.round(np.mean(nmi_list), 2)
+
+
+def test_different_axis(subjects_dict: Dict[str, Dict[str, Set[str]]], main_path: str, features_folder_name: str,
+                        clustering_model: str, top_n: int) -> Dict[str, Dict[str, Tuple[float, float, float]]]:
+    """
+    Tests the most common features without axis by adding different axes (x, y, z) and evaluates the performance.
+
+    :param subjects_dict: Dict[str, Dict[str, Set[str]]]
+    Dictionary where keys are the subject folder names and values are dictionaries with keys 'unique_features' and
+    'unique_features_no_axis', and the values are sets of unique features and unique features without the axis prefix, respectively.
+
+    :param main_path: str
+    Path to the main folder containing the subfolders of each subject.
+
+    :param features_folder_name: str
+    Name of the folder containing the csv file with the extracted features.
+
+    :param clustering_model: str
+    Unsupervised learning model used to test the feature set.
+
+    :param top_n: int
+    Number of top features to select.
+
+    :return: Dict[str, Dict[str, Tuple[float, float, float]]]
+    Dictionary where keys are 'x', 'y', 'z' and values are dictionaries with keys as subject names and values as
+    tuples of clustering scores.
+    """
+    results = {'x': {}, 'y': {}, 'z': {}}
+
+    # Get the top n most common features without axis
+    top_features_dict = get_top_features_across_all_subjects(subjects_dict, top_n)
+    top_features_without_axis = top_features_dict['features_without_axis']
+
+    for axis in ['x', 'y', 'z']:
+        # Add the axis prefix to the top features without axis
+        axis_feature_set = [f"{axis}{feature}" for feature in top_features_without_axis]
+
+        print(f"\nTest: {axis_feature_set}\n")
+        # Test the feature set with the axis prefix for each subject
+        mean_ri, mean_ari, mean_nmi = test_feature_set_each_subject(main_path, features_folder_name, clustering_model,
+                                                                    axis_feature_set)
+
+        results[axis] = {'mean_ri': mean_ri, 'mean_ari': mean_ari, 'mean_nmi': mean_nmi}
+        # print(f"Axis: {axis} -> Mean RI: {mean_ri}, Mean ARI: {mean_ari}, Mean NMI: {mean_nmi}")
+
+    return results
 
 
 # ------------------------------------------------------------------------------------------------------------------- #
@@ -585,13 +619,13 @@ def _evaluate_clustering(true_labels: pd.Series, predicted_labels: pd.Series) ->
     Rand Index, Adjusted Rand Index, and Normalized Mutual Information scores.
     """
     # calculate feature_engineering accuracy
-    rand_index = np.round(rand_score(true_labels, predicted_labels), 4)
+    rand_index = np.round(rand_score(true_labels, predicted_labels), 2)
 
     # rand index adjusted for chance
-    adjusted_rand_index = np.round(adjusted_rand_score(true_labels, predicted_labels), 4)
+    adjusted_rand_index = np.round(adjusted_rand_score(true_labels, predicted_labels), 2)
 
     # mutual information
-    normalized_mutual_info = np.round(normalized_mutual_info_score(true_labels, predicted_labels), 4)
+    normalized_mutual_info = np.round(normalized_mutual_info_score(true_labels, predicted_labels), 2)
 
     return rand_index, adjusted_rand_index, normalized_mutual_info
 
@@ -688,23 +722,6 @@ def _filter_best_feature_sets(feature_sets, feature_sets_accur):
     return best_feature_sets, best_accuracies
 
 
-# def _find_most_common_features_in_best_sets(best_feature_sets, n):
-#     # Flatten the list of lists
-#     flat_feature_sets = [feature for feature_set in best_feature_sets for feature in feature_set]
-#     # Count the frequency of each feature
-#     feature_counter = Counter(flat_feature_sets)
-#     # Get the most common features and their counts
-#     most_common_features = feature_counter.most_common(n)
-#     return most_common_features
-#
-#
-# def _aggregate_most_common_features(subjects_dict):
-#     all_most_common_features = []
-#     for features in subjects_dict.values():
-#         all_most_common_features.extend(features)
-#     return all_most_common_features
-
-
 def _aggregate_features(subjects_dict: Dict[str, Set[str]]) -> List[str]:
     """
     Aggregates features from the best feature sets of all subjects into a single list.
@@ -719,3 +736,45 @@ def _aggregate_features(subjects_dict: Dict[str, Set[str]]) -> List[str]:
     for feature_set in subjects_dict.values():
         all_features.extend(feature_set)
     return all_features
+
+
+def _select_top_n_features_with_tie_breaking(feature_counter: Counter, top_n: int) -> List[str]:
+    """
+    Selects the top n features from a Counter, with a tie-breaking strategy to randomly select among features with the same count.
+
+    :param feature_counter: Counter
+    Counter object with feature counts.
+
+    :param top_n: int
+    Number of top features to select.
+
+    :return: List[str]
+    List of the top n features.
+    """
+    # Sort features by count
+    features_by_count = sorted(feature_counter.items(), key=lambda item: item[1], reverse=True)
+
+    top_features = []
+    current_count = None
+    current_tie_group = []
+
+    for feature, count in features_by_count:
+        if len(top_features) >= top_n:
+            break
+        if current_count is None:
+            current_count = count
+
+        if count == current_count:
+            current_tie_group.append(feature)
+        else:
+            if len(top_features) + len(current_tie_group) > top_n:
+                top_features.extend(random.sample(current_tie_group, top_n - len(top_features)))
+            else:
+                top_features.extend(current_tie_group)
+            current_tie_group = [feature]
+            current_count = count
+
+    if len(top_features) < top_n and current_tie_group:
+        top_features.extend(random.sample(current_tie_group, top_n - len(top_features)))
+
+    return top_features[:top_n]

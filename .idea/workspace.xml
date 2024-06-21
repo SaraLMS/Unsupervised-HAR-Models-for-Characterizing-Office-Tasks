@@ -398,7 +398,15 @@
       <option name="project" value="LOCAL" />
       <updated>1718836598516</updated>
     </task>
-    <option name="localTasksCounter" value="41" />
+    <task id="LOCAL-00041" summary="changed feature selection to sets">
+      <option name="closed" value="true" />
+      <created>1718903687697</created>
+      <option name="number" value="00041" />
+      <option name="presentableId" value="LOCAL-00041" />
+      <option name="project" value="LOCAL" />
+      <updated>1718903687698</updated>
+    </task>
+    <option name="localTasksCounter" value="42" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -413,7 +421,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Implementing the task_segmentation. Not working, it's not cropping the actuall signal?" />
     <MESSAGE value="Implementing the task_segmentation. All cutting functions. No testing" />
     <MESSAGE value="task segmentation and filtering implemented. NOT TESTED YET!" />
     <MESSAGE value="Segmentation and filtering implemented and working. Added docstrings and checks for directories" />
@@ -438,6 +445,7 @@
     <MESSAGE value="added drop correlated features. Changed the search for the best feature set for all subjects" />
     <MESSAGE value="docstrings" />
     <MESSAGE value="tried pick random instead of n common in feature selection" />
-    <option name="LAST_COMMIT_MESSAGE" value="tried pick random instead of n common in feature selection" />
+    <MESSAGE value="changed feature selection to sets" />
+    <option name="LAST_COMMIT_MESSAGE" value="changed feature selection to sets" />
   </component>
 </project>

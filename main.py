@@ -1,5 +1,5 @@
 from feature_engineering.feature_selection import feature_selector, get_top_features_across_all_subjects, \
-    get_all_subjects_best_features, test_feature_set_each_subject
+    get_all_subjects_best_features, test_feature_set_each_subject, test_different_axis
 from feature_extraction.feature_extraction import feature_extractor, generate_cfg_file
 from processing.processor import processing
 from synchronization.synchronization import synchronization
@@ -58,16 +58,42 @@ def main():
         clustering_model = "kmeans"
         nr_iterations = 10
 
+        top_n = 8  # Number of top features to select
+
+        # subjects_dict = get_all_subjects_best_features(subject_path, features_folder_name, 0.05, nr_iterations,
+        #                                                clustering_model)
+        #
+        # final_feature_set = get_top_features_across_all_subjects(subjects_dict, 6)
+        #
+        # mean_ri, mean_ari, mean_nmi = test_feature_set_each_subject(subject_path, features_folder_name,
+        #                                                             clustering_model, final_feature_set)
+        #
+        # print(f"Mean rand index: {mean_ri} \nMean adjusted rand index: {mean_ari}\n"
+        #       f"Mean normalized mutual information: {mean_nmi}")
+        # Get the best features for each subject
         subjects_dict = get_all_subjects_best_features(subject_path, features_folder_name, 0.05, nr_iterations,
-                                                       clustering_model, 1)
+                                                       clustering_model)
 
-        final_feature_set = get_top_features_across_all_subjects(subjects_dict, 6)
+        # Get the top features with axis
+        final_feature_set_with_axis = get_top_features_across_all_subjects(subjects_dict, top_n)['features_with_axis']
 
+        # Test the top features with axis for each subject
         mean_ri, mean_ari, mean_nmi = test_feature_set_each_subject(subject_path, features_folder_name,
-                                                                    clustering_model, final_feature_set)
+                                                                    clustering_model, final_feature_set_with_axis)
 
-        print(f"Mean rand index: {mean_ri} \nMean adjusted rand index: {mean_ari}\n"
-              f"Mean normalized mutual information: {mean_nmi}")
+        print(f"Results for features with axis:")
+        print(f"Mean Rand Index: {mean_ri}")
+        print(f"Mean Adjusted Rand Index: {mean_ari}")
+        print(f"Mean Normalized Mutual Information: {mean_nmi}")
+
+        # Test the top features without axis by adding different axes
+        axis_test_results = test_different_axis(subjects_dict, subject_path, features_folder_name, clustering_model,
+                                                top_n)
+
+        print("Results for testing different axes:")
+        for axis, results in axis_test_results.items():
+            print(
+                f"Axis: {axis} -> Mean RI: {results['mean_ri']}, Mean ARI: {results['mean_ari']}, Mean NMI: {results['mean_nmi']}")
 
 
 if __name__ == "__main__":
