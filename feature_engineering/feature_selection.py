@@ -3,7 +3,6 @@
 # ------------------------------------------------------------------------------------------------------------------- #
 import os
 from collections import Counter
-from itertools import combinations
 from typing import List, Tuple, Dict, Set
 import pandas as pd
 import numpy as np
@@ -11,13 +10,11 @@ import matplotlib.pyplot as plt
 import random
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.feature_selection import VarianceThreshold
-from sklearn.metrics import rand_score, adjusted_rand_score, normalized_mutual_info_score
-
-from feature_engineering.models import kmeans_model, agglomerative_clustering_model, gaussian_mixture_model, \
+from models import kmeans_model, agglomerative_clustering_model, gaussian_mixture_model, \
     dbscan_model, birch_model
-from feature_engineering.split_train_test import train_test_split
-from load.load_sync_data import load_data_from_csv
-from parser.check_create_directories import create_dir
+import load
+import parser
+import metrics
 
 KMEANS = "kmeans"
 AGGLOMERATIVE = "agglomerative"
@@ -33,7 +30,7 @@ SUPPORTED_MODELS = [KMEANS, AGGLOMERATIVE, GAUSSIAN_MIXTURE_MODEL, DBSCAN, BIRCH
 
 def feature_selector(dataset_path: str, variance_threshold: float, n_iterations: int, clustering_model: str,
                      output_path: str, folder_name: str = "features_kmeans_plots",
-                     save_plots: bool = False) -> Tuple[List[List[str]], List[float]]:
+                     save_plots: bool = True) -> Tuple[List[List[str]], List[float]]:
     """
     Splits the dataset into train and test and returns the features sets that give the best clustering results
     for the train set as well as the rand index of the respective feature set.
@@ -76,11 +73,9 @@ def feature_selector(dataset_path: str, variance_threshold: float, n_iterations:
     :return:
 
     """
-    # load dataset from csv file
-    df = load_data_from_csv(dataset_path)
 
     # train test split
-    train_set, _ = train_test_split(df, 0.8, 0.2)
+    train_set, _ = load.train_test_split(dataset_path, 0.8, 0.2)
 
     # get the true (class) labels
     true_labels = train_set['class']
@@ -101,7 +96,7 @@ def feature_selector(dataset_path: str, variance_threshold: float, n_iterations:
 
     if save_plots:
         # generate output path to save the plots if it doesn't exist
-        output_path = create_dir(output_path, folder_name)
+        output_path = parser.create_dir(output_path, folder_name)
 
     feature_sets = []
     feature_sets_accur = []
@@ -156,7 +151,7 @@ def feature_selector(dataset_path: str, variance_threshold: float, n_iterations:
                                  f"Supported models are: {SUPPORTED_MODELS}")
 
             # Evaluate clustering with this feature set
-            ri, ari, nmi = _evaluate_clustering(true_labels, labels)
+            ri, ari, nmi = metrics.evaluate_clustering(true_labels, labels)
 
             # if the Rand Index does not improve remove feature
             if ri <= best_ri:
@@ -181,7 +176,11 @@ def feature_selector(dataset_path: str, variance_threshold: float, n_iterations:
         best_features_list = best_features[-1]
         highest_accuracy = accur_ri[-1]
 
-        print(best_features_list)
+        # inform user
+        print(f"Best features list: {best_features_list}\n"
+              f"Rand Index: {accur_ri[-1]}\n"
+              f"Adjusted Rand Index: {adj_rand_scores[-1]}\n"
+              f"Normalized Mutual Information: {norm_mutual_infos[-1]}")
 
         if best_features_list not in feature_sets:
 
@@ -245,7 +244,7 @@ def get_all_subjects_best_features(main_path: str, features_folder_name: str, va
     best feature sets.
     """
     subjects_dict = {}
-
+    # TODO OUTPUT PATH was INCORRECT NOT TESTED THO
     # iterate through the folders of each subject
     for subject_folder in os.listdir(main_path):
         subject_folder_path = os.path.join(main_path, subject_folder)
@@ -267,7 +266,7 @@ def get_all_subjects_best_features(main_path: str, features_folder_name: str, va
 
                     # Get the best feature sets for the subject
                     feature_sets, accuracies = feature_selector(dataset_path, variance_threshold, n_iterations,
-                                                                clustering_model, sub_folder)
+                                                                clustering_model, features_folder_name)
 
                     # Filter for the best feature sets and their accuracies
                     best_feature_sets, best_acc = _filter_best_feature_sets(feature_sets, accuracies)
@@ -379,16 +378,14 @@ def test_feature_set(feature_set: List[str], file_path: str, clustering_model: s
     :return: Tuple[float, float, float]
     Rand index, adjusted rand index and normalized mutual information scores for that feature set.
     """
-    # load dataset
-    df = load_data_from_csv(file_path)
-
-    # Check if all features in the feature set exist in the dataframe columns
-    missing_features = [feature for feature in feature_set if feature not in df.columns]
-    if missing_features:
-        raise ValueError(f"The following features are not in the dataset columns: {missing_features}")
 
     # train test split
-    train_set, _ = train_test_split(df, 0.8, 0.2)
+    train_set, _ = load.train_test_split(file_path, 0.8, 0.2)
+
+    # Check if all features in the feature set exist in the dataframe columns
+    missing_features = [feature for feature in feature_set if feature not in train_set.columns]
+    if missing_features:
+        raise ValueError(f"The following features are not in the dataset columns: {missing_features}")
 
     # get the true (class) labels
     true_labels = train_set['class']
@@ -427,7 +424,7 @@ def test_feature_set(feature_set: List[str], file_path: str, clustering_model: s
                          f"Supported models are: {SUPPORTED_MODELS}")
 
     # Evaluate clustering with this feature set
-    ri, ari, nmi = _evaluate_clustering(true_labels, labels)
+    ri, ari, nmi = metrics.evaluate_clustering(true_labels, labels)
 
     return ri, ari, nmi
 
@@ -602,34 +599,6 @@ def _standardize_features(x: pd.DataFrame) -> pd.DataFrame:
     return x
 
 
-def _evaluate_clustering(true_labels: pd.Series, predicted_labels: pd.Series) -> Tuple[float, float, float]:
-    """
-    Evaluates clustering performance using multiple metrics.
-
-    This function computes the Rand Index, Adjusted Rand Index, and Normalized Mutual Information
-    to evaluate the performance of a clustering algorithm based on the true and predicted labels.
-
-    :param true_labels: pd.Series
-    The ground truth labels for the data points.
-
-    :param predicted_labels: pd.Series
-    The labels predicted by the clustering algorithm.
-
-    :return: Tuple[float, float, float]
-    Rand Index, Adjusted Rand Index, and Normalized Mutual Information scores.
-    """
-    # calculate feature_engineering accuracy
-    rand_index = np.round(rand_score(true_labels, predicted_labels), 2)
-
-    # rand index adjusted for chance
-    adjusted_rand_index = np.round(adjusted_rand_score(true_labels, predicted_labels), 2)
-
-    # mutual information
-    normalized_mutual_info = np.round(normalized_mutual_info_score(true_labels, predicted_labels), 2)
-
-    return rand_index, adjusted_rand_index, normalized_mutual_info
-
-
 def _drop_low_variance_features(x: pd.DataFrame, variance_threshold: float) -> pd.DataFrame:
     """
     Removes features with low variance from a DataFrame.
@@ -751,19 +720,30 @@ def _select_top_n_features_with_tie_breaking(feature_counter: Counter, top_n: in
     :return: List[str]
     List of the top n features.
     """
-    # Sort features by count
+    # Sort features by count in descending order
     features_by_count = sorted(feature_counter.items(), key=lambda item: item[1], reverse=True)
 
+    # List to store the top n features
     top_features = []
+
+    # Track the current count group
     current_count = None
+
+    # List to store features with the same count
     current_tie_group = []
 
+    # Iterate through the sorted features by count
     for feature, count in features_by_count:
+
+        # If top n features are already selected, stop the loop
         if len(top_features) >= top_n:
             break
+
+        # Initialize the current count if it's None (first iteration)
         if current_count is None:
             current_count = count
 
+        # If the count is the same as the current count, add to the tie group
         if count == current_count:
             current_tie_group.append(feature)
         else:
@@ -778,3 +758,51 @@ def _select_top_n_features_with_tie_breaking(feature_counter: Counter, top_n: in
         top_features.extend(random.sample(current_tie_group, top_n - len(top_features)))
 
     return top_features[:top_n]
+# def _select_top_n_features_with_tie_breaking(feature_counter: Counter, top_n: int) -> List[str]:
+#     """
+#     Selects the top n features from a Counter, with a tie-breaking strategy to randomly select one feature among features with the same count.
+#
+#     :param feature_counter: Counter
+#     Counter object with feature counts.
+#
+#     :param top_n: int
+#     Number of top features to select.
+#
+#     :return: List[str]
+#     List of the top n features.
+#     """
+#     # Sort features by count in descending order
+#     features_by_count = sorted(feature_counter.items(), key=lambda item: item[1], reverse=True)
+#
+#     top_features = []  # List to store the top n features
+#     current_count = None  # Track the current count group
+#     current_tie_group = []  # List to store features with the same count
+#
+#     # Iterate through the sorted features by count
+#     for feature, count in features_by_count:
+#         # If we've already selected top n features, stop the loop
+#         if len(top_features) >= top_n:
+#             break
+#
+#         # Initialize the current count if it's None (first iteration)
+#         if current_count is None:
+#             current_count = count
+#
+#         # If the count is the same as the current count, add to the tie group
+#         if count == current_count:
+#             current_tie_group.append(feature)
+#         else:
+#             # If the count is different, resolve the tie group
+#             if current_tie_group:
+#                 # Randomly select one feature from the tie group and add it to the top features
+#                 top_features.append(random.choice(current_tie_group))
+#
+#             # Reset the tie group for the new count
+#             current_tie_group = [feature]
+#             current_count = count
+#
+#     # After the loop, resolve any remaining tie group
+#     if len(top_features) < top_n and current_tie_group:
+#         top_features.append(random.choice(current_tie_group))
+#
+#     return top_features[:top_n]

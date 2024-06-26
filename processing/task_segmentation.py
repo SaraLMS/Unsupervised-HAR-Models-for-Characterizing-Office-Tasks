@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------------------------------------------- #
 # imports
 # ------------------------------------------------------------------------------------------------------------------- #
-from typing import List, Union, Tuple
+from typing import List, Tuple
 import numpy as np
 import pandas as pd
 
@@ -18,6 +18,7 @@ def segment_tasks(folder_name: str, data: pd.DataFrame) -> List[pd.DataFrame]:
     """
     Segments the given DataFrame based on activity types defined in the folder name. The trim values differ
     since some activities are more segmented and therefor the trim value is lower not to lose too much signal.
+    The accelerometer from the smartphone must be selected for this method to work correctly.
 
     :param folder_name: str.
         The name of the folder which hints at the type of activity contained within. It determines how the data should
@@ -32,7 +33,7 @@ def segment_tasks(folder_name: str, data: pd.DataFrame) -> List[pd.DataFrame]:
     # # get time back to column named 'sec'
     # data = _reset_index_to_column(data)
     # get the y axis from the acc
-    # TODO ADD CHECK ACC NEEDS TO BE CHOSEN
+    # TODO ADD CHECK ACC from phone NEEDS TO BE CHOSEN - FOR GOOD RESULTS!!!!!!!!!!!!!!!!!!!!
     acc_series = data['yAcc'].to_numpy()
     # dataframes array
     tasks = []
@@ -91,7 +92,7 @@ def segment_tasks(folder_name: str, data: pd.DataFrame) -> List[pd.DataFrame]:
         envelope, starts, stops = _detect_walking_onset(acc_series, 100, 0.01)
 
         # validate the starts and stops
-        valid_starts, valid_stops = _validate_walking_starts_stops(acc_series, folder_name, starts, stops, 2000, 7000)
+        valid_starts, valid_stops = _validate_walking_starts_stops(acc_series, folder_name, starts, stops, 2000, 10000)
 
         # cut segments
         tasks_stairs = _cut_segments(data, valid_starts, valid_stops, 250)
@@ -242,6 +243,9 @@ def _validate_walking_starts_stops(yacc, folder_name, starts, stops, min_value_b
         # Check if the stop value is above min_stop_value and if the difference to the next element is greater than or equal to min_value_between_starts_stops
         if stops[i] >= min_stop_value and stops[i + 1] - stops[i] >= min_value_between_starts_stops:
             valid_stops.append(stops[i])
+
+    # append the last value of stops indices
+    valid_stops.append(stops[-1])
 
     # if the signal was cut early the last stop is the last value of the signal
     if len(valid_starts) != len(valid_stops):

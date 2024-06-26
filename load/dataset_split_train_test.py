@@ -2,13 +2,14 @@
 # imports
 # ------------------------------------------------------------------------------------------------------------------- #
 import pandas as pd
+import load
 
 
 # ------------------------------------------------------------------------------------------------------------------- #
 # public functions
 # ------------------------------------------------------------------------------------------------------------------- #
 
-def train_test_split(df, train_size, test_size):
+def train_test_split(file_path, train_size, test_size):
     """
     Splits the dataset into training and testing sets based on the given sizes.
 
@@ -22,7 +23,7 @@ def train_test_split(df, train_size, test_size):
     - test_set: DataFrame containing the test set.
     """
     # separate the dataframes by subclass of movement
-    dataframes_list = _split_by_subclass(df)
+    dataframes_list = _split_by_subclass(file_path)
 
     # lists for holding the train and test sets for each subclass
     train_set_list = []
@@ -30,7 +31,6 @@ def train_test_split(df, train_size, test_size):
 
     # iterate through the dataframes
     for dataframe in dataframes_list:
-
         # Determine the number of samples for training and testing
         train_end = int(len(dataframe) * train_size)
         test_start = int(len(dataframe) * (1 - test_size))
@@ -49,12 +49,13 @@ def train_test_split(df, train_size, test_size):
 
     return train_set, test_set
 
+
 # ------------------------------------------------------------------------------------------------------------------- #
 # private functions
 # ------------------------------------------------------------------------------------------------------------------- #
+# path
 
-
-def _split_by_subclass(df, subclass_column='subclass'):
+def _split_by_subclass(file_path, subclass_column='subclass'):
     """
     Splits the DataFrame into sub-DataFrames based on the unique values
     in the subclass column and stores them in a list.
@@ -66,6 +67,9 @@ def _split_by_subclass(df, subclass_column='subclass'):
     Returns:
     - A list of sub-DataFrames, each corresponding to a unique subclass.
     """
+    # load dataset
+    df = load.load_data_from_csv(file_path)
+
     # list to store dataframes of each subclass
     sub_dataframes = []
 

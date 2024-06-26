@@ -2,12 +2,9 @@
 # imports
 # ------------------------------------------------------------------------------------------------------------------- #
 
-import os
 import pandas as pd
 from typing import Dict, List, Tuple
 from datetime import datetime
-
-from parser.check_create_directories import create_dir
 
 
 # ------------------------------------------------------------------------------------------------------------------- #

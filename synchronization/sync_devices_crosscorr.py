@@ -2,9 +2,8 @@
 # imports
 # ------------------------------------------------------------------------------------------------------------------- #
 
-from load.load_sync_data import load_used_devices_data
-from parser.extract_from_path import get_folder_name_from_path
-from parser.save_to_csv import save_data_to_csv
+import load
+import parser
 from .common import crop_dataframes_on_shift, join_dataframes_on_index, generate_filename
 import numpy as np
 import pandas as pd
@@ -31,7 +30,7 @@ def sync_crosscorr(prefix: str, folder_path: str, output_path: str):
         Path to the location where the file should be saved.
     """
     # get the dataframes of the signals in the folder
-    dataframes_dic, datetimes_dic = load_used_devices_data(folder_path)
+    dataframes_dic, datetimes_dic = load.load_used_devices_data(folder_path)
 
     # get the acc axis depending on the type of device
     acc_axis_array = _get_axis_from_acc(dataframes_dic)
@@ -46,13 +45,13 @@ def sync_crosscorr(prefix: str, folder_path: str, output_path: str):
     df_joined = join_dataframes_on_index(sync_signal_1, sync_signal_2)
 
     # get folder name
-    folder_name = get_folder_name_from_path(folder_path)
+    folder_name = parser.get_folder_name_from_path(folder_path)
 
     # generate file name
     output_filename = generate_filename(datetimes_dic, folder_name, prefix, sync_type="crosscorr")
 
     # save csv file
-    save_data_to_csv(output_filename, df_joined, output_path, folder_name)
+    parser.save_data_to_csv(output_filename, df_joined, output_path, folder_name)
 
 
 def get_tau_crosscorr(folder_path: str) -> int:
@@ -67,7 +66,7 @@ def get_tau_crosscorr(folder_path: str) -> int:
         Shift in samples calculated using cross correlation.
     """
     # get the dataframes of the signals in the folder
-    dataframes_dic, datetimes_dic = load_used_devices_data(folder_path)
+    dataframes_dic, datetimes_dic = load.load_used_devices_data(folder_path)
 
     # get the acc axis depending on the type of device
     acc_axis_array = _get_axis_from_acc(dataframes_dic)

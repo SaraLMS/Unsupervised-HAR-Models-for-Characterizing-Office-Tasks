@@ -3,16 +3,13 @@
 # ------------------------------------------------------------------------------------------------------------------- #
 import json
 import os
-from typing import Dict, Any, List
 import numpy as np
 import pandas as pd
-
-from load.load_sync_data import load_data_from_csv
-from parser.save_to_csv import save_data_to_csv
-from tsfel.feature_extraction.features_settings import get_features_by_domain
-from tsfel.feature_extraction.calc_features import time_series_features_extractor
-from constants import SUPPORTED_ACTIVITIES, CABINETS, SITTING, STANDING, WALKING, STAIRS
-from parser.check_create_directories import check_in_path, create_dir
+import load
+import parser
+import tsfel
+from typing import Dict, Any, List
+from constants import SUPPORTED_ACTIVITIES, CABINETS, SITTING, STANDING, WALKING, STAIRS, SEC
 
 # constants supported from filenames
 COFFEE = "coffee"
@@ -44,7 +41,7 @@ SUPPORTED_SUBCLASSES = [COFFEE, FOLDERS, SIT, STAND_STILL1, GESTURES, FAST,
 
 def generate_cfg_file(path: str):
     # generate dictionary with all the features
-    cfg = get_features_by_domain()
+    cfg = tsfel.get_features_by_domain()
     # path = "C:/Users/srale/PycharmProjects/toolbox/feature_extraction"
     # specify the full path to save the file
     file_path = os.path.join(path, "cfg_file.json")
@@ -63,12 +60,12 @@ def load_json_file(json_path: str) -> Dict[Any, Any]:
 
 
 def feature_extractor(data_main_path: str, output_path: str, subclasses: list[str],
-                      json_path: str = "C:/Users/srale/PycharmProjects/toolbox/feature_extraction",
-                      output_filename: str = "acc_gyr_mag_phone_P010.csv",
-                      output_folder_name: str = "features_basic_activities") -> None:
+                      json_path: str = "C:/Users/srale/PycharmProjects/toolbox/feature_engineering",
+                      output_filename: str = "acc_gyr_mag_watch_P011.csv",
+                      output_folder_name: str = "watch_features_basic_activities", watch_only: bool = True) -> None:
     # TODO - DOCSTRING THIS SHIT
     # check directory
-    check_in_path(data_main_path, '.csv')
+    parser.check_in_path(data_main_path, '.csv')
 
     # load dictionary with chosen features
     features_dict = load_json_file(json_path)
@@ -83,7 +80,14 @@ def feature_extractor(data_main_path: str, output_path: str, subclasses: list[st
         for filename in os.listdir(folder_path):
             file_path = os.path.join(folder_path, filename)
 
-            df = load_data_from_csv(file_path)
+            df = load.load_data_from_csv(file_path)
+
+            if watch_only:
+                # Filter columns that contain '_wear'
+                wear_columns = [col for col in df.columns if '_wear' in col]
+
+                # Create a new dataframe with only the '_wear' columns
+                df = df[wear_columns]
 
             # if total_acceleration:
             #     # check if there's phone accelerometer or watch accelerometer
@@ -131,7 +135,7 @@ def feature_extractor(data_main_path: str, output_path: str, subclasses: list[st
     print(all_data_df['class'].value_counts())
     print(all_data_df['subclass'].value_counts())
 
-    output_path = create_dir(output_path, output_folder_name)
+    output_path = parser.create_dir(output_path, output_folder_name)
     file_path = os.path.join(output_path, output_filename)
 
     # save data to csv file
@@ -160,10 +164,11 @@ def _remove_keys_from_dict(df_dict: Dict[str, pd.DataFrame], subclasses: List[st
 
 def _extract_features_from_signal(df: pd.DataFrame, features_dict: Dict[Any, Any]) -> pd.DataFrame:
     # drop time column
-    df.drop(columns=['sec'], inplace=True)
+    if SEC in df.columns:
+        df.drop(columns=[SEC], inplace=True)
 
     # extract the features
-    features_df = time_series_features_extractor(features_dict, df, fs=100, window_size=150, overlap=0.5)
+    features_df = tsfel.time_series_features_extractor(features_dict, df, fs=100, window_size=150, overlap=0.5)
 
     return features_df
 

@@ -3,15 +3,13 @@
 # ------------------------------------------------------------------------------------------------------------------- #
 import os
 from typing import Dict, List
-
+import load
 import pandas as pd
 
 from constants import WALKING, CABINETS, STANDING, SITTING, SUPPORTED_ACTIVITIES, STAIRS
-from parser.check_create_directories import check_in_path, create_dir
-from parser.save_to_csv import save_data_to_csv
-from processing.filters import median_and_lowpass_filter, gravitational_filter
-from load.load_sync_data import load_data_from_csv
-from processing.task_segmentation import segment_tasks
+import parser
+from .filters import median_and_lowpass_filter, gravitational_filter
+from .task_segmentation import segment_tasks
 
 from constants import ACCELEROMETER_PREFIX, SUPPORTED_PREFIXES
 
@@ -20,8 +18,8 @@ from constants import ACCELEROMETER_PREFIX, SUPPORTED_PREFIXES
 # public functions
 # ------------------------------------------------------------------------------------------------------------------- #
 
-def processing(sync_data_path: str, output_path: str, raw_folder_name: str, filtered_folder_name: str,
-               save_raw_tasks: bool = True, fs: int = 100) -> None:
+def processor(sync_data_path: str, output_path: str, raw_folder_name: str, filtered_folder_name: str,
+              save_raw_tasks: bool = True, fs: int = 100) -> None:
     """
     Processes and filters signal data from csv files in a directory structure,
      storing the results in a dictionary.
@@ -40,11 +38,11 @@ def processing(sync_data_path: str, output_path: str, raw_folder_name: str, filt
 
     """
 
-    check_in_path(sync_data_path, '.csv')
+    parser.check_in_path(sync_data_path, '.csv')
 
     # create output paths
-    raw_output_path = create_dir(output_path, raw_folder_name)
-    filtered_output_path = create_dir(output_path, filtered_folder_name)
+    raw_output_path = parser.create_dir(output_path, raw_folder_name)
+    filtered_output_path = parser.create_dir(output_path, filtered_folder_name)
 
     for folder_name in os.listdir(sync_data_path):
 
@@ -55,7 +53,7 @@ def processing(sync_data_path: str, output_path: str, raw_folder_name: str, filt
             file_path = os.path.join(folder_path, filename)
 
             # load data to csv
-            data = load_data_from_csv(file_path)
+            data = load.load_data_from_csv(file_path)
 
             # cut tasks
             tasks_array = segment_tasks(folder_name, data)
@@ -66,7 +64,7 @@ def processing(sync_data_path: str, output_path: str, raw_folder_name: str, filt
 
                 for df, output_filename in zip(tasks_array, output_filenames):
                     # save data to csv
-                    save_data_to_csv(output_filename, df, raw_output_path, folder_name)
+                    parser.save_data_to_csv(output_filename, df, raw_output_path, folder_name)
 
             # list to store the segmented and filtered signals
             filtered_tasks = []
@@ -89,7 +87,7 @@ def processing(sync_data_path: str, output_path: str, raw_folder_name: str, filt
 
             for df, output_filename in zip(filtered_tasks, output_filenames):
                 # save data to csv
-                save_data_to_csv(output_filename, df, filtered_output_path, folder_name)
+                parser.save_data_to_csv(output_filename, df, filtered_output_path, folder_name)
 
         # inform user
         print(f"Segment and filter{folder_name} tasks")

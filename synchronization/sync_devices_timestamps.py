@@ -3,15 +3,13 @@
 # ------------------------------------------------------------------------------------------------------------------- #
 
 from datetime import datetime, time, timedelta
-
+import load
 import pandas as pd
 
 from constants import BUFFER_SIZE_SECONDS
-from load.load_sync_data import load_used_devices_data
-from parser.extract_from_path import get_folder_name_from_path
-from parser.save_to_csv import save_data_to_csv
+import parser
 from .common import crop_dataframes_on_shift, join_dataframes_on_index, generate_filename
-from load.load_raw_data import load_logger_file
+
 from typing import Dict, Tuple, Union, List
 
 from .sync_parser import check_logger_file
@@ -72,7 +70,7 @@ def get_tau_filename(folder_path: str) -> int:
         Shift in samples calculated using filename timestamps.
     """
     # get the dataframes of the signals in the folder
-    dataframes_dic, datetimes_dic = load_used_devices_data(folder_path)
+    dataframes_dic, datetimes_dic = load.load_used_devices_data(folder_path)
 
     # get start times as datetime objects for each device
     datetimes_obj_dic = _get_datetime_object(datetimes_dic)
@@ -97,7 +95,7 @@ def get_tau_logger(logger_folder_path: str, folder_path: str) -> int:
         Shift in samples calculated using logger timestamps.
     """
     # get the dataframes of the signals in the folder
-    dataframes_dic, datetimes_dic = load_used_devices_data(folder_path)
+    dataframes_dic, datetimes_dic = load.load_used_devices_data(folder_path)
 
     # get logger file from folder containing the raw signals
     logger_df = _filter_logger_file(logger_folder_path)
@@ -210,7 +208,7 @@ def _sync_on_filename_timestamps(prefix: str, folder_path: str, output_path: str
         Path to the location where the file should be saved.
     """
     # get the dataframes of the signals in the folder
-    dataframes_dic, datetimes_dic = load_used_devices_data(folder_path)
+    dataframes_dic, datetimes_dic = load.load_used_devices_data(folder_path)
 
     # get start times as datetime objects for each device
     datetimes_obj_dic = _get_datetime_object(datetimes_dic)
@@ -225,13 +223,13 @@ def _sync_on_filename_timestamps(prefix: str, folder_path: str, output_path: str
     df_joined = join_dataframes_on_index(sync_signal_1, sync_signal_2)
 
     # get folder name
-    folder_name = get_folder_name_from_path(folder_path)
+    folder_name = parser.get_folder_name_from_path(folder_path)
 
     # generate file name
     output_filename = generate_filename(datetimes_dic, folder_name, prefix, sync_type="filename_timestamps")
 
     # save csv file
-    save_data_to_csv(output_filename, df_joined, output_path, folder_name)
+    parser.save_data_to_csv(output_filename, df_joined, output_path, folder_name)
 
 
 def _filter_logger_file(raw_folder_path: str) -> pd.DataFrame:
@@ -252,7 +250,7 @@ def _filter_logger_file(raw_folder_path: str) -> pd.DataFrame:
         A filtered DataFrame containing only the relevant log rows.
     """
     # Load logger file to DataFrame
-    logger_df = load_logger_file(raw_folder_path)
+    logger_df = load.load_logger_file(raw_folder_path)
 
     # Drop rows where 'logs' column contains 'NOISERECORDER'
     logger_df = logger_df[~logger_df['logs'].str.contains("NOISERECORDER")]
@@ -349,7 +347,7 @@ def _get_used_devices_start_times_from_logger(dataframes_dic: Dict[str, pd.DataF
 
 def check_logger_timestamps(logger_folder_path, folder_path, selected_sensors):
     # get the dataframes of the signals in the folder
-    dataframes_dic, datetimes_dic = load_used_devices_data(folder_path)
+    dataframes_dic, datetimes_dic = load.load_used_devices_data(folder_path)
 
     # get logger file from folder containing the raw signals
     logger_df = _filter_logger_file(logger_folder_path)
@@ -383,7 +381,7 @@ def _sync_on_logger_timestamps(prefix: str, logger_folder_path: str, folder_path
         Path to the location where the file should be saved.
     """
     # get the dataframes of the signals in the folder
-    dataframes_dic, datetimes_dic = load_used_devices_data(folder_path)
+    dataframes_dic, datetimes_dic = load.load_used_devices_data(folder_path)
 
     # get logger file from folder containing the raw signals
     logger_df = _filter_logger_file(logger_folder_path)
@@ -401,10 +399,10 @@ def _sync_on_logger_timestamps(prefix: str, logger_folder_path: str, folder_path
     df_joined = join_dataframes_on_index(sync_signal_1, sync_signal_2)
 
     # get folder name
-    folder_name = get_folder_name_from_path(folder_path)
+    folder_name = parser.get_folder_name_from_path(folder_path)
 
     # generate file name
     output_filename = generate_filename(datetimes_dic, folder_name, prefix, sync_type="logger_timestamps")
 
     # save csv file
-    save_data_to_csv(output_filename, df_joined, output_path, folder_name)
+    parser.save_data_to_csv(output_filename, df_joined, output_path, folder_name)

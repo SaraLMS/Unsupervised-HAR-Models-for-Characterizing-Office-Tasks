@@ -4,16 +4,15 @@
 import shutil
 from typing import Dict, List
 import os
-
+import parser
 import pandas as pd
 
 from constants import CROSSCORR, TIMESTAMPS, ACCELEROMETER, WEAR_ACCELEROMETER, WATCH, PHONE, SUPPORTED_DEVICES, MBAN, \
     SUPPORTED_PHONE_SENSORS, SUPPORTED_WATCH_SENSORS, SUPPORTED_MBAN_SENSORS, ACC
-from parser.check_create_directories import check_in_path, create_dir
 from synchronization.sync_android_sensors import sync_all_classes
 from synchronization.sync_devices_crosscorr import sync_crosscorr
 from synchronization.sync_devices_timestamps import sync_timestamps
-from synchronization.sync_evaluation import sync_evaluation
+from synchronization.evaluation import sync_evaluation
 
 
 # ------------------------------------------------------------------------------------------------------------------- #
@@ -22,8 +21,8 @@ from synchronization.sync_evaluation import sync_evaluation
 
 def synchronization(raw_data_in_path: str, sync_android_out_path: str, selected_sensors: Dict[str, List[str]],
                     output_path: str, sync_type: str, evaluation_output_path: str,
-                    evaluation_filename: str = "evaluation_report_phone_sensors.csv", save_intermediate_files: bool = True,
-                    prefix: str = "P010") -> None:
+                    evaluation_filename: str = "evaluation_report_phone_sensors.csv", save_intermediate_files: bool = False,
+                    prefix: str = "P011") -> None:
     """
     Synchronizes android sensor data and between two different devices. Two different synchronization methods are
     supported: cross correlation and timestamps. Generates a new csv file containing all the synchronized sensor data
@@ -86,7 +85,7 @@ def synchronization(raw_data_in_path: str, sync_android_out_path: str, selected_
         sensors. False to delete. If there's only signals from one device, these files are not deleted.
     """
     # check if in path is valid
-    check_in_path(raw_data_in_path, '.txt')
+    parser.check_in_path(raw_data_in_path, '.txt')
 
     # check if selected sensors are valid
     _check_supported_sensors(selected_sensors)
@@ -142,7 +141,7 @@ def synchronization(raw_data_in_path: str, sync_android_out_path: str, selected_
         combined_df = pd.concat(evaluation_df_array, ignore_index=True)
 
         # create dir
-        evaluation_output_path = create_dir(evaluation_output_path, folder_name="sync_evaluation_"+prefix)
+        evaluation_output_path = parser.create_dir(evaluation_output_path, folder_name="sync_evaluation_"+prefix)
         # define output path
         evaluation_output_path = os.path.join(evaluation_output_path, evaluation_filename)
 

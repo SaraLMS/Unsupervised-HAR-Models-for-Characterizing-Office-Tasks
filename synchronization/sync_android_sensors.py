@@ -1,9 +1,8 @@
 # ------------------------------------------------------------------------------------------------------------------- #
 # imports
 # ------------------------------------------------------------------------------------------------------------------- #
-from load.load_raw_data import load_device_data, calc_avg_sampling_rate, round_sampling_rate
-from parser.check_create_directories import create_dir
-from parser.extract_from_path import get_folder_name_from_path
+import load
+import parser
 import numpy as np
 import pandas as pd
 import os
@@ -192,7 +191,7 @@ def _re_sample_data(time_axis, data, start=0, stop=-1, shift_time_axis=True, sam
     # calculate the approximate sampling rate and round it to the next tens digit
     if sampling_rate is None:
         # get the average sampling rate
-        sampling_rate = calc_avg_sampling_rate(time_axis)
+        sampling_rate = load.calc_avg_sampling_rate(time_axis)
 
     # create new time axis
     time_inter = np.arange(time_axis[0], time_axis[-1], 1 / sampling_rate)
@@ -468,7 +467,7 @@ def _sync_sensors_in_device(in_path, out_path, sync_file_name='android_synchroni
     """
 
     # load the data
-    sensor_data, report = load_device_data(in_path)
+    sensor_data, report = load.load_device_data(in_path)
 
     # ---- data padding ---- #
 
@@ -488,7 +487,7 @@ def _sync_sensors_in_device(in_path, out_path, sync_file_name='android_synchroni
     re_sampled_time = []
 
     # get the highest sampling rate and round it accordingly
-    sampling_rate = round_sampling_rate(report['max. sampling rate'])
+    sampling_rate = load.round_sampling_rate(report['max. sampling rate'])
 
     # cycle over the sig
     for data in padded_sensor_data:
@@ -605,12 +604,14 @@ def _sync_all_sensors_in_class(prefix, folder_path: str, out_path: str,
     -------
     None: The function saves the synchronized data to a CSV file.
     """
+    # TODO correct docstrings
     # get folder name from folder path
-    folder_name = get_folder_name_from_path(folder_path)
+    folder_name = parser.get_folder_name_from_path(folder_path)
+    print(folder_name)
 
     for device, sensor_list in selected_sensors.items():
         sensor_path_list = _get_sensor_path_list(folder_path, device, sensor_list)
-
+        print(sensor_path_list)
         # extract date and time from the filenames - assume that sensors from the same device
         # have the dame date and time in the filename
         path_date_time = sensor_path_list[0]
@@ -621,7 +622,7 @@ def _sync_all_sensors_in_class(prefix, folder_path: str, out_path: str,
         sync_file_name = prefix + "_synchronized_" + device + '_' + folder_name + "_" + date + "_" + time + ".csv"
 
         # generate output directory
-        output_path = create_dir(out_path, folder_name)
+        output_path = parser.create_dir(out_path, folder_name)
 
         # sync sensors from device
         df = _sync_sensors_in_device(sensor_path_list, output_path, sync_file_name)
