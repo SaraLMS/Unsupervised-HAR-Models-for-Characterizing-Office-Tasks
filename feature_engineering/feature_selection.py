@@ -23,7 +23,7 @@ from constants import KMEANS, AGGLOMERATIVE, GAUSSIAN_MIXTURE_MODEL, DBSCAN, BIR
 
 def feature_selector(dataset_path: str, variance_threshold: float, n_iterations: int, clustering_model: str,
                      output_path: str, folder_name: str = "watch_features_kmeans_plots",
-                     save_plots: bool = True) -> Tuple[List[List[str]], List[float]]:
+                     save_plots: bool = False) -> Tuple[List[List[str]], List[float]]:
     """
     Splits the dataset into train and test and returns the features sets that give the best clustering results
     for the train set as well as the rand index of the respective feature set.
@@ -81,11 +81,9 @@ def feature_selector(dataset_path: str, variance_threshold: float, n_iterations:
 
     # drop features with variance lower than variance_threshold
     train_set = _drop_low_variance_features(train_set, variance_threshold)
-    print(f"Columns after dropping low variance features: {train_set.columns.tolist()}")
 
     # drop correlated features
     train_set = _remove_collinear_features(train_set, 0.99)
-    print(f"\nColumns after dropping highly correlated features: {train_set.columns.tolist()}")
 
     if save_plots:
         # generate output path to save the plots if it doesn't exist
@@ -100,7 +98,7 @@ def feature_selector(dataset_path: str, variance_threshold: float, n_iterations:
 
         # Shuffle the column names at the beginning of each iteration
         shuffled_features = _shuffle_column_names(train_set)
-        print(f"Shuffled Features (Iteration {i}): {shuffled_features}")
+        # print(f"Shuffled Features (Iteration {i}): {shuffled_features}")
 
         # Reset the feature list for each iteration
         iter_feature_list = []
@@ -160,7 +158,7 @@ def feature_selector(dataset_path: str, variance_threshold: float, n_iterations:
                 adj_rand_scores.append(ari)
                 norm_mutual_infos.append(nmi)
 
-        print(f"Iteration {i}: Best Features - {best_features}\n")
+        # print(f"Iteration {i}: Best Features - {best_features}\n")
 
         # X-axis of the plot will show the features
         feature_names = ['\n'.join(features) for features in best_features]
@@ -170,10 +168,10 @@ def feature_selector(dataset_path: str, variance_threshold: float, n_iterations:
         highest_accuracy = accur_ri[-1]
 
         # inform user
-        print(f"Best features list: {best_features_list}\n"
-              f"Rand Index: {accur_ri[-1]}\n"
-              f"Adjusted Rand Index: {adj_rand_scores[-1]}\n"
-              f"Normalized Mutual Information: {norm_mutual_infos[-1]}")
+        # print(f"Best features list: {best_features_list}\n"
+        #       f"Rand Index: {accur_ri[-1]}\n"
+        #       f"Adjusted Rand Index: {adj_rand_scores[-1]}\n"
+        #       f"Normalized Mutual Information: {norm_mutual_infos[-1]}")
 
         if best_features_list not in feature_sets:
 
@@ -323,14 +321,14 @@ def get_top_features_across_all_subjects(subjects_dict: Dict[str, Dict[str, Set[
     # Count the frequency of each feature
     feature_counter_with_axis = Counter(features_with_axis)
     feature_counter_without_axis = Counter(features_without_axis)
-
-    print("Best feature occurrence across all subjects (with axis):")
-    for feature, count in feature_counter_with_axis.items():
-        print(f"{feature}: {count} occurrences")
-
-    print("\nBest feature occurrence across all subjects (without axis):")
-    for feature, count in feature_counter_without_axis.items():
-        print(f"{feature}: {count} occurrences")
+    #
+    # print("Best feature occurrence across all subjects (with axis):")
+    # for feature, count in feature_counter_with_axis.items():
+    #     print(f"{feature}: {count} occurrences")
+    #
+    # print("\nBest feature occurrence across all subjects (without axis):")
+    # for feature, count in feature_counter_without_axis.items():
+    #     print(f"{feature}: {count} occurrences")
 
     # Select the top n most common features
     # most_common_features_with_axis = [feature for feature, count in feature_counter_with_axis.most_common(top_n)]
@@ -431,7 +429,6 @@ def test_feature_set_each_subject(main_path: str, features_folder_name: str, clu
     # iterate through the folders of each subject
     for subject_folder in os.listdir(main_path):
         subject_folder_path = os.path.join(main_path, subject_folder)
-        print(f"\nTesting final feature set for subject: {subject_folder}")
 
         # iterate through the sub folders
         for sub_folder in os.listdir(subject_folder_path):
@@ -448,7 +445,7 @@ def test_feature_set_each_subject(main_path: str, features_folder_name: str, clu
                     dataset_path = os.path.join(features_folder_path, feature_files[0])
 
                     ri, ari, nmi = test_feature_set(feature_set, dataset_path, clustering_model)
-                    print(f"RI: {ri}; ARI: {ari}; NMI: {nmi}")
+                    # print(f"RI: {ri}; ARI: {ari}; NMI: {nmi}")
 
                     # Append the results to the lists
                     ri_list.append(ri)
@@ -504,11 +501,9 @@ def test_different_axis(subjects_dict: Dict[str, Dict[str, Set[str]]], main_path
         mean_ri, mean_ari, mean_nmi = test_feature_set_each_subject(main_path, features_folder_name, clustering_model,
                                                                     axis_feature_set)
 
-        results[axis] = {'mean_ri': mean_ri, 'mean_ari': mean_ari, 'mean_nmi': mean_nmi}
-        # print(f"Axis: {axis} -> Mean RI: {mean_ri}, Mean ARI: {mean_ari}, Mean NMI: {mean_nmi}")
+        results[axis] = {'features': axis_feature_set, 'mean_ri': mean_ri, 'mean_ari': mean_ari, 'mean_nmi': mean_nmi}
 
     return results
-
 
 # ------------------------------------------------------------------------------------------------------------------- #
 # Private functions
@@ -659,7 +654,7 @@ def _remove_collinear_features(x, threshold):
     # Drop one of each pair of correlated columns
     drops = set(drop_cols)
     x = x.drop(columns=drops)
-    print('Removed Columns {}'.format(drops))
+    # print('Removed Columns {}'.format(drops))
     return x
 
 
