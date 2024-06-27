@@ -5,6 +5,8 @@ import json
 import os
 import numpy as np
 import pandas as pd
+from sklearn.preprocessing import StandardScaler
+
 import load
 import parser
 import tsfel
@@ -61,7 +63,7 @@ def load_json_file(json_path: str) -> Dict[Any, Any]:
 
 def feature_extractor(data_main_path: str, output_path: str, subclasses: list[str],
                       json_path: str = "C:/Users/srale/PycharmProjects/toolbox/feature_engineering",
-                      output_filename: str = "acc_gyr_mag_watch_P011.csv",
+                      output_filename: str = "acc_gyr_mag_watch_features_P013.csv",
                       output_folder_name: str = "watch_features_basic_activities", watch_only: bool = True) -> None:
     # TODO - DOCSTRING THIS SHIT
     # check directory

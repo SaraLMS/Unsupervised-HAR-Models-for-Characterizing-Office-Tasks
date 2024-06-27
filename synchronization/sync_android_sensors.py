@@ -607,11 +607,9 @@ def _sync_all_sensors_in_class(prefix, folder_path: str, out_path: str,
     # TODO correct docstrings
     # get folder name from folder path
     folder_name = parser.get_folder_name_from_path(folder_path)
-    print(folder_name)
 
     for device, sensor_list in selected_sensors.items():
         sensor_path_list = _get_sensor_path_list(folder_path, device, sensor_list)
-        print(sensor_path_list)
         # extract date and time from the filenames - assume that sensors from the same device
         # have the dame date and time in the filename
         path_date_time = sensor_path_list[0]

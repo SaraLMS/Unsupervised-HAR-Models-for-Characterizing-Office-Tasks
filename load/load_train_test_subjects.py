@@ -10,7 +10,7 @@ import pandas as pd
 # public functions
 # ------------------------------------------------------------------------------------------------------------------- #
 
-def load_split_train_test_subjects(main_path: str, subfolder_name: str, train_ration: float = 0.7) \
+def load_train_test_subjects(main_path: str, subfolder_name: str, train_ration: float = 0.7) \
         -> Tuple[pd.DataFrame, pd.DataFrame]:
 
     all_subjects_df = _load_subject_data(main_path, subfolder_name)

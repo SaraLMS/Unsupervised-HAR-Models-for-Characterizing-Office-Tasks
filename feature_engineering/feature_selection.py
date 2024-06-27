@@ -8,20 +8,13 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import random
-from sklearn.preprocessing import MinMaxScaler
+from sklearn.preprocessing import MinMaxScaler, StandardScaler
 from sklearn.feature_selection import VarianceThreshold
-from models import kmeans_model, agglomerative_clustering_model, gaussian_mixture_model, \
-    dbscan_model, birch_model
+import models
 import load
 import parser
 import metrics
-
-KMEANS = "kmeans"
-AGGLOMERATIVE = "agglomerative"
-GAUSSIAN_MIXTURE_MODEL = "gmm"
-DBSCAN = "dbscan"
-BIRCH = "birch"
-SUPPORTED_MODELS = [KMEANS, AGGLOMERATIVE, GAUSSIAN_MIXTURE_MODEL, DBSCAN, BIRCH]
+from constants import KMEANS, AGGLOMERATIVE, GAUSSIAN_MIXTURE_MODEL, DBSCAN, BIRCH, SUPPORTED_MODELS
 
 
 # ------------------------------------------------------------------------------------------------------------------- #
@@ -29,7 +22,7 @@ SUPPORTED_MODELS = [KMEANS, AGGLOMERATIVE, GAUSSIAN_MIXTURE_MODEL, DBSCAN, BIRCH
 # ------------------------------------------------------------------------------------------------------------------- #
 
 def feature_selector(dataset_path: str, variance_threshold: float, n_iterations: int, clustering_model: str,
-                     output_path: str, folder_name: str = "features_kmeans_plots",
+                     output_path: str, folder_name: str = "watch_features_kmeans_plots",
                      save_plots: bool = True) -> Tuple[List[List[str]], List[float]]:
     """
     Splits the dataset into train and test and returns the features sets that give the best clustering results
@@ -83,7 +76,7 @@ def feature_selector(dataset_path: str, variance_threshold: float, n_iterations:
     # drop class and subclass column
     train_set = train_set.drop(['class', 'subclass'], axis=1)
 
-    # remove class and subclass column and standardize features
+    # scale features
     train_set = _standardize_features(train_set)
 
     # drop features with variance lower than variance_threshold
@@ -128,23 +121,23 @@ def feature_selector(dataset_path: str, variance_threshold: float, n_iterations:
 
             if clustering_model == KMEANS:
                 # kmeans feature_engineering
-                labels = kmeans_model(features_train, n_clusters=3)
+                labels = models.kmeans_model(features_train, features_train, n_clusters=3)
 
             elif clustering_model == AGGLOMERATIVE:
                 # agglomerative feature_engineering
-                labels = agglomerative_clustering_model(features_train, n_clusters=3)
+                labels = models.agglomerative_clustering_model(features_train, features_train, n_clusters=3)
 
             elif clustering_model == GAUSSIAN_MIXTURE_MODEL:
                 # gaussian mixture model
-                labels = gaussian_mixture_model(features_train, n_components=3)
+                labels = models.gaussian_mixture_model(features_train, features_train, n_components=3)
 
             elif clustering_model == DBSCAN:
                 # DBSCAN feature_engineering
-                labels = dbscan_model(features_train, 0.4, 10)
+                labels = models.dbscan_model(features_train, features_train, 0.4, 10)
 
             elif clustering_model == BIRCH:
                 # Birch feature_engineering
-                labels = birch_model(features_train, n_clusters=3)
+                labels = models.birch_model(features_train, features_train, n_clusters=3)
 
             else:
                 raise ValueError(f"The model {clustering_model} is not supported. "
@@ -393,7 +386,7 @@ def test_feature_set(feature_set: List[str], file_path: str, clustering_model: s
     # drop class and subclass column
     train_set = train_set.drop(['class', 'subclass'], axis=1)
 
-    # remove class and subclass column and standardize features
+    # scale features
     train_set = _standardize_features(train_set)
 
     # get only the wanted features
@@ -401,23 +394,23 @@ def test_feature_set(feature_set: List[str], file_path: str, clustering_model: s
 
     if clustering_model == KMEANS:
         # kmeans feature_engineering
-        labels = kmeans_model(train_set, n_clusters=3)
+        labels = models.kmeans_model(train_set, train_set, n_clusters=3)
 
     elif clustering_model == AGGLOMERATIVE:
         # agglomerative feature_engineering
-        labels = agglomerative_clustering_model(train_set, n_clusters=3)
+        labels = models.agglomerative_clustering_model(train_set, train_set, n_clusters=3)
 
     elif clustering_model == GAUSSIAN_MIXTURE_MODEL:
         # gaussian mixture model
-        labels = gaussian_mixture_model(train_set, n_components=3)
+        labels = models.gaussian_mixture_model(train_set, train_set, n_components=3)
 
     elif clustering_model == DBSCAN:
         # DBSCAN feature_engineering
-        labels = dbscan_model(train_set, 0.4, 10)
+        labels = models.dbscan_model(train_set, train_set, 0.4, 10)
 
     elif clustering_model == BIRCH:
         # Birch feature_engineering
-        labels = birch_model(train_set, n_clusters=3)
+        labels = models.birch_model(train_set, train_set, n_clusters=3)
 
     else:
         raise ValueError(f"The model {clustering_model} is not supported. "

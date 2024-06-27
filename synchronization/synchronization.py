@@ -9,10 +9,10 @@ import pandas as pd
 
 from constants import CROSSCORR, TIMESTAMPS, ACCELEROMETER, WEAR_ACCELEROMETER, WATCH, PHONE, SUPPORTED_DEVICES, MBAN, \
     SUPPORTED_PHONE_SENSORS, SUPPORTED_WATCH_SENSORS, SUPPORTED_MBAN_SENSORS, ACC
-from synchronization.sync_android_sensors import sync_all_classes
-from synchronization.sync_devices_crosscorr import sync_crosscorr
-from synchronization.sync_devices_timestamps import sync_timestamps
-from synchronization.evaluation import sync_evaluation
+from .sync_android_sensors import sync_all_classes
+from .sync_devices_crosscorr import sync_crosscorr
+from .sync_devices_timestamps import sync_timestamps
+from .evaluation import sync_evaluation
 
 
 # ------------------------------------------------------------------------------------------------------------------- #
@@ -22,7 +22,7 @@ from synchronization.evaluation import sync_evaluation
 def synchronization(raw_data_in_path: str, sync_android_out_path: str, selected_sensors: Dict[str, List[str]],
                     output_path: str, sync_type: str, evaluation_output_path: str,
                     evaluation_filename: str = "evaluation_report_phone_sensors.csv", save_intermediate_files: bool = False,
-                    prefix: str = "P011") -> None:
+                    prefix: str = "P013") -> None:
     """
     Synchronizes android sensor data and between two different devices. Two different synchronization methods are
     supported: cross correlation and timestamps. Generates a new csv file containing all the synchronized sensor data
