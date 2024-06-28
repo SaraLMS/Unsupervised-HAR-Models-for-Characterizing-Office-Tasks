@@ -4,6 +4,7 @@
 import os
 from typing import Tuple
 import pandas as pd
+from .load_sync_data import load_data_from_csv
 
 
 # ------------------------------------------------------------------------------------------------------------------- #
@@ -72,7 +73,7 @@ def _load_subject_data(main_path: str, subfolder_name: str) -> pd.DataFrame:
         for csv_file in os.listdir(subfolder_path):
             csv_path = os.path.join(subfolder_path, csv_file)
 
-            df = pd.read_csv(csv_path)
+            df = load_data_from_csv(csv_path)
             df['subject'] = subject_folder
             dfs.append(df)
 

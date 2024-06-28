@@ -21,8 +21,8 @@ from constants import KMEANS, AGGLOMERATIVE, GAUSSIAN_MIXTURE_MODEL, DBSCAN, BIR
 # Public functions
 # ------------------------------------------------------------------------------------------------------------------- #
 
-def feature_selector(dataset_path: str, variance_threshold: float, n_iterations: int, clustering_model: str,
-                     output_path: str, folder_name: str = "watch_features_kmeans_plots",
+def feature_selector(train_set: pd.DataFrame, variance_threshold: float, n_iterations: int, clustering_model: str,
+                     output_path: str, folder_name: str = "phone_features_kmeans_plots",
                      save_plots: bool = False) -> Tuple[List[List[str]], List[float]]:
     """
     Splits the dataset into train and test and returns the features sets that give the best clustering results
@@ -67,17 +67,18 @@ def feature_selector(dataset_path: str, variance_threshold: float, n_iterations:
 
     """
 
-    # train test split
-    train_set, _ = load.train_test_split(dataset_path, 0.8, 0.2)
-
     # get the true (class) labels
     true_labels = train_set['class']
 
     # drop class and subclass column
     train_set = train_set.drop(['class', 'subclass'], axis=1)
 
+    # remove subject column if exists
+    if "subject" in train_set.columns:
+        train_set = train_set.drop(['subject'], axis=1)
+
     # scale features
-    train_set = _standardize_features(train_set)
+    train_set = _normalize_features(train_set)
 
     # drop features with variance lower than variance_threshold
     train_set = _drop_low_variance_features(train_set, variance_threshold)
@@ -98,7 +99,7 @@ def feature_selector(dataset_path: str, variance_threshold: float, n_iterations:
 
         # Shuffle the column names at the beginning of each iteration
         shuffled_features = _shuffle_column_names(train_set)
-        # print(f"Shuffled Features (Iteration {i}): {shuffled_features}")
+        print(f"Shuffled Features (Iteration {i}): {shuffled_features}")
 
         # Reset the feature list for each iteration
         iter_feature_list = []
@@ -168,10 +169,10 @@ def feature_selector(dataset_path: str, variance_threshold: float, n_iterations:
         highest_accuracy = accur_ri[-1]
 
         # inform user
-        # print(f"Best features list: {best_features_list}\n"
-        #       f"Rand Index: {accur_ri[-1]}\n"
-        #       f"Adjusted Rand Index: {adj_rand_scores[-1]}\n"
-        #       f"Normalized Mutual Information: {norm_mutual_infos[-1]}")
+        print(f"Best features list: {best_features_list}\n"
+              f"Rand Index: {accur_ri[-1]}\n"
+              f"Adjusted Rand Index: {adj_rand_scores[-1]}\n"
+              f"Normalized Mutual Information: {norm_mutual_infos[-1]}")
 
         if best_features_list not in feature_sets:
 
@@ -255,8 +256,11 @@ def get_all_subjects_best_features(main_path: str, features_folder_name: str, va
                     # only one csv file for the features folder
                     dataset_path = os.path.join(features_folder_path, feature_files[0])
 
+                    # train test split
+                    train_set, _ = load.train_test_split(dataset_path, 0.8, 0.2)
+
                     # Get the best feature sets for the subject
-                    feature_sets, accuracies = feature_selector(dataset_path, variance_threshold, n_iterations,
+                    feature_sets, accuracies = feature_selector(train_set, variance_threshold, n_iterations,
                                                                 clustering_model, features_folder_name)
 
                     # Filter for the best feature sets and their accuracies
@@ -385,7 +389,7 @@ def test_feature_set(feature_set: List[str], file_path: str, clustering_model: s
     train_set = train_set.drop(['class', 'subclass'], axis=1)
 
     # scale features
-    train_set = _standardize_features(train_set)
+    train_set = _normalize_features(train_set)
 
     # get only the wanted features
     train_set = train_set[feature_set]
@@ -562,7 +566,7 @@ def _save_plot_clustering_results(feature_names: List[str], accur_ri: List[float
     plt.close()
 
 
-def _standardize_features(x: pd.DataFrame) -> pd.DataFrame:
+def _normalize_features(x: pd.DataFrame) -> pd.DataFrame:
     """
     Standardizes the features of a DataFrame using MinMaxscaler from sklearn.
 

@@ -3,7 +3,7 @@
 # ------------------------------------------------------------------------------------------------------------------- #
 
 import pandas as pd
-from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import MinMaxScaler
 
 import load
 import models
@@ -19,7 +19,6 @@ from constants import KMEANS, AGGLOMERATIVE, GAUSSIAN_MIXTURE_MODEL, DBSCAN, BIR
 
 def cluster_all_subjects(main_path: str, subfolder_name: str, clustering_model: str,
                          feature_set: List[str], train_size: float = 0.7) -> Tuple[float, float, float]:
-
     # split train and test subjects
     train_subjects_df, test_subjects_df = load.load_train_test_subjects(main_path, subfolder_name, train_size)
 
@@ -32,6 +31,11 @@ def cluster_all_subjects(main_path: str, subfolder_name: str, clustering_model: 
 
     # get only the wanted features
     train_subjects_df = train_subjects_df[feature_set]
+    test_subjects_df = test_subjects_df[feature_set]
+
+    # normalize features
+    train_subjects_df = _normalize_features(train_subjects_df)
+    test_subjects_df = _normalize_features(test_subjects_df)
 
     if clustering_model == KMEANS:
         # kmeans feature_engineering
@@ -39,15 +43,15 @@ def cluster_all_subjects(main_path: str, subfolder_name: str, clustering_model: 
 
     elif clustering_model == AGGLOMERATIVE:
         # agglomerative feature_engineering
-        labels = models.agglomerative_clustering_model(train_subjects_df, test_subjects_df, n_clusters=3)
+        labels = models.agglomerative_clustering_model(train_subjects_df, train_subjects_df, n_clusters=3)
 
     elif clustering_model == GAUSSIAN_MIXTURE_MODEL:
         # gaussian mixture model
-        labels = models.gaussian_mixture_model(train_subjects_df, test_subjects_df, n_components=3)
+        labels = models.gaussian_mixture_model(train_subjects_df, train_subjects_df, n_components=3)
 
     elif clustering_model == DBSCAN:
         # DBSCAN feature_engineering
-        labels = models.dbscan_model(train_subjects_df, test_subjects_df, 0.4, 10)
+        labels = models.dbscan_model(train_subjects_df, train_subjects_df, 0.4, 10)
 
     elif clustering_model == BIRCH:
         # Birch feature_engineering
@@ -59,6 +63,8 @@ def cluster_all_subjects(main_path: str, subfolder_name: str, clustering_model: 
 
     # evaluate clustering
     rand_index, adj_rand_index, norm_mutual_info = metrics.evaluate_clustering(true_labels, labels)
+    print(
+        f"General model clustering results:\nRand Index: {rand_index}\nAdjusted Rand Index: {adj_rand_index}\nNormalized Mutual Information: {norm_mutual_info}")
 
     return rand_index, adj_rand_index, norm_mutual_info
 
@@ -68,7 +74,7 @@ def cluster_all_subjects(main_path: str, subfolder_name: str, clustering_model: 
 # ------------------------------------------------------------------------------------------------------------------- #
 
 
-def _standardize_features(x: pd.DataFrame) -> pd.DataFrame:
+def _normalize_features(x: pd.DataFrame) -> pd.DataFrame:
     """
     Standardizes the features of a DataFrame using MinMaxscaler from sklearn.
 
@@ -85,10 +91,9 @@ def _standardize_features(x: pd.DataFrame) -> pd.DataFrame:
     x_column_names = x.columns
 
     # standardize the features
-    x = StandardScaler().fit_transform(x)
+    x = MinMaxScaler().fit_transform(x)
 
     # new dataframe without class and subclass column
     x = pd.DataFrame(x, columns=x_column_names)
 
     return x
-
