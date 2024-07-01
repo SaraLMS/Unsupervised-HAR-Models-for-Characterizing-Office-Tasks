@@ -18,8 +18,14 @@ COFFEE = "coffee"
 FOLDERS = "folders"
 SIT = "sit"
 GESTURES = "gestures"
+STANDING_GESTURES = "standing_gestures"
 STAND_STILL1 = "stand_still1"
 STAND_STILL2 = "stand_still2"
+STANDING_STILL = "standing_still"
+STAIRS = "stairs"
+WALK_FAST = "walk_fast"
+WALK_MEDIUM = "walk_medium"
+WALK_SLOW = "walk_slow"
 FAST = "fast"
 MEDIUM = "medium"
 SLOW = "slow"
@@ -32,16 +38,26 @@ STAIRS_DOWN3 = "stairsdown3"
 STAIRS_UP4 = "stairsup4"
 STAIRS_DOWN4 = "stairsdown4"
 
-SUPPORTED_SUBCLASSES = [COFFEE, FOLDERS, SIT, STAND_STILL1, GESTURES, FAST,
-                        MEDIUM, SLOW, STAIRS_UP1, STAIRS_DOWN1, STAIRS_UP2, STAIRS_DOWN2, STAIRS_UP3,
-                        STAIRS_DOWN3, STAIRS_UP4, STAIRS_DOWN4]
+SUPPORTED_FILENAME_SUBCLASSES = [COFFEE, FOLDERS, SIT, STAND_STILL1, GESTURES, FAST,
+                                 MEDIUM, SLOW, STAIRS_UP1, STAIRS_DOWN1, STAIRS_UP2, STAIRS_DOWN2, STAIRS_UP3,
+                                 STAIRS_DOWN3, STAIRS_UP4, STAIRS_DOWN4]
 
+SUPPORTED_INPUT_SUBCLASSES = [SIT, COFFEE, FOLDERS, STANDING_STILL, STANDING_GESTURES, WALK_FAST, WALK_SLOW,
+                              WALK_MEDIUM, STAIRS]
 
 # ------------------------------------------------------------------------------------------------------------------- #
 # public functions
 # ------------------------------------------------------------------------------------------------------------------- #
 
-def generate_cfg_file(path: str):
+def generate_cfg_file(path: str) -> None:
+    """
+    Generates the json file from TSFEL.
+
+    :param path: str
+        Path to save the json file
+
+    :return: None
+    """
     # generate dictionary with all the features
     cfg = tsfel.get_features_by_domain()
     # path = "C:/Users/srale/PycharmProjects/toolbox/feature_extraction"
@@ -53,6 +69,13 @@ def generate_cfg_file(path: str):
 
 
 def load_json_file(json_path: str) -> Dict[Any, Any]:
+    """
+    Loads the json file containing the features from TSFEL to a dictionary
+    :param json_path: str
+        Path to the json file
+    :return: Dict[Any,Any]
+    Dictionary containing the features from TSFEL
+    """
     json_file_path = os.path.join(json_path, "cfg_file.json")
     # read json file to a features dict
     with open(json_file_path, "r") as file:
@@ -63,9 +86,48 @@ def load_json_file(json_path: str) -> Dict[Any, Any]:
 
 def feature_extractor(data_main_path: str, output_path: str, subclasses: list[str],
                       json_path: str = "C:/Users/srale/PycharmProjects/toolbox/feature_engineering",
-                      output_filename: str = "acc_gyr_mag_watch_phone_features_P013.csv",
-                      output_folder_name: str = "watch_phone_features_basic_activities", watch_only: bool = False) -> None:
-    # TODO - DOCSTRING THIS SHIT
+                      output_filename: str = "acc_gyr_mag_phone_features_P013.csv",
+                      output_folder_name: str = "phone_features_basic_plus_activities", watch_only: bool = False) -> None:
+    """
+    Extracts features from sensor data files contained within subfolders of a main directory, adds class and subclass
+    columns based on the filenames, and saves the extracted features into a CSV file. This function also balances the
+    dataset so that there's the same number of samples from each class, and for each class there's the same number of
+    samples from each subclass. Each subclass should be equally sampled inside their respective class for this function
+    to work correctly.
+
+    :param data_main_path: str
+        Path to the main folder. Signals are contained in the sub folders inside the main path.
+
+    :param output_path: str
+        Path to the folder where the csv file should be saved.
+
+    :param subclasses: List[str]
+        List containing the name of the subclasses to load and extract features. Supported subclasses:
+            "sit": sitting
+            "standing_still": Standing still
+            "standing_gestures": Standing with gestures
+            "coffee": Standing while doing coffee
+            "folders": Standing while moving folders inside a cabinet
+            "walk_slow": Walking slow speed
+            "walk_medium": Walking medium speed
+            "walk_fast": Walking fast speed
+            "stairs": Going up and down the stairs
+
+    :param json_path: str
+        Path to the json file containing the features to be extracted using TSFEL
+
+    :param output_filename: str
+        Name of the file containing the features
+
+    :param output_folder_name: str
+        Name of the folder in which to store the dataset
+
+    :param watch_only: bool. Default = False:
+        Extract only features from the smartwatch, removing smartphone columns.
+
+    :return: None
+
+    """
     # check directory
     parser.check_in_path(data_main_path, '.csv')
 
@@ -90,27 +152,6 @@ def feature_extractor(data_main_path: str, output_path: str, subclasses: list[st
 
                 # Create a new dataframe with only the '_wear' columns
                 df = df[wear_columns]
-
-            # if total_acceleration:
-            #     # check if there's phone accelerometer or watch accelerometer
-            #     phone_acc_columns = []
-            #     watch_acc_columns = []
-            #
-            #     # Separate the columns by device
-            #     for col in df.columns:
-            #         if ACCELEROMETER_PREFIX in col:
-            #             if WEAR_PREFIX in col:
-            #                 watch_acc_columns.append(col)
-            #             else:
-            #                 phone_acc_columns.append(col)
-            #
-            #     # Check if accelerometer data is available for phone and calculate total acceleration
-            #     if phone_acc_columns:
-            #         df['total_acc_phone'] = _calculate_total_acceleration(df, phone_acc_columns)
-            #
-            #     # Check if accelerometer data is available for smartwatch and calculate total acceleration
-            #     if watch_acc_columns:
-            #         df['total_acc_wear'] = _calculate_total_acceleration(df, watch_acc_columns)
 
             print(f"Extract features from {folder_name}")
 
@@ -155,7 +196,7 @@ def feature_extractor(data_main_path: str, output_path: str, subclasses: list[st
 def _remove_keys_from_dict(df_dict: Dict[str, pd.DataFrame], subclasses: List[str]) -> Dict[str, pd.DataFrame]:
     # Collect keys to be removed
     keys_to_remove = [key for key in df_dict.keys() if not any(key.startswith(subclass) for subclass in subclasses)]
-    print(keys_to_remove)
+    print(f"Subclasses removed: {keys_to_remove}")
 
     # Drop the keys/subclasses that weren't chosen
     for key in keys_to_remove:
@@ -175,8 +216,8 @@ def _extract_features_from_signal(df: pd.DataFrame, features_dict: Dict[Any, Any
     return features_df
 
 
-def _calculate_total_acceleration(df: pd.DataFrame, columns: List[str]) -> pd.DataFrame:
-    return np.sqrt((df[columns[0]] ** 2) + (df[columns[1]] ** 2) + (df[columns[2]] ** 2))
+# def _calculate_total_acceleration(df: pd.DataFrame, columns: List[str]) -> pd.DataFrame:
+#     return np.sqrt((df[columns[0]] ** 2) + (df[columns[1]] ** 2) + (df[columns[2]] ** 2))
 
 
 def _add_class_and_subclass_column(df: pd.DataFrame, folder_name: str, filename: str) -> pd.DataFrame:
@@ -261,7 +302,7 @@ def _check_subclass(filename: str) -> str:
 
     else:
         raise ValueError(f"Subclass not supported. Check filename: {filename}"
-                         f" \n Supported subclasses are: {SUPPORTED_SUBCLASSES}")
+                         f" \n Supported subclasses are: {SUPPORTED_FILENAME_SUBCLASSES}")
 
     return subclass_str
 
@@ -325,7 +366,12 @@ def _balance_dataset(df_dict):
 
         # Special case for class 3 if stairs are present, subclass size needs adjustments
         if stairs_present and i == 2:
-            subclass_size = min_class_size // (len(signals)-2)
+            subclass_size = min_class_size // (len(signals)-4)
+        #
+        # # standing class
+        # elif i == 0:
+        #     subclass_size = min_class_size // (len(signals))
+
         else:
             subclass_size = min_class_size // len(signals)
 

@@ -1,5 +1,5 @@
-from .all_subjects_clustering import cluster_all_subjects
+from .all_subjects_clustering import general_model_clustering
 
 __all__ = [
-    "cluster_all_subjects"
+    "general_model_clustering"
 ]

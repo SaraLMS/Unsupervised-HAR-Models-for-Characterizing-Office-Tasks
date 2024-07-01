@@ -38,7 +38,7 @@ def feature_selector(train_set: pd.DataFrame, variance_threshold: float, n_itera
     combinations of features can be tested.
 
     :param dataset_path: str
-    Path to the file containing the features extrated (columns) and data instances (rows).
+    Path to the file containing the features extracted (columns) and data instances (rows).
 
     :param variance_threshold: float
     Minimum variance value. Features with a training-set variance lower than this threshold will be removed.

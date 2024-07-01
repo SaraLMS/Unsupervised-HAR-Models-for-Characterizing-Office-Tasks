@@ -10,47 +10,7 @@ from .load_sync_data import load_data_from_csv
 # ------------------------------------------------------------------------------------------------------------------- #
 # public functions
 # ------------------------------------------------------------------------------------------------------------------- #
-
-def load_train_test_subjects(main_path: str, subfolder_name: str, train_ration: float = 0.7) \
-        -> Tuple[pd.DataFrame, pd.DataFrame]:
-
-    all_subjects_df = _load_subject_data(main_path, subfolder_name)
-    train_subjects_df, test_subjects_df = _split_train_test_subjects(all_subjects_df, train_ration)
-
-    return train_subjects_df, test_subjects_df
-
-
-# ------------------------------------------------------------------------------------------------------------------- #
-# private functions
-# ------------------------------------------------------------------------------------------------------------------- #
-
-
-def _split_train_test_subjects(data: pd.DataFrame, train_ratio:float = 0.7) -> Tuple[pd.DataFrame, pd.DataFrame]:
-    """
-    Split dataframe into train and test sets based on subjects.
-
-    Parameters:
-    - data (pd.DataFrame): DataFrame containing all subjects' data with 'subject' column.
-    - train_ratio (float): Ratio of subjects to include in the training set (default is 0.7).
-
-    Returns:
-    - tuple: Two dataframes (train_data, test_data) containing train and test sets respectively.
-    """
-    unique_subjects = data['subject'].unique()
-    num_subjects = len(unique_subjects)
-    num_train_subjects = int(train_ratio * num_subjects)
-    num_test_subjects = num_subjects - num_train_subjects
-
-    train_subjects = unique_subjects[:num_train_subjects]
-    test_subjects = unique_subjects[num_train_subjects:]
-
-    train_data = data[data['subject'].isin(train_subjects)]
-    test_data = data[data['subject'].isin(test_subjects)]
-
-    return train_data, test_data
-
-
-def _load_subject_data(main_path: str, subfolder_name: str) -> pd.DataFrame:
+def load_subject_data(main_path: str, subfolder_name: str) -> pd.DataFrame:
     """
     Load subject data from CSV files into a single dataframe.
 
@@ -78,5 +38,11 @@ def _load_subject_data(main_path: str, subfolder_name: str) -> pd.DataFrame:
             dfs.append(df)
 
     return pd.concat(dfs, ignore_index=True)
+
+
+# ------------------------------------------------------------------------------------------------------------------- #
+# private functions
+# ------------------------------------------------------------------------------------------------------------------- #
+
 
 

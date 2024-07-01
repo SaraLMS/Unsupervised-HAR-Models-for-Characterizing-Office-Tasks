@@ -41,24 +41,24 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "Python tests.Python tests in test_supported_sensors.py.executor": "Run",
-    "Python tests.Python tests in test_sync.py.executor": "Run",
-    "Python.all_subjects_clustering.executor": "Run",
-    "Python.feature_extraction.executor": "Run",
-    "Python.feature_extractor.executor": "Run",
-    "Python.feature_selection.executor": "Run",
-    "Python.main.executor": "Run",
-    "Python.models.executor": "Run",
-    "Python.sync_devices_timestamps.executor": "Run",
-    "Python.synchronization.executor": "Run",
-    "RunOnceActivity.OpenProjectViewOnStart": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "git-widget-placeholder": "master",
-    "ignore.virus.scanning.warn.message": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Python tests.Python tests in test_supported_sensors.py.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.Python tests in test_sync.py.executor&quot;: &quot;Run&quot;,
+    &quot;Python.all_subjects_clustering.executor&quot;: &quot;Run&quot;,
+    &quot;Python.feature_extraction.executor&quot;: &quot;Run&quot;,
+    &quot;Python.feature_extractor.executor&quot;: &quot;Run&quot;,
+    &quot;Python.feature_selection.executor&quot;: &quot;Run&quot;,
+    &quot;Python.main.executor&quot;: &quot;Run&quot;,
+    &quot;Python.models.executor&quot;: &quot;Run&quot;,
+    &quot;Python.sync_devices_timestamps.executor&quot;: &quot;Run&quot;,
+    &quot;Python.synchronization.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
+    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
       <recent name="C:\Users\srale\PycharmProjects\toolbox\load" />
@@ -444,7 +444,15 @@
       <option name="project" value="LOCAL" />
       <updated>1719526178981</updated>
     </task>
-    <option name="localTasksCounter" value="46" />
+    <task id="LOCAL-00046" summary="corrected clustering">
+      <option name="closed" value="true" />
+      <created>1719589170827</created>
+      <option name="number" value="00046" />
+      <option name="presentableId" value="LOCAL-00046" />
+      <option name="project" value="LOCAL" />
+      <updated>1719589170827</updated>
+    </task>
+    <option name="localTasksCounter" value="47" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -459,7 +467,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="corrected Sec column and indes" />
     <MESSAGE value="corrected Sec column and index" />
     <MESSAGE value="cut first 200 samples after filtering" />
     <MESSAGE value="added tsfel" />
@@ -484,6 +491,7 @@
     <MESSAGE value="used __init__ files. Added loading all subjects and train/test subjects - not tested yet. Deleted tsfel package. Added metrics package" />
     <MESSAGE value="added clustering" />
     <MESSAGE value="automatic best feature sets in main file" />
-    <option name="LAST_COMMIT_MESSAGE" value="automatic best feature sets in main file" />
+    <MESSAGE value="corrected clustering" />
+    <option name="LAST_COMMIT_MESSAGE" value="corrected clustering" />
   </component>
 </project>

@@ -29,26 +29,26 @@ def main():
     do_feature_extraction = False
     do_one_subject_feature_selection = False
     do_general_model_feature_selection = False
-    do_all_subjects_feature_selection = True
+    do_all_subjects_feature_selection = False
     do_clustering = False
 
     if do_synchronization:
 
-        raw_data_in_path = "D:/tese_backups/raw_signals_backups/acquisitions/P013"
-        sync_android_out_path = ("D:/tese_backups/subjects/P013/acc_gyr_mag_watch_phone/sync_android_P013")
-        output_path = "D:/tese_backups/subjects/P013/acc_gyr_mag_watch_phone/synchronized_P013"
-        selected_sensors = {'phone': ['acc', 'gyr', 'mag'], 'watch': ['acc', 'gyr', 'mag']}
+        raw_data_in_path = "D:/tese_backups/raw_signals_backups/acquisitions/P001"
+        sync_android_out_path = ("D:/tese_backups/subjects/P001/acc_gyr_mag_phone/sync_android_P001")
+        output_path = "D:/tese_backups/subjects/P001/acc_gyr_mag_phone/synchronized_P001"
+        selected_sensors = {'phone': ['acc', 'gyr', 'mag']}
         sync_type = 'crosscorr'
-        evaluation_path = "D:/tese_backups/subjects/P013/acc_gyr_mag_watch_phone"
+        evaluation_path = "D:/tese_backups/subjects/P001/acc_gyr_mag_phone"
         synchronization.synchronization(raw_data_in_path, sync_android_out_path, selected_sensors, output_path,
                                         sync_type, evaluation_path)
 
     if do_processing:
 
-        output_path = "D:/tese_backups/subjects/P013/acc_gyr_mag_watch_phone"
-        filtered_folder_name = "filtered_tasks_P013"
-        raw_folder_name = "raw_tasks_P013"
-        sync_data_path = "D:/tese_backups/subjects/P013/acc_gyr_mag_watch_phone/synchronized_P013"
+        output_path = "D:/tese_backups/subjects/P001/acc_gyr_mag_phone"
+        filtered_folder_name = "filtered_tasks_P001"
+        raw_folder_name = "raw_tasks_P001"
+        sync_data_path = "D:/tese_backups/subjects/P001/acc_gyr_mag_phone/sync_android_P001"
         processing.processor(sync_data_path, output_path, raw_folder_name, filtered_folder_name)
 
     if do_generate_cfg_file:
@@ -58,8 +58,8 @@ def main():
 
     if do_feature_extraction:
 
-        subclasses = ['standing_still', 'walk_medium', 'sit']
-        main_path = "D:/tese_backups/subjects/P013/acc_gyr_mag_watch_phone/filtered_tasks_P013"
+        subclasses = ['standing_still', 'walk_medium', 'sit', 'standing_gestures', 'stairs']
+        main_path = "D:/tese_backups/subjects/P013/acc_gyr_mag_phone/filtered_tasks_P013"
         output_path = "C:/Users/srale/OneDrive - FCT NOVA/Tese/subjects_datasets/P013"
         feature_engineering.feature_extractor(main_path, output_path, subclasses)
 
@@ -86,11 +86,11 @@ def main():
     if do_all_subjects_feature_selection:
 
         subject_path = "C:/Users/srale/OneDrive - FCT NOVA/Tese/subjects_datasets"
-        features_folder_name = "watch_features_basic_activities"
+        features_folder_name = "watch_phone_features_basic_activities"
         clustering_model = "kmeans"
         nr_iterations = 10
 
-        top_n = 7  # Number of top features to select
+        top_n = 4  # Number of top features to select
 
         best_feature_set_with_axis = None
         best_scores_with_axis = [0, 0, 0]
@@ -166,7 +166,7 @@ def main():
         clustering_model = "kmeans"
         feature_set = ['yMag_Max', 'xMag_Spectral centroid', 'yAcc_Interquartile range', 'zAcc_Interquartile range',
                        'zGyr_Interquartile range', 'zAcc_Min', 'yGyr_Spectral entropy']
-        ri, ari, nmi = clustering.cluster_all_subjects(main_path, subfolder_name, clustering_model, feature_set)
+        ri, ari, nmi = clustering.general_model_clustering(main_path, subfolder_name, clustering_model, feature_set)
 
 
 if __name__ == "__main__":
