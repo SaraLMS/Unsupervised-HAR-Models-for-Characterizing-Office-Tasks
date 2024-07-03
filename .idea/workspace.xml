@@ -5,13 +5,15 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="3466cb1d-2559-4122-9522-f23b0d0f6b0a" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/clustering/common.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/clustering/subject_specific_model.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/clustering/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/clustering/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/clustering/all_subjects_clustering.py" beforeDir="false" afterPath="$PROJECT_DIR$/clustering/all_subjects_clustering.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clustering/all_subjects_clustering.py" beforeDir="false" afterPath="$PROJECT_DIR$/clustering/general_model.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/feature_engineering/feature_extraction.py" beforeDir="false" afterPath="$PROJECT_DIR$/feature_engineering/feature_extraction.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/feature_engineering/feature_selection.py" beforeDir="false" afterPath="$PROJECT_DIR$/feature_engineering/feature_selection.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/load/load_train_test_subjects.py" beforeDir="false" afterPath="$PROJECT_DIR$/load/load_train_test_subjects.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/load/dataset_split_train_test.py" beforeDir="false" afterPath="$PROJECT_DIR$/load/dataset_split_train_test.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/models.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -452,7 +454,15 @@
       <option name="project" value="LOCAL" />
       <updated>1719589170827</updated>
     </task>
-    <option name="localTasksCounter" value="47" />
+    <task id="LOCAL-00047" summary="changes to clustering and docstrings">
+      <option name="closed" value="true" />
+      <created>1719849442143</created>
+      <option name="number" value="00047" />
+      <option name="presentableId" value="LOCAL-00047" />
+      <option name="project" value="LOCAL" />
+      <updated>1719849442143</updated>
+    </task>
+    <option name="localTasksCounter" value="48" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -467,7 +477,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="corrected Sec column and index" />
     <MESSAGE value="cut first 200 samples after filtering" />
     <MESSAGE value="added tsfel" />
     <MESSAGE value="new segmentation implemented" />
@@ -492,6 +501,7 @@
     <MESSAGE value="added clustering" />
     <MESSAGE value="automatic best feature sets in main file" />
     <MESSAGE value="corrected clustering" />
-    <option name="LAST_COMMIT_MESSAGE" value="corrected clustering" />
+    <MESSAGE value="changes to clustering and docstrings" />
+    <option name="LAST_COMMIT_MESSAGE" value="changes to clustering and docstrings" />
   </component>
 </project>

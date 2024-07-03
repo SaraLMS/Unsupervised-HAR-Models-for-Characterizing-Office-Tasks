@@ -166,7 +166,7 @@ def main():
         clustering_model = "kmeans"
         feature_set = ['yMag_Max', 'xMag_Spectral centroid', 'yAcc_Interquartile range', 'zAcc_Interquartile range',
                        'zGyr_Interquartile range', 'zAcc_Min', 'yGyr_Spectral entropy']
-        ri, ari, nmi = clustering.general_model_clustering(main_path, subfolder_name, clustering_model, feature_set)
+        _, _, _ = clustering.general_model_clustering(main_path, subfolder_name, clustering_model, feature_set)
 
 
 if __name__ == "__main__":

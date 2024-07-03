@@ -2,14 +2,10 @@
 # imports
 # ------------------------------------------------------------------------------------------------------------------- #
 
-import pandas as pd
-from sklearn.preprocessing import MinMaxScaler
-
 import load
-import models
 import metrics
+from .common import normalize_features, cluster_data
 from typing import List, Tuple
-from constants import KMEANS, AGGLOMERATIVE, GAUSSIAN_MIXTURE_MODEL, DBSCAN, BIRCH, SUPPORTED_MODELS
 
 
 # ------------------------------------------------------------------------------------------------------------------- #
@@ -31,7 +27,7 @@ def general_model_clustering(main_path: str, subfolder_name: str, clustering_mod
     all_subjects_df = all_subjects_df[feature_set]
 
     # normalize features
-    all_subjects_df = _normalize_features(all_subjects_df)
+    all_subjects_df = normalize_features(all_subjects_df)
 
     # Initialize evaluation metrics accumulators
     total_rand_index = 0.0
@@ -49,19 +45,7 @@ def general_model_clustering(main_path: str, subfolder_name: str, clustering_mod
         true_labels = test_subjects_df['class']
 
         # Perform clustering based on the selected model
-        if clustering_model == KMEANS:
-            labels = models.kmeans_model(train_subjects_df, test_subjects_df, n_clusters=3)
-        elif clustering_model == AGGLOMERATIVE:
-            labels = models.agglomerative_clustering_model(train_subjects_df, test_subjects_df, n_clusters=3)
-        elif clustering_model == GAUSSIAN_MIXTURE_MODEL:
-            labels = models.gaussian_mixture_model(train_subjects_df, test_subjects_df, n_components=3)
-        elif clustering_model == DBSCAN:
-            labels = models.dbscan_model(train_subjects_df, test_subjects_df, 0.4, 10)
-        elif clustering_model == BIRCH:
-            labels = models.birch_model(train_subjects_df, test_subjects_df, n_clusters=3)
-        else:
-            raise ValueError(f"The model {clustering_model} is not supported. "
-                             f"Supported models are: {SUPPORTED_MODELS}")
+        labels = cluster_data(clustering_model, train_subjects_df, test_subjects_df, n_clusters=3)
 
         # Evaluate clustering
         rand_index, adj_rand_index, norm_mutual_info = metrics.evaluate_clustering(true_labels, labels)
@@ -89,26 +73,4 @@ def general_model_clustering(main_path: str, subfolder_name: str, clustering_mod
 # ------------------------------------------------------------------------------------------------------------------- #
 
 
-def _normalize_features(x: pd.DataFrame) -> pd.DataFrame:
-    """
-    Standardizes the features of a DataFrame using MinMaxscaler from sklearn.
 
-    This function applies Min-Max scaling to the features of the input DataFrame, transforming the values to a range
-    between 0 and 1.
-
-    :param x: pd.DataFrame
-    The input DataFrame containing the features to be standardized.
-
-    :return: pd.DataFrame
-    A DataFrame with the standardized feature values
-    """
-    # get new column names
-    x_column_names = x.columns
-
-    # standardize the features
-    x = MinMaxScaler().fit_transform(x)
-
-    # new dataframe without class and subclass column
-    x = pd.DataFrame(x, columns=x_column_names)
-
-    return x

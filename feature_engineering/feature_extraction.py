@@ -11,7 +11,7 @@ import load
 import parser
 import tsfel
 from typing import Dict, Any, List
-from constants import SUPPORTED_ACTIVITIES, CABINETS, SITTING, STANDING, WALKING, STAIRS, SEC
+from constants import SUPPORTED_ACTIVITIES, CABINETS, SITTING, STANDING, WALKING, STAIRS, SEC, WEAR_PREFIX
 
 # constants supported from filenames
 COFFEE = "coffee"
@@ -44,6 +44,7 @@ SUPPORTED_FILENAME_SUBCLASSES = [COFFEE, FOLDERS, SIT, STAND_STILL1, GESTURES, F
 
 SUPPORTED_INPUT_SUBCLASSES = [SIT, COFFEE, FOLDERS, STANDING_STILL, STANDING_GESTURES, WALK_FAST, WALK_SLOW,
                               WALK_MEDIUM, STAIRS]
+
 
 # ------------------------------------------------------------------------------------------------------------------- #
 # public functions
@@ -87,7 +88,8 @@ def load_json_file(json_path: str) -> Dict[Any, Any]:
 def feature_extractor(data_main_path: str, output_path: str, subclasses: list[str],
                       json_path: str = "C:/Users/srale/PycharmProjects/toolbox/feature_engineering",
                       output_filename: str = "acc_gyr_mag_phone_features_P013.csv",
-                      output_folder_name: str = "phone_features_basic_plus_activities", watch_only: bool = False) -> None:
+                      output_folder_name: str = "phone_features_basic_plus_activities",
+                      watch_only: bool = False) -> None:
     """
     Extracts features from sensor data files contained within subfolders of a main directory, adds class and subclass
     columns based on the filenames, and saves the extracted features into a CSV file. This function also balances the
@@ -148,7 +150,7 @@ def feature_extractor(data_main_path: str, output_path: str, subclasses: list[st
 
             if watch_only:
                 # Filter columns that contain '_wear'
-                wear_columns = [col for col in df.columns if '_wear' in col]
+                wear_columns = [col for col in df.columns if WEAR_PREFIX in col]
 
                 # Create a new dataframe with only the '_wear' columns
                 df = df[wear_columns]
@@ -157,6 +159,7 @@ def feature_extractor(data_main_path: str, output_path: str, subclasses: list[st
 
             # extract the features
             df = _extract_features_from_signal(df, features_dict)
+            # TODO NORMALIZE FEATURES HERE
 
             # add class and subclass columns
             df = _add_class_and_subclass_column(df, folder_name, filename)
@@ -366,7 +369,7 @@ def _balance_dataset(df_dict):
 
         # Special case for class 3 if stairs are present, subclass size needs adjustments
         if stairs_present and i == 2:
-            subclass_size = min_class_size // (len(signals)-4)
+            subclass_size = min_class_size // (len(signals) - 4)
         #
         # # standing class
         # elif i == 0:

@@ -2,16 +2,17 @@
 # imports
 # ------------------------------------------------------------------------------------------------------------------- #
 import pandas as pd
-import load
 
 
 # ------------------------------------------------------------------------------------------------------------------- #
 # public functions
 # ------------------------------------------------------------------------------------------------------------------- #
 
-def train_test_split(file_path, train_size, test_size):
+def train_test_split(df, train_size, test_size):
     """
     Splits the dataset into training and testing sets based on the given sizes.
+    The train set corresponds to the first train_size percentage of the dataset and the test_set the last
+    test_size percentage of the dataset.
 
     Args:
     - dataframes_list: DataFrame containing all the data.
@@ -23,7 +24,7 @@ def train_test_split(file_path, train_size, test_size):
     - test_set: DataFrame containing the test set.
     """
     # separate the dataframes by subclass of movement
-    dataframes_list = _split_by_subclass(file_path)
+    dataframes_list = _split_by_subclass(df)
 
     # lists for holding the train and test sets for each subclass
     train_set_list = []
@@ -55,20 +56,18 @@ def train_test_split(file_path, train_size, test_size):
 # ------------------------------------------------------------------------------------------------------------------- #
 # path
 
-def _split_by_subclass(file_path, subclass_column='subclass'):
+def _split_by_subclass(df, subclass_column='subclass'):
     """
     Splits the DataFrame into sub-DataFrames based on the unique values
     in the subclass column and stores them in a list.
 
     Args:
-    - df: The input DataFrame.
+    -
     - subclass_column: The column name containing the subclass information.
 
     Returns:
     - A list of sub-DataFrames, each corresponding to a unique subclass.
     """
-    # load dataset
-    df = load.load_data_from_csv(file_path)
 
     # list to store dataframes of each subclass
     sub_dataframes = []
