@@ -30,7 +30,7 @@ def main():
     do_one_subject_feature_selection = False
     do_general_model_feature_selection = False
     do_all_subjects_feature_selection = False
-    do_clustering = False
+    do_general_model_clustering = False
 
     if do_synchronization:
 
@@ -107,7 +107,7 @@ def main():
                 f"************************************* Iteration {i} ************************************************")
 
             # Get the best features for each subject
-            subjects_dict = feature_engineering.get_all_subjects_best_features(subject_path, features_folder_name, 0.05,
+            subjects_dict = feature_engineering.find_best_features_per_subject(subject_path, features_folder_name, 0.05,
                                                                                nr_iterations, clustering_model)
 
             # Get the top features with axis
@@ -160,7 +160,7 @@ def main():
         print(f"Mean Adjusted Rand Index: {best_scores_without_axis[1]}")
         print(f"Mean Normalized Mutual Information: {best_scores_without_axis[2]}")
 
-    if do_clustering:
+    if do_general_model_clustering:
         main_path = "C:/Users/srale/OneDrive - FCT NOVA/Tese/subjects_datasets"
         subfolder_name = "phone_features_basic_activities"
         clustering_model = "kmeans"

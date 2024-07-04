@@ -164,23 +164,20 @@ def feature_selector(train_set: pd.DataFrame, variance_threshold: float, n_itera
         # X-axis of the plot will show the features
         feature_names = ['\n'.join(features) for features in best_features]
 
-        # last position of the list has the final feature set and its rand index
-        best_features_list = best_features[-1]
-        highest_accuracy = accur_ri[-1]
-
+        # last position of the list has the final feature set and correspondent rand index
         # inform user
-        print(f"Best features list: {best_features_list}\n"
+        print(f"Best features list: {best_features[-1]}\n"
               f"Rand Index: {accur_ri[-1]}\n"
               f"Adjusted Rand Index: {adj_rand_scores[-1]}\n"
               f"Normalized Mutual Information: {norm_mutual_infos[-1]}")
 
-        if best_features_list not in feature_sets:
+        if best_features[-1] not in feature_sets:
 
             # save the feature set
-            feature_sets.append(best_features_list)
+            feature_sets.append(best_features[-1])
 
             # save the rand index of this feature set
-            feature_sets_accur.append(highest_accuracy)
+            feature_sets_accur.append(accur_ri[-1])
 
             if save_plots:
                 # generate filepath to store the plot
@@ -190,7 +187,7 @@ def feature_selector(train_set: pd.DataFrame, variance_threshold: float, n_itera
                 _save_plot_clustering_results(feature_names, accur_ri, adj_rand_scores, norm_mutual_infos, file_path,
                                               clustering_model)
                 # inform user
-                print(f"Plot saved with the following features: {best_features_list}")
+                print(f"Plot saved with the following features: {best_features[-1]}")
         else:
             # inform user
             print(f"Feature combination already tested.")
@@ -198,12 +195,12 @@ def feature_selector(train_set: pd.DataFrame, variance_threshold: float, n_itera
     return feature_sets, feature_sets_accur
 
 
-def get_all_subjects_best_features(main_path: str, features_folder_name: str, variance_threshold: float,
+def find_best_features_per_subject(main_path: str, features_folder_name: str, variance_threshold: float,
                                    n_iterations: int, clustering_model: str) -> Dict[str, Dict[str, Set[str]]]:
     """
     Apply the feature selection method in feature_selector for every subject. Filters the feature sets to get only
-    the ones with the highest accuracy, then counts the n most common features. Returns a dictionary with the subjects
-    and the lists with the n most common features in the best feature sets.
+    the ones with the highest accuracy for each subject, then counts the n most common features across all subjects.
+    Returns a dictionary with the subjects and the lists with the n most common features in the best feature sets.
 
     The subjects diretories must be organized the following way:
     main_path/subjects_folders/features_folder (features_folder_name)/csv_file(one only)
@@ -289,7 +286,7 @@ def get_all_subjects_best_features(main_path: str, features_folder_name: str, va
                     raise ValueError(f"Too many files: {len(feature_files)} files. Only one dataset per folder.")
 
             else:
-                ValueError(f"Folder name {features_folder_name} not found.")
+                raise ValueError(f"Folder name {features_folder_name} not found.")
 
     return subjects_dict
 
@@ -299,7 +296,7 @@ def get_top_features_across_all_subjects(subjects_dict: Dict[str, Dict[str, Set[
     """
     Aggregates and identifies the most common best features across all subjects.
 
-    This function takes a dictionary where the keys are subject folder names and the values are dictionaries containing
+    This function takes a dictionary where the keys are subject names and the values are dictionaries containing
     sets of unique features from the best feature sets of each subject (with and without axis). It then aggregates these
     features, counts their occurrences across all subjects, prints the feature occurrence counts, and returns a dictionary
     with two lists: the top n most common features with axis and the top n most common features without axis.
@@ -457,10 +454,10 @@ def test_feature_set_each_subject(main_path: str, features_folder_name: str, clu
                     nmi_list.append(nmi)
 
                 else:
-                    ValueError(f"Too many files: {len(feature_files)}")
+                    raise ValueError(f"Too many files: {len(feature_files)}")
 
             else:
-                ValueError(f"Folder name {features_folder_name} not found.")
+                raise ValueError(f"Folder name {features_folder_name} not found.")
 
     return np.round(np.mean(ri_list), 2), np.round(np.mean(ari_list), 2), np.round(np.mean(nmi_list), 2)
 

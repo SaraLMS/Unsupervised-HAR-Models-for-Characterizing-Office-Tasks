@@ -12,7 +12,7 @@ from .common import normalize_features, cluster_data
 # public functions
 # ------------------------------------------------------------------------------------------------------------------- #
 
-def subject_specific_clustering(df: pd.DataFrame, clustering_model: str, feature_set: str, train_size: float = 0.7,
+def cluster_subject(df: pd.DataFrame, clustering_model: str, feature_set: str, train_size: float = 0.7,
                                 test_size: float = 0.3):
     # Check if all features in the feature set exist in the dataframe columns
     missing_features = [feature for feature in feature_set if feature not in df.columns]
