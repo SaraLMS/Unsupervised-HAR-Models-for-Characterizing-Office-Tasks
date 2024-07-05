@@ -8,13 +8,12 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import random
-from sklearn.preprocessing import MinMaxScaler, StandardScaler
+from sklearn.preprocessing import MinMaxScaler
 from sklearn.feature_selection import VarianceThreshold
-import models
 import load
 import parser
 import metrics
-from constants import KMEANS, AGGLOMERATIVE, GAUSSIAN_MIXTURE_MODEL, DBSCAN, BIRCH, SUPPORTED_MODELS
+import clustering
 
 
 # ------------------------------------------------------------------------------------------------------------------- #
@@ -25,23 +24,25 @@ def feature_selector(train_set: pd.DataFrame, variance_threshold: float, n_itera
                      output_path: str, folder_name: str = "phone_features_kmeans_plots",
                      save_plots: bool = False) -> Tuple[List[List[str]], List[float]]:
     """
-    Splits the dataset into train and test and returns the features sets that give the best clustering results
-    for the train set as well as the rand index of the respective feature set.
+    This function returns the features sets that give the best clustering results for the train set
+    as well as the rand index of the respective feature set.
 
     The first step of the feature selection is removing the low variance and highly correlated features.
-    Then, shuffles the remaining features and iteratively adds features. The feature is removed if the accuracy
-    (rand index) doesn't improve. This process generated a plot with the x-axis being the features added in each
-    iteration and the y-axis the scores for the rand index, adjusted rand index and normalized mutual information.
+    Then, shuffles the remaining features and iteratively adds one feature at a time. If by adding the feature, the
+    rand index (accuracy) doesn't improve, that feature is removed from the feature set.
+    This process generates a plot with the x-axis being the features added in each iteration and the y-axis the scores
+    for the rand index, adjusted rand index and normalized mutual information.
+
     The plot is generated and saved if save_plots is set to True.
 
-    This process is repeated n_iterations times and with every iteration, the features are shuffled so that different
-    combinations of features can be tested.
+    This process is repeated n_iterations times and with every iteration, the column names (feature names) are shuffled
+    so that different combinations of features can be tested.
 
-    :param dataset_path: str
-    Path to the file containing the features extracted (columns) and data instances (rows).
+    :param train_set: pd.DataFrame
+    Train set containing the features extracted (columns) and data instances (rows).
 
     :param variance_threshold: float
-    Minimum variance value. Features with a training-set variance lower than this threshold will be removed.
+    Minimum variance value. Features with variance lower than this threshold will be removed.
 
     :param n_iterations: int
     Number of times the feature selection method is repeated.
@@ -61,10 +62,10 @@ def feature_selector(train_set: pd.DataFrame, variance_threshold: float, n_itera
     Name of the folder in which to store the plots
 
     :param save_plots: bool (default = True)
-    If True, Save the plots of each iteration of the feature selection process. Don't save if False.
+    If True, saves the plots of each iteration of the feature selection process. Don't save if False.
 
-    :return:
-
+    :return: Tuple[List[List[str]], List[float]]
+    List of feature sets and another list with the rand index of each feature set
     """
 
     # get the true (class) labels
@@ -118,29 +119,8 @@ def feature_selector(train_set: pd.DataFrame, variance_threshold: float, n_itera
             # Get the corresponding columns
             features_train = train_set[iter_feature_list]
 
-            if clustering_model == KMEANS:
-                # kmeans feature_engineering
-                labels = models.kmeans_model(features_train, features_train, n_clusters=3)
-
-            elif clustering_model == AGGLOMERATIVE:
-                # agglomerative feature_engineering
-                labels = models.agglomerative_clustering_model(features_train, features_train, n_clusters=3)
-
-            elif clustering_model == GAUSSIAN_MIXTURE_MODEL:
-                # gaussian mixture model
-                labels = models.gaussian_mixture_model(features_train, features_train, n_components=3)
-
-            elif clustering_model == DBSCAN:
-                # DBSCAN feature_engineering
-                labels = models.dbscan_model(features_train, features_train, 0.4, 10)
-
-            elif clustering_model == BIRCH:
-                # Birch feature_engineering
-                labels = models.birch_model(features_train, features_train, n_clusters=3)
-
-            else:
-                raise ValueError(f"The model {clustering_model} is not supported. "
-                                 f"Supported models are: {SUPPORTED_MODELS}")
+            # cluster the data
+            labels = clustering.cluster_data(clustering_model, features_train, features_train, n_clusters=3)
 
             # Evaluate clustering with this feature set
             ri, ari, nmi = metrics.evaluate_clustering(true_labels, labels)
@@ -263,6 +243,7 @@ def find_best_features_per_subject(main_path: str, features_folder_name: str, va
                     # Filter for the best feature sets and their accuracies
                     best_feature_sets, best_acc = _filter_best_feature_sets(feature_sets, accuracies)
 
+                    # inform user
                     print("#########################################################################")
                     print(f"SUBJECT: {subject_folder}")
                     print("#########################################################################")
@@ -270,11 +251,19 @@ def find_best_features_per_subject(main_path: str, features_folder_name: str, va
                     for feat, acc in zip(best_feature_sets, best_acc):
                         print(f"Features: {feat} \n Rand Index: {acc}")
 
-                    # Store the unique features in a set to avoid repetitions
+                    # set to store the features with axis
                     unique_features = set()
+
+                    # set to store the features without axis
                     unique_features_no_axis = set()
+
+                    # iterate through the best feature sets
                     for feat_set in best_feature_sets:
+
+                        # add the feature with axis to the respective set
                         unique_features.update(feat_set)
+
+                        # remove the first letter - axis to the respective set
                         unique_features_no_axis.update([feature[1:] for feature in feat_set])
 
                     subjects_dict[subject_folder] = {
@@ -291,8 +280,8 @@ def find_best_features_per_subject(main_path: str, features_folder_name: str, va
     return subjects_dict
 
 
-def get_top_features_across_all_subjects(subjects_dict: Dict[str, Dict[str, Set[str]]], top_n: int) -> Dict[
-    str, List[str]]:
+def get_top_features_across_all_subjects(subjects_dict: Dict[str, Dict[str, Set[str]]], top_n: int) \
+        -> Dict[str, List[str]]:
     """
     Aggregates and identifies the most common best features across all subjects.
 
@@ -331,9 +320,6 @@ def get_top_features_across_all_subjects(subjects_dict: Dict[str, Dict[str, Set[
     # for feature, count in feature_counter_without_axis.items():
     #     print(f"{feature}: {count} occurrences")
 
-    # Select the top n most common features
-    # most_common_features_with_axis = [feature for feature, count in feature_counter_with_axis.most_common(top_n)]
-    # most_common_features_without_axis = [feature for feature, count in feature_counter_without_axis.most_common(top_n)]
     # Select the top n most common features with tie-breaking
     most_common_features_with_axis = _select_top_n_features_with_tie_breaking(feature_counter_with_axis, top_n)
     most_common_features_without_axis = _select_top_n_features_with_tie_breaking(feature_counter_without_axis, top_n)
@@ -351,7 +337,7 @@ def test_feature_set(feature_set: List[str], file_path: str, clustering_model: s
     Tests a specific set of features for clustering.
 
     This function evaluates the performance of a specified clustering model using a given set of features from a dataset.
-    It calculates the Rand Index, Adjusted Rand Index, and Normalized Mutual Information scores.
+    Calculates the Rand Index, Adjusted Rand Index, and Normalized Mutual Information scores.
 
     :param feature_set: List[str]
     List of features to be used for clustering.
@@ -391,29 +377,8 @@ def test_feature_set(feature_set: List[str], file_path: str, clustering_model: s
     # get only the wanted features
     train_set = train_set[feature_set]
 
-    if clustering_model == KMEANS:
-        # kmeans feature_engineering
-        labels = models.kmeans_model(train_set, train_set, n_clusters=3)
-
-    elif clustering_model == AGGLOMERATIVE:
-        # agglomerative feature_engineering
-        labels = models.agglomerative_clustering_model(train_set, train_set, n_clusters=3)
-
-    elif clustering_model == GAUSSIAN_MIXTURE_MODEL:
-        # gaussian mixture model
-        labels = models.gaussian_mixture_model(train_set, train_set, n_components=3)
-
-    elif clustering_model == DBSCAN:
-        # DBSCAN feature_engineering
-        labels = models.dbscan_model(train_set, train_set, 0.4, 10)
-
-    elif clustering_model == BIRCH:
-        # Birch feature_engineering
-        labels = models.birch_model(train_set, train_set, n_clusters=3)
-
-    else:
-        raise ValueError(f"The model {clustering_model} is not supported. "
-                         f"Supported models are: {SUPPORTED_MODELS}")
+    # cluster the data
+    labels = clustering.cluster_data(clustering_model, train_set, train_set, n_clusters=3)
 
     # Evaluate clustering with this feature set
     ri, ari, nmi = metrics.evaluate_clustering(true_labels, labels)
@@ -421,8 +386,35 @@ def test_feature_set(feature_set: List[str], file_path: str, clustering_model: s
     return ri, ari, nmi
 
 
-def test_feature_set_each_subject(main_path: str, features_folder_name: str, clustering_model: str,
-                                  feature_set: List[str]) -> Tuple[float, float, float]:
+def test_same_feature_set_for_all_subjects(main_path: str, features_folder_name: str, clustering_model: str,
+                                           feature_set: List[str]) -> Tuple[float, float, float]:
+    """
+    Performs clustering and evaluates the performance across all subjects with the same feature set.
+    This function goes through the main folder containing the subject folders. Inside each subject folder finds
+    the folder with the name features_folder_name where the csv file containing all the features is stored. Loads this
+    file, gets only the columns with the chose features is feature_set, clusters the data and evaluates. Returns the
+    mean of the rand index, adjusted rand index and normalized mutual information of all subjects.
+
+    :param main_path: str
+    Path to the main folder containing the subject folders
+
+    :param features_folder_name: str
+    Name of the folder containing the csv file with the features
+
+    :param clustering_model: str
+    Unsupervised learning model used to test the feature set. Supported models are:
+        "kmeans" - KMeans clustering
+        "agglomerative": Agglomerative clustering model
+        "gmm": Gaussian Mixture Model
+        "dbscan": DBSCAN. Needs parameter search - not implemented
+        "birch": Birch clustering algorithm
+
+    :param feature_set: List[str]
+    List of features to be used for clustering
+
+    :return: Tuple[float, float, float]
+    Mean scores of all subjects
+    """
     ri_list = []
     ari_list = []
     nmi_list = []
@@ -465,10 +457,13 @@ def test_feature_set_each_subject(main_path: str, features_folder_name: str, clu
 def test_different_axis(subjects_dict: Dict[str, Dict[str, Set[str]]], main_path: str, features_folder_name: str,
                         clustering_model: str, top_n: int) -> Dict[str, Dict[str, Tuple[float, float, float]]]:
     """
-    Tests the most common features without axis by adding different axes (x, y, z) and evaluates the performance.
+    Cluster the data using the most common features without axis.
+    Gets the top n most common features without axis then adds the axis (x, y, z).
+    Performs clustering on these features with only the x-axis, y-axis, and z-axis. Saves the feature sets and
+    clustering results (rand index, adjusted rand index and normalized mutual information) in a dictionary.
 
     :param subjects_dict: Dict[str, Dict[str, Set[str]]]
-    Dictionary where keys are the subject folder names and values are dictionaries with keys 'unique_features' and
+    Dictionary where keys are the subject names and values are dictionaries with keys 'unique_features' and
     'unique_features_no_axis', and the values are sets of unique features and unique features without the axis prefix, respectively.
 
     :param main_path: str
@@ -499,12 +494,14 @@ def test_different_axis(subjects_dict: Dict[str, Dict[str, Set[str]]], main_path
 
         print(f"\nTest: {axis_feature_set}\n")
         # Test the feature set with the axis prefix for each subject
-        mean_ri, mean_ari, mean_nmi = test_feature_set_each_subject(main_path, features_folder_name, clustering_model,
-                                                                    axis_feature_set)
+        mean_ri, mean_ari, mean_nmi = test_same_feature_set_for_all_subjects(main_path, features_folder_name,
+                                                                             clustering_model,
+                                                                             axis_feature_set)
 
         results[axis] = {'features': axis_feature_set, 'mean_ri': mean_ri, 'mean_ari': mean_ari, 'mean_nmi': mean_nmi}
 
     return results
+
 
 # ------------------------------------------------------------------------------------------------------------------- #
 # Private functions
@@ -618,20 +615,23 @@ def _drop_low_variance_features(x: pd.DataFrame, variance_threshold: float) -> p
     return x
 
 
-def _remove_collinear_features(x, threshold):
-    '''
-    Objective:
-        Remove collinear features in a dataframe with a correlation coefficient
-        greater than the threshold. Removing collinear features can help a model
-        to generalize and improves the interpretability of the model.
+def _remove_collinear_features(x: pd.DataFrame, threshold: float) -> pd.DataFrame:
+    """
+    https://www.kaggle.com/code/oldwine357/removing-highly-correlated-features
 
-    Inputs:
-        x: features dataframe
-        threshold: features with correlations greater than this value are removed
+    Remove collinear features in a dataframe with a correlation coefficient
+    greater than the threshold. Removing collinear features can help a model
+    to generalize and improves the interpretability of the model.
 
-    Output:
-        dataframe that contains only the non-highly-collinear features
-    '''
+    :param x: pd.DataFrame
+    A pandas DataFrame containing the features
+
+    :param threshold: float
+    features with correlations greater than this value are removed
+
+    :return: pd.DataFrame
+    A pandas DataFrame that contains only the non-highly-collinear features
+    """
 
     # Calculate the correlation matrix
     corr_matrix = x.corr()
@@ -655,21 +655,54 @@ def _remove_collinear_features(x, threshold):
     # Drop one of each pair of correlated columns
     drops = set(drop_cols)
     x = x.drop(columns=drops)
+
     # print('Removed Columns {}'.format(drops))
     return x
 
 
-def _shuffle_column_names(x: pd.DataFrame):
+def _shuffle_column_names(x: pd.DataFrame) -> List[str]:
+    """
+    Shuffle the column names of a dataframe.
+
+    :param x: pd.DataFrame
+    Pandas dataframe containing the data
+
+    :return: List[str]
+    List containing the shuffled column names
+    """
     column_names = list(x.columns)
     random.shuffle(column_names)
     return column_names
 
 
 def _remove_first_letter(feature_sets: List[List[str]]) -> List[List[str]]:
+    """
+    Removes the first letter of every string inside a List of Lists. This first letter corresponds to the axis of
+    the sensor.
+
+    :param feature_sets: List[List[str]]
+    List containing lists of strings (feature sets).
+
+    :return: List[List[str]]
+    List of lists with the first letter of every string removed
+    """
     return [[feature[1:] for feature in feature_set] for feature_set in feature_sets]
 
 
-def _filter_best_feature_sets(feature_sets, feature_sets_accur):
+def _filter_best_feature_sets(feature_sets: List[List[str]], feature_sets_accur: List[float]) \
+        -> Tuple[List[List[str]], List[float]]:
+    """
+    Gets the feature set(s) with the highest rand index.
+
+    :param feature_sets: List[List[str]]
+    List containing lists of strings (feature sets).
+
+    :param feature_sets_accur: List[float]
+    List containing the rand index of the correspondent feature set
+
+    :return: Tuple[List[List[str]], List[float]]
+    Feature sets with the highest rand index and the rand index itself
+    """
     # Find the highest accuracy
     highest_accuracy = max(feature_sets_accur)
 
@@ -698,10 +731,16 @@ def _aggregate_features(subjects_dict: Dict[str, Set[str]]) -> List[str]:
 
 def _select_top_n_features_with_tie_breaking(feature_counter: Counter, top_n: int) -> List[str]:
     """
-    Selects the top n features from a Counter, with a tie-breaking strategy to randomly select among features with the same count.
+    Selects the top n most common features from a feature Counter. This feature counter has the feature name and the
+    amount of times this features appears in the best feature sets across all subjects. For features that appear the
+    same number of times, these are randomly chosen.
+    Example:
+    top_n = 3 most common features from the following feature counter:
+    (feature1, 10) (feature2, 9) (feature3, 9) (feature4, 9)
+    returns: [feature1, feature2, feature4] or [feature1, feature3, feature4] or [feature1, feature2, feature3]
 
     :param feature_counter: Counter
-    Counter object with feature counts.
+    Object (Counter) with feature counts.
 
     :param top_n: int
     Number of top features to select.
@@ -736,6 +775,7 @@ def _select_top_n_features_with_tie_breaking(feature_counter: Counter, top_n: in
         if count == current_count:
             current_tie_group.append(feature)
         else:
+            # randomly choose the features that have the same count
             if len(top_features) + len(current_tie_group) > top_n:
                 top_features.extend(random.sample(current_tie_group, top_n - len(top_features)))
             else:
@@ -747,51 +787,3 @@ def _select_top_n_features_with_tie_breaking(feature_counter: Counter, top_n: in
         top_features.extend(random.sample(current_tie_group, top_n - len(top_features)))
 
     return top_features[:top_n]
-# def _select_top_n_features_with_tie_breaking(feature_counter: Counter, top_n: int) -> List[str]:
-#     """
-#     Selects the top n features from a Counter, with a tie-breaking strategy to randomly select one feature among features with the same count.
-#
-#     :param feature_counter: Counter
-#     Counter object with feature counts.
-#
-#     :param top_n: int
-#     Number of top features to select.
-#
-#     :return: List[str]
-#     List of the top n features.
-#     """
-#     # Sort features by count in descending order
-#     features_by_count = sorted(feature_counter.items(), key=lambda item: item[1], reverse=True)
-#
-#     top_features = []  # List to store the top n features
-#     current_count = None  # Track the current count group
-#     current_tie_group = []  # List to store features with the same count
-#
-#     # Iterate through the sorted features by count
-#     for feature, count in features_by_count:
-#         # If we've already selected top n features, stop the loop
-#         if len(top_features) >= top_n:
-#             break
-#
-#         # Initialize the current count if it's None (first iteration)
-#         if current_count is None:
-#             current_count = count
-#
-#         # If the count is the same as the current count, add to the tie group
-#         if count == current_count:
-#             current_tie_group.append(feature)
-#         else:
-#             # If the count is different, resolve the tie group
-#             if current_tie_group:
-#                 # Randomly select one feature from the tie group and add it to the top features
-#                 top_features.append(random.choice(current_tie_group))
-#
-#             # Reset the tie group for the new count
-#             current_tie_group = [feature]
-#             current_count = count
-#
-#     # After the loop, resolve any remaining tie group
-#     if len(top_features) < top_n and current_tie_group:
-#         top_features.append(random.choice(current_tie_group))
-#
-#     return top_features[:top_n]

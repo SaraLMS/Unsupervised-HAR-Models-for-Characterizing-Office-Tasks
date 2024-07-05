@@ -7,7 +7,6 @@
     <list default="true" id="3466cb1d-2559-4122-9522-f23b0d0f6b0a" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/clustering/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/clustering/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/clustering/subject_specific_model.py" beforeDir="false" afterPath="$PROJECT_DIR$/clustering/subject_specific_model.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/feature_engineering/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/feature_engineering/__init__.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/feature_engineering/feature_selection.py" beforeDir="false" afterPath="$PROJECT_DIR$/feature_engineering/feature_selection.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
@@ -467,7 +466,15 @@
       <option name="project" value="LOCAL" />
       <updated>1720002435549</updated>
     </task>
-    <option name="localTasksCounter" value="49" />
+    <task id="LOCAL-00049" summary="function names changed">
+      <option name="closed" value="true" />
+      <created>1720109024232</created>
+      <option name="number" value="00049" />
+      <option name="presentableId" value="LOCAL-00049" />
+      <option name="project" value="LOCAL" />
+      <updated>1720109024232</updated>
+    </task>
+    <option name="localTasksCounter" value="50" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -482,7 +489,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="added tsfel" />
     <MESSAGE value="new segmentation implemented" />
     <MESSAGE value="added features to tsfel" />
     <MESSAGE value="corrected subclass name" />
@@ -507,6 +513,7 @@
     <MESSAGE value="corrected clustering" />
     <MESSAGE value="changes to clustering and docstrings" />
     <MESSAGE value="subject specific clustering" />
-    <option name="LAST_COMMIT_MESSAGE" value="subject specific clustering" />
+    <MESSAGE value="function names changed" />
+    <option name="LAST_COMMIT_MESSAGE" value="function names changed" />
   </component>
 </project>

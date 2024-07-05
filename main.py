@@ -115,10 +115,10 @@ def main():
                 feature_engineering.get_top_features_across_all_subjects(subjects_dict, top_n)['features_with_axis']
 
             # Test the top features with axis for each subject
-            mean_ri, mean_ari, mean_nmi = feature_engineering.test_feature_set_each_subject(subject_path,
-                                                                                            features_folder_name,
-                                                                                            clustering_model,
-                                                                                            final_feature_set_with_axis)
+            mean_ri, mean_ari, mean_nmi = feature_engineering.test_same_feature_set_for_all_subjects(subject_path,
+                                                                                                     features_folder_name,
+                                                                                                     clustering_model,
+                                                                                                     final_feature_set_with_axis)
 
             # Update the best feature set with axis if the current one is better
             if mean_ri > best_scores_with_axis[0]:
