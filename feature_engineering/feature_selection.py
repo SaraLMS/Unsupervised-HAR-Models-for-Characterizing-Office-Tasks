@@ -10,6 +10,8 @@ import matplotlib.pyplot as plt
 import random
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.feature_selection import VarianceThreshold
+
+# internal imports
 import load
 import parser
 import metrics
@@ -25,7 +27,8 @@ def feature_selector(train_set: pd.DataFrame, variance_threshold: float, n_itera
                      save_plots: bool = False) -> Tuple[List[List[str]], List[float]]:
     """
     This function returns the features sets that give the best clustering results for the train set
-    as well as the rand index of the respective feature set.
+    as well as the rand index of the respective feature sets.
+    # TODO (1) (2) (3)
 
     The first step of the feature selection is removing the low variance and highly correlated features.
     Then, shuffles the remaining features and iteratively adds one feature at a time. If by adding the feature, the
@@ -58,8 +61,8 @@ def feature_selector(train_set: pd.DataFrame, variance_threshold: float, n_itera
     :param output_path: str
     Path to the main folder in which the plots should be saved
 
-    :param folder_name: str
-    Name of the folder in which to store the plots
+    :param folder_name: (optional) str
+    Name of the folder in which to store the plots. Default: "phone_features_kmeans_plots".
 
     :param save_plots: bool (default = True)
     If True, saves the plots of each iteration of the feature selection process. Don't save if False.
@@ -67,7 +70,7 @@ def feature_selector(train_set: pd.DataFrame, variance_threshold: float, n_itera
     :return: Tuple[List[List[str]], List[float]]
     List of feature sets and another list with the rand index of each feature set
     """
-
+    # TODO CHECK MODELS
     # get the true (class) labels
     true_labels = train_set['class']
 
@@ -78,7 +81,8 @@ def feature_selector(train_set: pd.DataFrame, variance_threshold: float, n_itera
     if "subject" in train_set.columns:
         train_set = train_set.drop(['subject'], axis=1)
 
-    # scale features
+    # (1) scale features
+    # TODO EXPLAIN IN DOCSTRING NORM
     train_set = _normalize_features(train_set)
 
     # drop features with variance lower than variance_threshold
@@ -94,13 +98,13 @@ def feature_selector(train_set: pd.DataFrame, variance_threshold: float, n_itera
     feature_sets = []
     feature_sets_accur = []
 
-    for i in range(1, n_iterations + 1):
+    for iteration in range(1, n_iterations + 1):
         # Reset the best accuracy for each iteration
         best_ri = 0
 
         # Shuffle the column names at the beginning of each iteration
         shuffled_features = _shuffle_column_names(train_set)
-        print(f"Shuffled Features (Iteration {i}): {shuffled_features}")
+        print(f"Shuffled Features (Iteration {iteration}): {shuffled_features}")
 
         # Reset the feature list for each iteration
         iter_feature_list = []
@@ -120,10 +124,10 @@ def feature_selector(train_set: pd.DataFrame, variance_threshold: float, n_itera
             features_train = train_set[iter_feature_list]
 
             # cluster the data
-            labels = clustering.cluster_data(clustering_model, features_train, features_train, n_clusters=3)
+            pred_labels = clustering.cluster_data(clustering_model, features_train, features_train, n_clusters=3)
 
             # Evaluate clustering with this feature set
-            ri, ari, nmi = metrics.evaluate_clustering(true_labels, labels)
+            ri, ari, nmi = metrics.evaluate_clustering(true_labels, pred_labels)
 
             # if the Rand Index does not improve remove feature
             if ri <= best_ri:
@@ -161,7 +165,7 @@ def feature_selector(train_set: pd.DataFrame, variance_threshold: float, n_itera
 
             if save_plots:
                 # generate filepath to store the plot
-                file_path = f"{output_path}/feature_set{i}_results.png"
+                file_path = f"{output_path}/feature_set{iteration}_results.png"
 
                 # plot clustering results for that feature set
                 _save_plot_clustering_results(feature_names, accur_ri, adj_rand_scores, norm_mutual_infos, file_path,
@@ -182,7 +186,7 @@ def find_best_features_per_subject(main_path: str, features_folder_name: str, va
     the ones with the highest accuracy for each subject, then counts the n most common features across all subjects.
     Returns a dictionary with the subjects and the lists with the n most common features in the best feature sets.
 
-    The subjects diretories must be organized the following way:
+    The subjects directories must be organized the following way:
     main_path/subjects_folders/features_folder (features_folder_name)/csv_file(one only)
 
     The output path to the plots is main_path/subjects_folders/subfolder, and the output folder name is set in feature

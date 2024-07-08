@@ -91,14 +91,18 @@ def feature_extractor(data_main_path: str, output_path: str, subclasses: list[st
                       output_folder_name: str = "phone_features_basic_plus_activities",
                       watch_only: bool = False) -> None:
     """
-    Extracts features from sensor data files contained within subfolders of a main directory, adds class and subclass
+    # TODO filename prefix and subject number - FILE_SUFFIX = "_feature_P{}.csv" in the constants
+    file_name = prefix + FILE_SUFFIX.format(subject_num)
+    # TODO doctsring sucks
+    # TODO WATCH ONLY IN TASK SEGMENTATION
+    Extracts features from sensor data files contained within the sub-folders of a main directory, adds class and subclass
     columns based on the filenames, and saves the extracted features into a CSV file. This function also balances the
     dataset so that there's the same number of samples from each class, and for each class there's the same number of
     samples from each subclass. Each subclass should be equally sampled inside their respective class for this function
     to work correctly.
 
     :param data_main_path: str
-        Path to the main folder. Signals are contained in the sub folders inside the main path.
+        Path to the main folder. Signals are contained in the sub folders inside the main path. EXAMPLE
 
     :param output_path: str
         Path to the folder where the csv file should be saved.
@@ -119,7 +123,7 @@ def feature_extractor(data_main_path: str, output_path: str, subclasses: list[st
         Path to the json file containing the features to be extracted using TSFEL
 
     :param output_filename: str
-        Name of the file containing the features
+        Name of the file containing the EXTRACTED features
 
     :param output_folder_name: str
         Name of the folder in which to store the dataset
@@ -130,6 +134,7 @@ def feature_extractor(data_main_path: str, output_path: str, subclasses: list[st
     :return: None
 
     """
+    # TODO CHECK SUBCLASSES
     # check directory
     parser.check_in_path(data_main_path, '.csv')
 
@@ -145,6 +150,7 @@ def feature_extractor(data_main_path: str, output_path: str, subclasses: list[st
 
         for filename in os.listdir(folder_path):
             file_path = os.path.join(folder_path, filename)
+            # TODO LOAD ONLY THE SUBCLASSES IN SUBCLASSES
 
             df = load.load_data_from_csv(file_path)
 
@@ -159,12 +165,11 @@ def feature_extractor(data_main_path: str, output_path: str, subclasses: list[st
 
             # extract the features
             df = _extract_features_from_signal(df, features_dict)
-            # TODO NORMALIZE FEATURES HERE
 
             # add class and subclass columns
             df = _add_class_and_subclass_column(df, folder_name, filename)
 
-            # get subclass name
+            # get subclass name: used as key for dictionary
             subclass_name = _check_subclass(filename)
 
             # save in dict
@@ -311,6 +316,7 @@ def _check_subclass(filename: str) -> str:
 
 
 def _balance_subclasses(signals, subclass_size):
+    # TODO DOCSTRING EXPLAIN CUT AT THE END
     balanced_class = [df.iloc[:subclass_size] for df in signals]
     return balanced_class
 
@@ -327,13 +333,14 @@ def _balance_dataset(df_dict):
     # TODO - PUT THIS IN A FUCNTION MAYBE ?
     # TODO - SUBCLASS SIZES WHEN THERE'S STAIRS MIGHT NEED TO BE ADJUSTED BY THE USER
     # lists to store dataframes from the same class
+    # TODO give class names
     signals_class_1 = []
     signals_class_2 = []
     signals_class_3 = []
-
+    # TODO: @p-probst dynamically assign classes
     # get list of signals (dataframes) from each class
     for subclass_key, df in df_dict.items():
-
+        # TODO APPEND LEN OF DF
         # df containing data from one subclass only
         # check first value of the class column since all values are the same
         if df['class'].iloc[0] == 1:

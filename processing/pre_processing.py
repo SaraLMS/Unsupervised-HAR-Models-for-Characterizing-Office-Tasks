@@ -74,9 +74,10 @@ def processor(sync_data_path: str, output_path: str, raw_folder_name: str, filte
                 filtered_data = _apply_filters(df, fs)
 
                 # cut first 200 samples to remove impulse response from the butterworth filters
+                # TODO parameter this 200
                 filtered_data = filtered_data.iloc[200:]
                 filtered_tasks.append(filtered_data)
-
+            # TODO no need if else
             if STAIRS in folder_name:
                 nr_stairs_segments = len(filtered_tasks)
                 # generate output filenames
@@ -86,6 +87,7 @@ def processor(sync_data_path: str, output_path: str, raw_folder_name: str, filte
                 output_filenames = _generate_task_filenames(folder_name, filename, 4)
 
             for df, output_filename in zip(filtered_tasks, output_filenames):
+                # TODO: @p-probst allow for saving in different file formats
                 # save data to csv
                 parser.save_data_to_csv(output_filename, df, filtered_output_path, folder_name)
 
@@ -156,6 +158,7 @@ def _generate_task_filenames(folder_name: str, filename: str, nr_stairs_segments
     # split .csv from the filename
     base_filename, extension = os.path.splitext(filename)
 
+    # TODO suffixes in constants, pass suffixes as parameter check nr of segments and suffixes
     # get the suffixes to be added according to the activity
     if WALKING in folder_name:
         suffixes = ['_slow', '_medium', '_fast']

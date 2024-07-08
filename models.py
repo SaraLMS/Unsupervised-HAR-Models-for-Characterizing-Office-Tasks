@@ -14,7 +14,7 @@ from sklearn.ensemble import RandomForestClassifier
 def kmeans_model(train_set: pd.DataFrame, test_set: pd.DataFrame, n_clusters: int) -> pd.Series:
     kmeans = KMeans(n_clusters=n_clusters, random_state=42).fit(train_set)
     labels_kmeans = kmeans.predict(test_set)
-
+    # predicted_labels = KMeans(n_clusters, random_state).fit_predict(df)
     return labels_kmeans
 
 

@@ -6,6 +6,7 @@ import numpy as np
 from typing import Tuple
 from sklearn.metrics import rand_score, adjusted_rand_score, normalized_mutual_info_score
 
+
 # ------------------------------------------------------------------------------------------------------------------- #
 # public functions
 # ------------------------------------------------------------------------------------------------------------------- #
