@@ -36,7 +36,7 @@ def normalize_features(x: pd.DataFrame) -> pd.DataFrame:
     return x
 
 
-def cluster_data(clustering_model: str, train_set: pd.DataFrame, test_set: pd.DataFrame, n_clusters: int):
+def cluster_data(clustering_model: str, train_set: pd.DataFrame, test_set: pd.DataFrame, n_clusters: int) -> pd.Series:
     # Perform clustering based on the selected model
     if clustering_model == KMEANS:
         labels = models.kmeans_model(train_set, test_set, n_clusters)

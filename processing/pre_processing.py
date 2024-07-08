@@ -6,7 +6,7 @@ from typing import Dict, List
 import load
 import pandas as pd
 
-from constants import WALKING, CABINETS, STANDING, SITTING, SUPPORTED_ACTIVITIES, STAIRS
+from constants import WALKING, CABINETS, STANDING, SITTING, SUPPORTED_ACTIVITIES, STAIRS, CSV
 import parser
 from .filters import median_and_lowpass_filter, gravitational_filter
 from .task_segmentation import segment_tasks
@@ -19,7 +19,7 @@ from constants import ACCELEROMETER_PREFIX, SUPPORTED_PREFIXES
 # ------------------------------------------------------------------------------------------------------------------- #
 
 def processor(sync_data_path: str, output_path: str, raw_folder_name: str, filtered_folder_name: str,
-              save_raw_tasks: bool = True, fs: int = 100) -> None:
+              save_raw_tasks: bool = True, fs: int = 100, impulse_response_samples: int = 200) -> None:
     """
     Processes and filters signal data from csv files in a directory structure,
      storing the results in a dictionary.
@@ -38,7 +38,7 @@ def processor(sync_data_path: str, output_path: str, raw_folder_name: str, filte
 
     """
 
-    parser.check_in_path(sync_data_path, '.csv')
+    parser.check_in_path(sync_data_path, CSV)
 
     # create output paths
     raw_output_path = parser.create_dir(output_path, raw_folder_name)
@@ -74,8 +74,7 @@ def processor(sync_data_path: str, output_path: str, raw_folder_name: str, filte
                 filtered_data = _apply_filters(df, fs)
 
                 # cut first 200 samples to remove impulse response from the butterworth filters
-                # TODO parameter this 200
-                filtered_data = filtered_data.iloc[200:]
+                filtered_data = filtered_data.iloc[impulse_response_samples:]
                 filtered_tasks.append(filtered_data)
             # TODO no need if else
             if STAIRS in folder_name:

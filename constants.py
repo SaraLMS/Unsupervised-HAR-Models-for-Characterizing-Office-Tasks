@@ -1,11 +1,24 @@
 # ------------------------------------------------------------------------------------------------------------------- #
-# private functions # TODO ADD THESE SECTIONS
+# supported file extensions
+# ------------------------------------------------------------------------------------------------------------------- #
+
+TXT = ".txt"
+CSV = ".csv"
+
+
+# ------------------------------------------------------------------------------------------------------------------- #
+# synchronization constants
 # ------------------------------------------------------------------------------------------------------------------- #
 BUFFER_SIZE_SECONDS = 0.5
 
+# synchronization methods
 CROSSCORR = "crosscorr"
 TIMESTAMPS = "timestamps"
 
+
+# ------------------------------------------------------------------------------------------------------------------- #
+# supported sensors and devices
+# ------------------------------------------------------------------------------------------------------------------- #
 # supported devices
 PHONE = "phone"
 WATCH = "watch"
@@ -38,6 +51,10 @@ ROTATION_VECTOR_PREFIX = "Rot"
 WEAR_PREFIX = "_wear"
 SUPPORTED_PREFIXES = [ACCELEROMETER_PREFIX, GYROSCOPE_PREFIX, MAGNETOMETER_PREFIX, ROTATION_VECTOR_PREFIX]
 
+# ------------------------------------------------------------------------------------------------------------------- #
+# supported activities
+# ------------------------------------------------------------------------------------------------------------------- #
+
 # activity types
 WALKING = "walking"
 STANDING = "standing"
@@ -47,11 +64,15 @@ STAIRS = "stairs"
 
 SUPPORTED_ACTIVITIES = [WALKING, STANDING, SITTING, CABINETS, STAIRS]
 
+# ------------------------------------------------------------------------------------------------------------------- #
+# supported clustering models
+# ------------------------------------------------------------------------------------------------------------------- #
 
-# clustering
 KMEANS = "kmeans"
 AGGLOMERATIVE = "agglomerative"
 GAUSSIAN_MIXTURE_MODEL = "gmm"
 DBSCAN = "dbscan"
 BIRCH = "birch"
 SUPPORTED_MODELS = [KMEANS, AGGLOMERATIVE, GAUSSIAN_MIXTURE_MODEL, DBSCAN, BIRCH]
+
+

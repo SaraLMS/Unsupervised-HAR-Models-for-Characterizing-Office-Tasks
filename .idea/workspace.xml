@@ -6,14 +6,12 @@
   <component name="ChangeListManager">
     <list default="true" id="3466cb1d-2559-4122-9522-f23b0d0f6b0a" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/clustering/general_model.py" beforeDir="false" afterPath="$PROJECT_DIR$/clustering/general_model.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/clustering/subject_specific_model.py" beforeDir="false" afterPath="$PROJECT_DIR$/clustering/subject_specific_model.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clustering/common.py" beforeDir="false" afterPath="$PROJECT_DIR$/clustering/common.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/constants.py" beforeDir="false" afterPath="$PROJECT_DIR$/constants.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/feature_engineering/feature_extraction.py" beforeDir="false" afterPath="$PROJECT_DIR$/feature_engineering/feature_extraction.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/feature_engineering/feature_selection.py" beforeDir="false" afterPath="$PROJECT_DIR$/feature_engineering/feature_selection.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/metrics/clustering_metrics.py" beforeDir="false" afterPath="$PROJECT_DIR$/metrics/clustering_metrics.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/models.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/processing/pre_processing.py" beforeDir="false" afterPath="$PROJECT_DIR$/processing/pre_processing.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/processing/task_segmentation.py" beforeDir="false" afterPath="$PROJECT_DIR$/processing/task_segmentation.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/synchronization/synchronization.py" beforeDir="false" afterPath="$PROJECT_DIR$/synchronization/synchronization.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -85,14 +83,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1711360410072</updated>
-    </task>
-    <task id="LOCAL-00002" summary="add synchronization">
-      <option name="closed" value="true" />
-      <created>1711385322708</created>
-      <option name="number" value="00002" />
-      <option name="presentableId" value="LOCAL-00002" />
-      <option name="project" value="LOCAL" />
-      <updated>1711385322708</updated>
     </task>
     <task id="LOCAL-00003" summary="add synchronization">
       <option name="closed" value="true" />
@@ -478,7 +468,15 @@
       <option name="project" value="LOCAL" />
       <updated>1720189268247</updated>
     </task>
-    <option name="localTasksCounter" value="51" />
+    <task id="LOCAL-00051" summary="cluster all subjects">
+      <option name="closed" value="true" />
+      <created>1720453085241</created>
+      <option name="number" value="00051" />
+      <option name="presentableId" value="LOCAL-00051" />
+      <option name="project" value="LOCAL" />
+      <updated>1720453085241</updated>
+    </task>
+    <option name="localTasksCounter" value="52" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -493,7 +491,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="added features to tsfel" />
     <MESSAGE value="corrected subclass name" />
     <MESSAGE value="added stairs to features. Balance datasets" />
     <MESSAGE value="new balancing implemented" />
@@ -518,6 +515,7 @@
     <MESSAGE value="subject specific clustering" />
     <MESSAGE value="function names changed" />
     <MESSAGE value="correted docstrings on feature selection" />
-    <option name="LAST_COMMIT_MESSAGE" value="correted docstrings on feature selection" />
+    <MESSAGE value="cluster all subjects" />
+    <option name="LAST_COMMIT_MESSAGE" value="cluster all subjects" />
   </component>
 </project>

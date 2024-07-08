@@ -4,17 +4,20 @@
 from typing import List, Tuple
 import numpy as np
 import pandas as pd
+import re
 
-from constants import WALKING, STANDING, SITTING, CABINETS, SUPPORTED_ACTIVITIES, STAIRS
+from constants import WALKING, STANDING, SITTING, CABINETS, SUPPORTED_ACTIVITIES, STAIRS, WEAR_PREFIX, SEC
 from processing.filters import median_and_lowpass_filter, gravitational_filter, get_envelope
 from scipy.signal import find_peaks
+
+YACC = 'yAcc'
 
 
 # ------------------------------------------------------------------------------------------------------------------- #
 # public functions
 # ------------------------------------------------------------------------------------------------------------------- #
 
-def segment_tasks(folder_name: str, data: pd.DataFrame) -> List[pd.DataFrame]:
+def segment_tasks(folder_name: str, data: pd.DataFrame, watch_only: bool = False) -> List[pd.DataFrame]:
     """
     Segments the given DataFrame based on activity types defined in the folder name. The trim values differ
     since some activities are more segmented and therefor the trim value is lower not to lose too much signal.
@@ -26,16 +29,22 @@ def segment_tasks(folder_name: str, data: pd.DataFrame) -> List[pd.DataFrame]:
     :param data: pd.DataFrame.
         The DataFrame containing sensor data to be segmented by task.
 
+    :param watch_only: bool (default = False)
+        Removes all columns that are not watch sensors and time column.
+
     :return: List[pd.DataFrame].
         A list of DataFrames, where each DataFrame is a segment of the original data corresponding to a specific task
         within the given activity type.
     """
-    # # get time back to column named 'sec'
-    # data = _reset_index_to_column(data)
-    # get the y axis from the acc
-    # TODO ADD CHECK ACC from phone NEEDS TO BE CHOSEN - FOR GOOD RESULTS!!!!!!!!!!!!!!!!!!!!
+    # check if the yacc from the phone exists
+    pattern = rf'\b{re.escape(YACC)}\b'
+    if not any(re.fullmatch(pattern, col) for col in data.columns):
+        raise ValueError("The DataFrame must contain 'yAcc' column from the smartphone accelerometer for good results.")
+
+    # get the y-axis from the acc
     acc_series = data['yAcc'].to_numpy()
-    # dataframes array
+
+    # List to store the dataframes of the segmented tasks
     tasks = []
 
     # check type of activity
@@ -81,10 +90,6 @@ def segment_tasks(folder_name: str, data: pd.DataFrame) -> List[pd.DataFrame]:
         # cut the tasks
         tasks_standing = _cut_segments(data, starts, stops, 1000)
 
-        # # first and last segments are the same task
-        # # join the separated task into one df
-        # task_standing_no_gestures = pd.concat([tasks_standing[0], tasks_standing[2]], ignore_index=True)
-
         tasks.extend(tasks_standing)
 
     elif STAIRS in folder_name:
@@ -97,15 +102,20 @@ def segment_tasks(folder_name: str, data: pd.DataFrame) -> List[pd.DataFrame]:
         # cut segments
         tasks_stairs = _cut_segments(data, valid_starts, valid_stops, 250)
 
-        # # join the separated tasks into one df
-        # stairs_up = pd.concat([tasks_stairs[0], tasks_stairs[2]], ignore_index=True)
-        # stairs_down = pd.concat([tasks_stairs[1], tasks_stairs[3]], ignore_index=True)
-
         tasks.extend(tasks_stairs)
 
     if not any(activity in folder_name for activity in SUPPORTED_ACTIVITIES):
         # If no supported activity is found, raise a ValueError
         raise ValueError(f"The activity: {folder_name} is not supported")
+
+    if watch_only:
+
+        # remove every column that doesn't have _wear except the sec column
+        # Filter columns that contain '_wear' and 'sec'
+        columns_to_keep = [col for col in data.columns if WEAR_PREFIX in col or col == SEC]
+
+        # update the tasks list with the dataframes with only the '_wear' columns and 'sec'
+        tasks = [task[columns_to_keep] for task in tasks]
 
     return tasks
 

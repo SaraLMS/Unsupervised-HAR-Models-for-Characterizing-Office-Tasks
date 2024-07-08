@@ -88,13 +88,12 @@ def load_json_file(json_path: str) -> Dict[Any, Any]:
 def feature_extractor(data_main_path: str, output_path: str, subclasses: list[str],
                       json_path: str = "C:/Users/srale/PycharmProjects/toolbox/feature_engineering",
                       output_filename: str = "acc_gyr_mag_phone_features_P013.csv",
-                      output_folder_name: str = "phone_features_basic_plus_activities",
-                      watch_only: bool = False) -> None:
+                      output_folder_name: str = "phone_features_basic_plus_activities") -> None:
     """
     # TODO filename prefix and subject number - FILE_SUFFIX = "_feature_P{}.csv" in the constants
     file_name = prefix + FILE_SUFFIX.format(subject_num)
     # TODO doctsring sucks
-    # TODO WATCH ONLY IN TASK SEGMENTATION
+
     Extracts features from sensor data files contained within the sub-folders of a main directory, adds class and subclass
     columns based on the filenames, and saves the extracted features into a CSV file. This function also balances the
     dataset so that there's the same number of samples from each class, and for each class there's the same number of
@@ -114,9 +113,9 @@ def feature_extractor(data_main_path: str, output_path: str, subclasses: list[st
             "standing_gestures": Standing with gestures
             "coffee": Standing while doing coffee
             "folders": Standing while moving folders inside a cabinet
-            "walk_slow": Walking slow speed
-            "walk_medium": Walking medium speed
-            "walk_fast": Walking fast speed
+            "slow": Walking slow speed
+            "medium": Walking medium speed
+            "fast": Walking fast speed
             "stairs": Going up and down the stairs
 
     :param json_path: str
@@ -128,13 +127,12 @@ def feature_extractor(data_main_path: str, output_path: str, subclasses: list[st
     :param output_folder_name: str
         Name of the folder in which to store the dataset
 
-    :param watch_only: bool. Default = False:
-        Extract only features from the smartwatch, removing smartphone columns.
-
     :return: None
 
     """
-    # TODO CHECK SUBCLASSES
+    # check if subclasses is valid
+    _validate_subclasses_list(subclasses)
+
     # check directory
     parser.check_in_path(data_main_path, '.csv')
 
@@ -149,34 +147,29 @@ def feature_extractor(data_main_path: str, output_path: str, subclasses: list[st
         folder_path = os.path.join(data_main_path, folder_name)
 
         for filename in os.listdir(folder_path):
-            file_path = os.path.join(folder_path, filename)
-            # TODO LOAD ONLY THE SUBCLASSES IN SUBCLASSES
 
-            df = load.load_data_from_csv(file_path)
-
-            if watch_only:
-                # Filter columns that contain '_wear'
-                wear_columns = [col for col in df.columns if WEAR_PREFIX in col]
-
-                # Create a new dataframe with only the '_wear' columns
-                df = df[wear_columns]
-
-            print(f"Extract features from {folder_name}")
-
-            # extract the features
-            df = _extract_features_from_signal(df, features_dict)
-
-            # add class and subclass columns
-            df = _add_class_and_subclass_column(df, folder_name, filename)
-
-            # get subclass name: used as key for dictionary
+            # get subclass name from the filename
             subclass_name = _check_subclass(filename)
 
-            # save in dict
-            df_dict[subclass_name] = df
+            # load only the chosen subclasses
+            if any(subclass in subclass_name for subclass in subclasses):
+                # get the path to the csv with the signals from that subclass
+                file_path = os.path.join(folder_path, filename)
 
-    # remove unwanted subclasses
-    df_dict = _remove_keys_from_dict(df_dict, subclasses)
+                # load to a dataframe
+                df = load.load_data_from_csv(file_path)
+
+                # inform user
+                print(f"Extract features from {folder_name}")
+
+                # extract the features
+                df = _extract_features_from_signal(df, features_dict)
+
+                # add class and subclass columns
+                df = _add_class_and_subclass_column(df, folder_name, filename)
+
+                # save in dict
+                df_dict[subclass_name] = df
 
     # here guarantee that there's the same number of samples for each subclass
     all_data_df = _balance_dataset(df_dict)
@@ -188,17 +181,37 @@ def feature_extractor(data_main_path: str, output_path: str, subclasses: list[st
 
     output_path = parser.create_dir(output_path, output_folder_name)
     file_path = os.path.join(output_path, output_filename)
-
-    # save data to csv file
-    all_data_df.to_csv(file_path)
-
-    # inform user
-    print(f"Data saved to {file_path}")
+    #
+    # # save data to csv file
+    # all_data_df.to_csv(file_path)
+    #
+    # # inform user
+    # print(f"Data saved to {file_path}")
 
 
 # ------------------------------------------------------------------------------------------------------------------- #
 # private functions
 # ------------------------------------------------------------------------------------------------------------------- #
+
+
+def _validate_subclasses_list(subclasses: List[str]) -> None:
+    """
+    Raises ValueError exceptions if the subclasses list is empty or if the chosen subclasses are not supported.
+
+    :param subclasses: List[str]
+    List containing the subclass strings
+
+    :return: None
+    """
+    # Raise an exception if the subclasses list is empty
+    if not subclasses:
+        raise ValueError("The subclasses list is empty. Please provide at least one subclass.")
+
+    # check if the subclasses are valid
+    for subclass in subclasses:
+        if subclass not in SUPPORTED_INPUT_SUBCLASSES:
+            raise ValueError(f"Subclass: {subclass} is not supported.\n "
+                             f"Supported subclasses are: {SUPPORTED_INPUT_SUBCLASSES}")
 
 
 def _remove_keys_from_dict(df_dict: Dict[str, pd.DataFrame], subclasses: List[str]) -> Dict[str, pd.DataFrame]:
@@ -222,10 +235,6 @@ def _extract_features_from_signal(df: pd.DataFrame, features_dict: Dict[Any, Any
     features_df = tsfel.time_series_features_extractor(features_dict, df, fs=100, window_size=150, overlap=0.5)
 
     return features_df
-
-
-# def _calculate_total_acceleration(df: pd.DataFrame, columns: List[str]) -> pd.DataFrame:
-#     return np.sqrt((df[columns[0]] ** 2) + (df[columns[1]] ** 2) + (df[columns[2]] ** 2))
 
 
 def _add_class_and_subclass_column(df: pd.DataFrame, folder_name: str, filename: str) -> pd.DataFrame:
@@ -315,8 +324,19 @@ def _check_subclass(filename: str) -> str:
     return subclass_str
 
 
-def _balance_subclasses(signals, subclass_size):
-    # TODO DOCSTRING EXPLAIN CUT AT THE END
+def _balance_subclasses(signals: List[pd.DataFrame], subclass_size: int) -> List[pd.DataFrame]:
+    """
+    Cuts the dataframes inside a list of dataframes to the length of subclass_size. The dataframes are cut at the start.
+
+    :param signals: List[pd.DataFrame]
+    List of dataframes
+
+    :param subclass_size: Int
+    Length in samples to cut from the start of the dataframes
+
+    :return: List[pd.DataFrame]
+    List of dataframes cut to the same length
+    """
     balanced_class = [df.iloc[:subclass_size] for df in signals]
     return balanced_class
 
@@ -331,12 +351,10 @@ def _calculate_class_lengths(signals_classes):
 
 def _balance_dataset(df_dict):
     # TODO - PUT THIS IN A FUCNTION MAYBE ?
-    # TODO - SUBCLASS SIZES WHEN THERE'S STAIRS MIGHT NEED TO BE ADJUSTED BY THE USER
     # lists to store dataframes from the same class
-    # TODO give class names
-    signals_class_1 = []
-    signals_class_2 = []
-    signals_class_3 = []
+    signals_standing = []
+    signals_sitting = []
+    signals_walking = []
     # TODO: @p-probst dynamically assign classes
     # get list of signals (dataframes) from each class
     for subclass_key, df in df_dict.items():
@@ -344,19 +362,19 @@ def _balance_dataset(df_dict):
         # df containing data from one subclass only
         # check first value of the class column since all values are the same
         if df['class'].iloc[0] == 1:
-            signals_class_1.append(df)
+            signals_standing.append(df)
 
         elif df['class'].iloc[0] == 2:
-            signals_class_2.append(df)
+            signals_sitting.append(df)
 
         elif df['class'].iloc[0] == 3:
-            signals_class_3.append(df)
+            signals_walking.append(df)
 
         else:
             raise ValueError(f"Class number not supported:", df['class'].iloc[0])
 
     # list containing the lists of dataframes from each class of movement
-    signals_classes = [signals_class_1, signals_class_2, signals_class_3]
+    signals_classes = [signals_standing, signals_sitting, signals_walking]
 
     # Calculate the lengths of each class
     class_lengths = _calculate_class_lengths(signals_classes)
