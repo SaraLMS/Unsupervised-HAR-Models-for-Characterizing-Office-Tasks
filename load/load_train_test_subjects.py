@@ -10,7 +10,7 @@ from .load_sync_data import load_data_from_csv
 # ------------------------------------------------------------------------------------------------------------------- #
 # public functions
 # ------------------------------------------------------------------------------------------------------------------- #
-def load_subject_data(main_path: str, subfolder_name: str) -> pd.DataFrame:
+def load_all_subjects(main_path: str, subfolder_name: str) -> pd.DataFrame:
     """
     Load subject data from CSV files into a single dataframe.
 

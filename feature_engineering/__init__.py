@@ -1,14 +1,10 @@
 from .feature_extraction import generate_cfg_file, feature_extractor
-from .feature_selection import (feature_selector, find_best_features_per_subject, get_top_features_across_all_subjects,
-                                test_feature_set, test_same_feature_set_for_all_subjects, test_different_axis)
+from .feature_selection import (feature_selector, one_stage_feature_selection, two_stage_feature_selection)
 
 __all__ = [
     "generate_cfg_file",
     "feature_extractor",
     "feature_selector",
-    "find_best_features_per_subject",
-    "get_top_features_across_all_subjects",
-    "test_feature_set",
-    "test_same_feature_set_for_all_subjects",
-    "test_different_axis"
+    "one_stage_feature_selection",
+    "two_stage_feature_selection"
 ]

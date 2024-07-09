@@ -6,11 +6,18 @@
   <component name="ChangeListManager">
     <list default="true" id="3466cb1d-2559-4122-9522-f23b0d0f6b0a" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/clustering/common.py" beforeDir="false" afterPath="$PROJECT_DIR$/clustering/common.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clustering/subject_specific_model.py" beforeDir="false" afterPath="$PROJECT_DIR$/clustering/subject_specific_model.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/constants.py" beforeDir="false" afterPath="$PROJECT_DIR$/constants.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/feature_engineering/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/feature_engineering/__init__.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/feature_engineering/feature_extraction.py" beforeDir="false" afterPath="$PROJECT_DIR$/feature_engineering/feature_extraction.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/feature_engineering/feature_selection.py" beforeDir="false" afterPath="$PROJECT_DIR$/feature_engineering/feature_selection.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/load/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/load/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/load/load_train_test_subjects.py" beforeDir="false" afterPath="$PROJECT_DIR$/load/load_train_test_subjects.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/parser/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/parser/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/parser/check_create_directories.py" beforeDir="false" afterPath="$PROJECT_DIR$/parser/check_create_directories.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/parser/extract_from_path.py" beforeDir="false" afterPath="$PROJECT_DIR$/parser/extract_from_path.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/processing/pre_processing.py" beforeDir="false" afterPath="$PROJECT_DIR$/processing/pre_processing.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/processing/task_segmentation.py" beforeDir="false" afterPath="$PROJECT_DIR$/processing/task_segmentation.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/synchronization/synchronization.py" beforeDir="false" afterPath="$PROJECT_DIR$/synchronization/synchronization.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -83,14 +90,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1711360410072</updated>
-    </task>
-    <task id="LOCAL-00003" summary="add synchronization">
-      <option name="closed" value="true" />
-      <created>1711385406499</created>
-      <option name="number" value="00003" />
-      <option name="presentableId" value="LOCAL-00003" />
-      <option name="project" value="LOCAL" />
-      <updated>1711385406499</updated>
     </task>
     <task id="LOCAL-00004" summary="Added corrected loading and synchronization of sensors in the same device. Saves to csv with correct column names">
       <option name="closed" value="true" />
@@ -476,7 +475,15 @@
       <option name="project" value="LOCAL" />
       <updated>1720453085241</updated>
     </task>
-    <option name="localTasksCounter" value="52" />
+    <task id="LOCAL-00052" summary="corrected some TODOs - not tested">
+      <option name="closed" value="true" />
+      <created>1720469204290</created>
+      <option name="number" value="00052" />
+      <option name="presentableId" value="LOCAL-00052" />
+      <option name="project" value="LOCAL" />
+      <updated>1720469204291</updated>
+    </task>
+    <option name="localTasksCounter" value="53" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -491,7 +498,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="corrected subclass name" />
     <MESSAGE value="added stairs to features. Balance datasets" />
     <MESSAGE value="new balancing implemented" />
     <MESSAGE value="improved balancing dataset and removal of subclasses" />
@@ -516,6 +522,7 @@
     <MESSAGE value="function names changed" />
     <MESSAGE value="correted docstrings on feature selection" />
     <MESSAGE value="cluster all subjects" />
-    <option name="LAST_COMMIT_MESSAGE" value="cluster all subjects" />
+    <MESSAGE value="corrected some TODOs - not tested" />
+    <option name="LAST_COMMIT_MESSAGE" value="corrected some TODOs - not tested" />
   </component>
 </project>

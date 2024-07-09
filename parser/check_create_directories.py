@@ -26,6 +26,18 @@ def create_dir(path: str, folder_name: str) -> str:
 
     return new_path
 
+def create_txt_file(file_path: str):
+    """
+    Creates a txt file if it doesn't exist already.
+
+    :param file_path: the full path to the txt file to be created
+    """
+    # Check if the file does not exist yet
+    if not Path(file_path).exists():
+        # Create the file
+        with open(file_path, 'w') as file:
+            file.write('')  # Create an empty file
+
 
 def check_in_path(raw_data_in_path: str, file_extension: str) -> None:
     """

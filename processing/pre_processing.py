@@ -1,17 +1,17 @@
 # ------------------------------------------------------------------------------------------------------------------- #
 # imports
 # ------------------------------------------------------------------------------------------------------------------- #
+import pandas as pd
 import os
 from typing import Dict, List
-import load
-import pandas as pd
 
-from constants import WALKING, CABINETS, STANDING, SITTING, SUPPORTED_ACTIVITIES, STAIRS, CSV
+# internal imports
+import load
 import parser
+from constants import (WALKING, CABINETS, STANDING, SITTING, SUPPORTED_ACTIVITIES, STAIRS, CSV,
+                       ACCELEROMETER_PREFIX, SUPPORTED_PREFIXES)
 from .filters import median_and_lowpass_filter, gravitational_filter
 from .task_segmentation import segment_tasks
-
-from constants import ACCELEROMETER_PREFIX, SUPPORTED_PREFIXES
 
 
 # ------------------------------------------------------------------------------------------------------------------- #
@@ -37,7 +37,7 @@ def processor(sync_data_path: str, output_path: str, raw_folder_name: str, filte
         containing the filtered data from that folder.
 
     """
-
+    # check path
     parser.check_in_path(sync_data_path, CSV)
 
     # create output paths
@@ -76,14 +76,15 @@ def processor(sync_data_path: str, output_path: str, raw_folder_name: str, filte
                 # cut first 200 samples to remove impulse response from the butterworth filters
                 filtered_data = filtered_data.iloc[impulse_response_samples:]
                 filtered_tasks.append(filtered_data)
-            # TODO no need if else
+
+            # generate filename
+            output_filenames = _generate_task_filenames(folder_name, filename, 4)
+
+            # special case if it's STAIRS
             if STAIRS in folder_name:
                 nr_stairs_segments = len(filtered_tasks)
                 # generate output filenames
                 output_filenames = _generate_task_filenames(folder_name, filename, nr_stairs_segments)
-
-            else:
-                output_filenames = _generate_task_filenames(folder_name, filename, 4)
 
             for df, output_filename in zip(filtered_tasks, output_filenames):
                 # TODO: @p-probst allow for saving in different file formats

@@ -87,8 +87,8 @@ def load_json_file(json_path: str) -> Dict[Any, Any]:
 
 def feature_extractor(data_main_path: str, output_path: str, subclasses: list[str],
                       json_path: str = "C:/Users/srale/PycharmProjects/toolbox/feature_engineering",
-                      output_filename: str = "acc_gyr_mag_phone_features_P013.csv",
-                      output_folder_name: str = "phone_features_basic_plus_activities") -> None:
+                      output_filename: str = "acc_gyr_mag_phone_features_P015.csv",
+                      output_folder_name: str = "phone_features_basic_activities") -> None:
     """
     # TODO filename prefix and subject number - FILE_SUFFIX = "_feature_P{}.csv" in the constants
     file_name = prefix + FILE_SUFFIX.format(subject_num)
@@ -182,11 +182,11 @@ def feature_extractor(data_main_path: str, output_path: str, subclasses: list[st
     output_path = parser.create_dir(output_path, output_folder_name)
     file_path = os.path.join(output_path, output_filename)
     #
-    # # save data to csv file
-    # all_data_df.to_csv(file_path)
-    #
-    # # inform user
-    # print(f"Data saved to {file_path}")
+    # save data to csv file
+    all_data_df.to_csv(file_path)
+
+    # inform user
+    print(f"Data saved to {file_path}")
 
 
 # ------------------------------------------------------------------------------------------------------------------- #

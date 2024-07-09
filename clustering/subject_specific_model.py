@@ -63,7 +63,7 @@ def cluster_all_subjects(main_path: str, subjects_features_path: str, clustering
                         print(f"Clustering results for subject: {subject_folder}")
                         print(f"Rand Index: {ri}; Adjusted Rand Index: {ari}; Normalized Mutual Information: {nmi}\n")
                     else:
-                        print(f"Subject ID {subject_folder} not found in the feature sets CSV.")
+                        raise ValueError(f"Subject ID {subject_folder} not found in the feature sets CSV.")
 
                 else:
                     raise ValueError("Only one dataset per folder is allowed.")
