@@ -3,6 +3,7 @@
 # ------------------------------------------------------------------------------------------------------------------- #
 import os
 from glob import glob
+from pathlib import Path
 
 
 # ------------------------------------------------------------------------------------------------------------------- #
@@ -26,6 +27,7 @@ def create_dir(path: str, folder_name: str) -> str:
 
     return new_path
 
+
 def create_txt_file(file_path: str):
     """
     Creates a txt file if it doesn't exist already.
@@ -36,7 +38,7 @@ def create_txt_file(file_path: str):
     if not Path(file_path).exists():
         # Create the file
         with open(file_path, 'w') as file:
-            file.write('')  # Create an empty file
+            file.write('subject_id;feature_set;rand_index;adj_rand_index;norm_mutual_info\n')  # Create an empty file
 
 
 def check_in_path(raw_data_in_path: str, file_extension: str) -> None:

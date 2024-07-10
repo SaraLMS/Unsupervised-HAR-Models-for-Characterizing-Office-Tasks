@@ -62,7 +62,7 @@ def segment_tasks(folder_name: str, data: pd.DataFrame, watch_only: bool = False
     elif CABINETS in folder_name:
 
         # cut cabinets tasks and store in a list
-        starts, stops = _detect_cabinets_tasks(acc_series, fs=100, peak_height=7, min_distance=20000)
+        starts, stops = _detect_cabinets_tasks(acc_series, fs=100, peak_height=7, min_distance=40000)
 
         # cut the tasks
         tasks_cabinets = _cut_segments(data, starts, stops, 1000)

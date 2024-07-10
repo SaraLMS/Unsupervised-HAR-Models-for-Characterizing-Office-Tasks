@@ -6,7 +6,7 @@ from processing.pre_processing import _apply_filters
 import load
 
 
-# path ="D:/tese_backups/subjects/P015/acc_gyr_mag_phone/raw_tasks_P015/walking/P015_synchronized_phone_walking_2024-07-05_10-29-51_fast.csv"
+# path ="D:/tese_backups/subjects/P016/acc_gyr_mag_phone/raw_tasks_P016/stairs/P016_synchronized_phone_stairs_2024-07-09_16-13-30_stairsdown2.csv"
 # # load data to csv
 # data = load.load_data_from_csv(path)
 # # filter signals
@@ -15,7 +15,7 @@ import load
 # # cut first 200 samples to remove impulse response from the butterworth filters
 # filtered_data = filtered_data.iloc[200:]
 #
-# path_filt = "D:/tese_backups/subjects/P015/acc_gyr_mag_phone/filtered_tasks_P015/walking/P015_synchronized_phone_walking_2024-07-05_10-29-51_fast.csv"
+# path_filt = "D:/tese_backups/subjects/P016/acc_gyr_mag_phone/filtered_tasks_P016/stairs/P016_synchronized_phone_stairs_2024-07-09_16-13-30_stairsdown2.csv"
 #
 # filtered_data.to_csv(path_filt)
 
@@ -26,26 +26,26 @@ def main():
     do_processing = False
     do_generate_cfg_file = False
     do_feature_extraction = False
-    do_one_subject_feature_selection = False
+    do_one_subject_feature_selection = True
     do_general_model_feature_selection = False
     do_all_subjects_feature_selection = False
     do_general_model_clustering = False
 
     if do_synchronization:
-        raw_data_in_path = "D:/tese_backups/raw_signals_backups/acquisitions/P015"
-        sync_android_out_path = ("D:/tese_backups/subjects/P015/acc_gyr_mag_phone/sync_android_P015")
-        output_path = "D:/tese_backups/subjects/P015/acc_gyr_mag_phone/synchronized_P015"
+        raw_data_in_path = "D:/tese_backups/raw_signals_backups/acquisitions/P016"
+        sync_android_out_path = ("D:/tese_backups/subjects/P016/acc_gyr_mag_phone/sync_android_P016")
+        output_path = "D:/tese_backups/subjects/P016/acc_gyr_mag_phone/synchronized_P016"
         selected_sensors = {'phone': ['acc', 'gyr', 'mag']}
         sync_type = 'crosscorr'
-        evaluation_path = "D:/tese_backups/subjects/P015/acc_gyr_mag_phone"
+        evaluation_path = "D:/tese_backups/subjects/P016/acc_gyr_mag_phone"
         synchronization.synchronization(raw_data_in_path, sync_android_out_path, selected_sensors, output_path,
                                         sync_type, evaluation_path)
 
     if do_processing:
-        output_path = "D:/tese_backups/subjects/P015/acc_gyr_mag_phone"
-        filtered_folder_name = "filtered_tasks_P015"
-        raw_folder_name = "raw_tasks_P015"
-        sync_data_path = "D:/tese_backups/subjects/P015/acc_gyr_mag_phone/sync_android_P015"
+        output_path = "D:/tese_backups/subjects/P016/acc_gyr_mag_phone"
+        filtered_folder_name = "filtered_tasks_P016"
+        raw_folder_name = "raw_tasks_P016"
+        sync_data_path = "D:/tese_backups/subjects/P016/acc_gyr_mag_phone/sync_android_P016"
         processing.processor(sync_data_path, output_path, raw_folder_name, filtered_folder_name)
 
     if do_generate_cfg_file:
@@ -54,21 +54,29 @@ def main():
 
     if do_feature_extraction:
         subclasses = ['standing_still', 'walk_medium', 'sit']  # , 'standing_gestures', 'stairs'
-        main_path = "D:/tese_backups/subjects/P015/acc_gyr_mag_phone/filtered_tasks_P015"
-        output_path = "C:/Users/srale/OneDrive - FCT NOVA/Tese/subjects_datasets/P015"
+        main_path = "D:/tese_backups/subjects/P016/acc_gyr_mag_phone/filtered_tasks_P016"
+        output_path = "C:/Users/srale/OneDrive - FCT NOVA/Tese/subjects_datasets/P016"
         feature_engineering.feature_extractor(main_path, output_path, subclasses)
 
     if do_one_subject_feature_selection:
         dataset_path = (
-            "C:/Users/srale/OneDrive - FCT NOVA/Tese/subjects_datasets/P001/watch_features_basic_activities"
-            "/acc_gyr_mag_watch_P001.csv")
+            "C:/Users/srale/OneDrive - FCT NOVA/Tese/subjects_datasets/P016/phone_features_basic_activities"
+            "/acc_gyr_mag_phone_features_P016.csv")
+        #
+        df = load.load_data_from_csv(dataset_path)
 
         # train test split
-        train_set, _ = load.train_test_split(dataset_path, 0.8, 0.2)
+        train_set, _ = load.train_test_split(df, 0.8, 0.2)
 
-        output_path_plots = "D:/tese_backups/subjects/P001/acc_gyr_mag_watch_phone"
+        output_path_plots = "D:/tese_backups/subjects/P016/acc_gyr_mag_phone"
         _, _, _, _ = feature_engineering.feature_selector(train_set, 0.01, 0.99, 20,
                                                           "kmeans", output_path_plots)
+        # results_output_path = "C:/Users/srale/OneDrive - FCT NOVA/Tese/results"
+        # results_folder_name = "subject_specific_feature_selection"
+        # results_filename_prefix = "phone"
+        # feature_engineering.one_stage_feature_selection(dataset_path, 0.1, 0.99,
+        #                                                 35, "kmeans", output_path_plots, results_output_path,
+        #                                                 results_folder_name, results_filename_prefix)
 
     if do_general_model_feature_selection:
         main_path = "C:/Users/srale/OneDrive - FCT NOVA/Tese/subjects_datasets"

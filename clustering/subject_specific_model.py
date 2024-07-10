@@ -1,6 +1,9 @@
 # ------------------------------------------------------------------------------------------------------------------- #
 # imports
 # ------------------------------------------------------------------------------------------------------------------- #
+import ast
+from typing import List
+
 import pandas as pd
 import numpy as np
 import os
@@ -23,7 +26,7 @@ def cluster_all_subjects(main_path: str, subjects_features_path: str, clustering
 
     # load the csv file with the subject id's and the respective feature sets
     # columns are the subject id's and the feature set to be used for that subject
-    feature_sets = pd.read_csv(subjects_features_path)
+    feature_sets = pd.read_csv(subjects_features_path, delimiter=";")
 
     # iterate through the subject folders
     for subject_folder in os.listdir(main_path):
@@ -48,20 +51,28 @@ def cluster_all_subjects(main_path: str, subjects_features_path: str, clustering
 
                     # find the subject id in the subject features df to get the feature set for that subject
                     if subject_folder in feature_sets['subject_id'].values:
-                        subject_feature_set = \
-                        feature_sets.loc[feature_sets['subject_id'] == subject_folder, 'feature_set'].values[0]
 
-                        # cluster the subject
-                        ri, ari, nmi = cluster_subject(df, clustering_model, subject_feature_set)
+                        subject_feature_set_str = \
+                            feature_sets.loc[feature_sets['subject_id'] == subject_folder, 'feature_set'].values[0]
 
-                        # add to the respective lists
-                        ri_list.append(ri)
-                        ari_list.append(ari)
-                        nmi_list.append(nmi)
+                        # Convert feature_set string into a list of strings
+                        subject_feature_set = parse_feature_set(subject_feature_set_str)
 
-                        # inform user
-                        print(f"Clustering results for subject: {subject_folder}")
-                        print(f"Rand Index: {ri}; Adjusted Rand Index: {ari}; Normalized Mutual Information: {nmi}\n")
+                        if subject_feature_set:
+                            # Cluster the subject
+                            ri, ari, nmi = cluster_subject(df, clustering_model, subject_feature_set)
+
+                            # Add to the respective lists
+                            ri_list.append(ri)
+                            ari_list.append(ari)
+                            nmi_list.append(nmi)
+
+                            # Inform user
+                            print(f"Clustering results for subject: {subject_folder}")
+                            print(
+                                f"Rand Index: {ri}; Adjusted Rand Index: {ari}; Normalized Mutual Information: {nmi}\n")
+                        else:
+                            print(f"Failed to parse feature set for subject {subject_folder}. Skipping.")
                     else:
                         raise ValueError(f"Subject ID {subject_folder} not found in the feature sets CSV.")
 
@@ -73,7 +84,7 @@ def cluster_all_subjects(main_path: str, subjects_features_path: str, clustering
     return np.round(np.mean(ri_list), 2), np.round(np.mean(ari_list), 2), np.round(np.mean(nmi_list), 2)
 
 
-def cluster_subject(df: pd.DataFrame, clustering_model: str, feature_set: str, train_size: float = 0.7,
+def cluster_subject(df: pd.DataFrame, clustering_model: str, feature_set: List[str], train_size: float = 0.7,
                     test_size: float = 0.3):
     # Check if all features in the feature set exist in the dataframe columns
     missing_features = [feature for feature in feature_set if feature not in df.columns]
@@ -100,3 +111,23 @@ def cluster_subject(df: pd.DataFrame, clustering_model: str, feature_set: str, t
     ri, ari, nmi = metrics.evaluate_clustering(true_labels, pred_labels)
 
     return ri, ari, nmi
+
+
+# ------------------------------------------------------------------------------------------------------------------- #
+# private functions
+# ------------------------------------------------------------------------------------------------------------------- #
+def parse_feature_set(feature_set_str):
+    """
+    Parses the feature set string into a list of features.
+
+    :param feature_set_str: str
+    A string representation of a list of features.
+
+    :return: list
+    A list of features.
+    """
+    try:
+        return ast.literal_eval(feature_set_str)
+    except (ValueError, SyntaxError) as e:
+        print(f"Error parsing feature set: {e}")
+        return []

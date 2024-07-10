@@ -71,7 +71,6 @@ def _split_by_subclass(df, subclass_column='subclass'):
 
     # list to store dataframes of each subclass
     sub_dataframes = []
-
     # find the unique values in the subclass column
     subclasses = df[subclass_column].unique()
 

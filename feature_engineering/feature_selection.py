@@ -16,8 +16,9 @@ import load
 import parser
 import metrics
 import clustering
+from constants import TXT
 
-CLASS = "Class"
+CLASS = "class"
 SUBJECT = "subject"
 SUBCLASS = "subclass"
 
@@ -139,7 +140,7 @@ def feature_selector(train_set: pd.DataFrame, variance_threshold: float, correla
             features_train = train_set[iter_feature_list]
 
             # cluster the data
-            pred_labels = clustering.cluster_data(clustering_model, features_train, features_train, n_clusters=4)
+            pred_labels = clustering.cluster_data(clustering_model, features_train, features_train, n_clusters=3)
 
             # Evaluate clustering with this feature set
             ri, ari, nmi = metrics.evaluate_clustering(true_labels, pred_labels)
@@ -198,11 +199,12 @@ def feature_selector(train_set: pd.DataFrame, variance_threshold: float, correla
 
 def one_stage_feature_selection(file_path: str, variance_threshold: float, correlation_threshold: float,
                                 n_iterations: int, clustering_model: str,
-                                plots_output_path: str, results_output_path: str, results_folder_name: str) -> Tuple[
-    List[str], float, float, float]:
+                                plots_output_path: str, results_output_path: str, results_folder_name: str,
+                                results_filename_prefix: str) -> Tuple[List[str], float, float, float]:
     # check path
     # load dataset and train/test split
-    train_set, _ = load.train_test_split(file_path, 0.8, 0.2)
+    df = load.load_data_from_csv(file_path)
+    train_set, _ = load.train_test_split(df, 0.8, 0.2)
 
     # find feature sets and respective scores
     feature_sets, list_ri, list_ari, list_nmi = feature_selector(train_set, variance_threshold, correlation_threshold,
@@ -213,23 +215,27 @@ def one_stage_feature_selection(file_path: str, variance_threshold: float, corre
                                                                                list_nmi)
 
     # randomly pick one feature set if there's more than one
-    final_feature_set, final_ri, final_ari, final_nmi = _select_random_best_feature_set(best_feature_sets, best_ri,
-                                                                                        best_ari, best_nmi)
+    final_feature_set, final_ri, final_ari, final_nmi = _select_best_feature_set(best_feature_sets, best_ri,
+                                                                                 best_ari, best_nmi)
 
     # get the subject ID from the file path
     subject_id = parser.get_subject_id_from_path(file_path)
 
     # Create directory if it does not exist
     results_file_path = parser.create_dir(results_output_path, results_folder_name)
-    results_file_path = os.path.join(results_file_path, f"feature_selection_results_{subject_id}")
+    filename = f"{results_filename_prefix}_feature_selection_results{TXT}"
+    results_file_path = os.path.join(results_file_path, filename)
 
     # create file if it doesn't exist
     parser.create_txt_file(results_file_path)
 
     # Append results to the file
     with open(results_file_path, 'a') as file:
-        result_line = f"{subject_id},{final_feature_set},{final_ri},{final_ari},{final_nmi}\n"
+        result_line = f"{subject_id};{final_feature_set};{final_ri};{final_ari};{final_nmi}\n"
         file.write(result_line)
+
+    # inform user
+    print(f"Results from subject {subject_id} added to {results_file_path}")
 
     return final_feature_set, final_ri, final_ari, final_nmi
 
@@ -237,7 +243,6 @@ def one_stage_feature_selection(file_path: str, variance_threshold: float, corre
 def two_stage_feature_selection(main_path, features_folder_name, variance_threshold, corr_threshold,
                                 feature_selector_iterations: int,
                                 clustering_model, nr_iterations, top_n):
-
     best_feature_set_with_axis = None
     best_scores_with_axis = [0, 0, 0]
 
@@ -639,10 +644,11 @@ def _test_different_axis(subjects_dict: Dict[str, Dict[str, Set[str]]], main_pat
     return results
 
 
-def _select_random_best_feature_set(best_feature_sets: List[List[str]], best_ri: List[float],
-                                    best_ari: List[float], best_nmi: List[float]) -> Tuple[List[str], float, float, float]:
+def _select_best_feature_set(best_feature_sets: List[List[str]], best_ri: List[float],
+                             best_ari: List[float], best_nmi: List[float]) -> Tuple[List[str], float, float, float]:
     """
-    Randomly select one of the best feature sets and return it along with its corresponding scores.
+    Select the best feature set based on the highest ARI. In case of ties, use the highest NMI.
+    If there's still a tie, choose randomly among the remaining options.
 
     :param best_feature_sets: List[List[str]]
     List of best feature sets.
@@ -657,9 +663,29 @@ def _select_random_best_feature_set(best_feature_sets: List[List[str]], best_ri:
     List of Normalized Mutual Information scores corresponding to the best feature sets.
 
     :return: Tuple[List[str], float, float, float]
-    A randomly selected best feature set and its corresponding Rand Index, ARI, and NMI scores.
+    The selected best feature set and its corresponding Rand Index, ARI, and NMI scores.
     """
-    idx = random.choice(range(len(best_feature_sets)))
+    # Find the highest ARI
+    max_ari = max(best_ari)
+    best_ari_indices = [i for i, ari in enumerate(best_ari) if ari == max_ari]
+
+    if len(best_ari_indices) > 1:
+        # If there's a tie, find the highest NMI among the tied ARI
+        max_nmi = max(best_nmi[i] for i in best_ari_indices)
+        best_nmi_indices = [i for i in best_ari_indices if best_nmi[i] == max_nmi]
+
+        if len(best_nmi_indices) > 1:
+            # If there's still a tie, find the sets with the smallest number of features
+            min_feature_count = min(len(best_feature_sets[i]) for i in best_nmi_indices)
+            best_feature_count_indices = [i for i in best_nmi_indices if len(best_feature_sets[i]) == min_feature_count]
+
+            # If there's still a tie, choose randomly among the tied ARI, NMI, and feature count
+            idx = random.choice(best_feature_count_indices)
+        else:
+            idx = best_nmi_indices[0]
+    else:
+        idx = best_ari_indices[0]
+
     return best_feature_sets[idx], best_ri[idx], best_ari[idx], best_nmi[idx]
 
 
