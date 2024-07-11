@@ -2,24 +2,40 @@
 # imports
 # ------------------------------------------------------------------------------------------------------------------- #
 import os
-from typing import Tuple
 import pandas as pd
+
+from constants import SUBJECT
 from .load_sync_data import load_data_from_csv
+from .dataset_split_train_test import train_test_split
 
 
 # ------------------------------------------------------------------------------------------------------------------- #
 # public functions
 # ------------------------------------------------------------------------------------------------------------------- #
-def load_all_subjects(main_path: str, subfolder_name: str) -> pd.DataFrame:
+def load_all_subjects(main_path: str, subfolder_name: str, all_data: bool, train_size: float = 0.8,
+                      test_size: float = 0.2) -> pd.DataFrame:
     """
-    Load subject data from CSV files into a single dataframe.
+    Load subject data from CSV files into a unified dataframe. If all_data is set to True, load the complete dataset of
+    each subject; otherwise, load only the training sets. A 'subject' column is added for identifying subjects.
+    The training set consists of the initial portion of the entire dataset, determined by the train_size parameter.
 
-    Parameters:
-    - main_path (str): Root directory where subject data is stored.
-    - subfolder_name (str): Name of the subfolder containing CSV files.
+    :param main_path: str
+    Root directory where all subjects data is stored
 
-    Returns:
-    - pd.DataFrame: Combined dataframe containing all subjects' data with 'subject' column.
+    :param subfolder_name: str
+    Name of the subfolder containing the dataset to be loaded
+
+    :param all_data: bool
+    If set to True, the function loads all the data from each subject. If False, loads only the train_set of all subjects
+
+    :param train_size: float (Optional)
+    Size of the train set.
+
+    :param test_size: float (Optional)
+    Size of the test set
+
+    :return: pd.DataFrame
+    A pandas dataframe containing the data from all subjects including a new 'subject' column for subject identification
     """
     dfs = []
 
@@ -33,9 +49,27 @@ def load_all_subjects(main_path: str, subfolder_name: str) -> pd.DataFrame:
         for csv_file in os.listdir(subfolder_path):
             csv_path = os.path.join(subfolder_path, csv_file)
 
-            df = load_data_from_csv(csv_path)
-            df['subject'] = subject_folder
-            dfs.append(df)
+            if not all_data:
+
+                # get only the train sets from each subject
+                train_set, _ = train_test_split(csv_path, train_size, test_size)
+
+                # add subject column for subject identification
+                train_set[SUBJECT] = subject_folder
+
+                # add to the list of dataframes
+                dfs.append(train_set)
+
+            else:
+
+                # get the whole dataset from all subjects
+                df = load_data_from_csv(csv_path)
+
+                # add subject column for subject identification
+                df[SUBJECT] = subject_folder
+
+                # add to the list of dataframes
+                dfs.append(df)
 
     return pd.concat(dfs, ignore_index=True)
 

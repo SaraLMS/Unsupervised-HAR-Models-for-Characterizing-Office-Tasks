@@ -16,11 +16,7 @@ import load
 import parser
 import metrics
 import clustering
-from constants import TXT
-
-CLASS = "class"
-SUBJECT = "subject"
-SUBCLASS = "subclass"
+from constants import TXT, CLASS, SUBJECT, SUBCLASS
 
 
 # ------------------------------------------------------------------------------------------------------------------- #
@@ -203,8 +199,7 @@ def one_stage_feature_selection(file_path: str, variance_threshold: float, corre
                                 results_filename_prefix: str) -> Tuple[List[str], float, float, float]:
     # check path
     # load dataset and train/test split
-    df = load.load_data_from_csv(file_path)
-    train_set, _ = load.train_test_split(df, 0.8, 0.2)
+    train_set, _ = load.train_test_split(file_path, 0.9, 0.1)
 
     # find feature sets and respective scores
     feature_sets, list_ri, list_ari, list_nmi = feature_selector(train_set, variance_threshold, correlation_threshold,

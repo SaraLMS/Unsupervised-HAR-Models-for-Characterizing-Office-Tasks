@@ -3,12 +3,14 @@
 # ------------------------------------------------------------------------------------------------------------------- #
 import pandas as pd
 
+from load import load_data_from_csv
+
 
 # ------------------------------------------------------------------------------------------------------------------- #
 # public functions
 # ------------------------------------------------------------------------------------------------------------------- #
 
-def train_test_split(df, train_size, test_size):
+def train_test_split(path: str, train_size, test_size):
     """
     Splits the dataset into training and testing sets based on the given sizes.
     The train set corresponds to the first train_size percentage of the dataset and the test_set the last
@@ -23,6 +25,9 @@ def train_test_split(df, train_size, test_size):
     - train_set: DataFrame containing the train set.
     - test_set: DataFrame containing the test set.
     """
+
+    df = load_data_from_csv(path)
+
     # separate the dataframes by subclass of movement
     dataframes_list = _split_by_subclass(df)
 
@@ -71,6 +76,7 @@ def _split_by_subclass(df, subclass_column='subclass'):
 
     # list to store dataframes of each subclass
     sub_dataframes = []
+
     # find the unique values in the subclass column
     subclasses = df[subclass_column].unique()
 

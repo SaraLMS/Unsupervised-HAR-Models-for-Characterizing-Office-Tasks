@@ -6,12 +6,14 @@
   <component name="ChangeListManager">
     <list default="true" id="3466cb1d-2559-4122-9522-f23b0d0f6b0a" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clustering/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/clustering/__init__.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/clustering/subject_specific_model.py" beforeDir="false" afterPath="$PROJECT_DIR$/clustering/subject_specific_model.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/constants.py" beforeDir="false" afterPath="$PROJECT_DIR$/constants.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/feature_engineering/feature_extraction.py" beforeDir="false" afterPath="$PROJECT_DIR$/feature_engineering/feature_extraction.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/feature_engineering/feature_selection.py" beforeDir="false" afterPath="$PROJECT_DIR$/feature_engineering/feature_selection.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/load/dataset_split_train_test.py" beforeDir="false" afterPath="$PROJECT_DIR$/load/dataset_split_train_test.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/load/load_train_test_subjects.py" beforeDir="false" afterPath="$PROJECT_DIR$/load/load_train_test_subjects.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/parser/check_create_directories.py" beforeDir="false" afterPath="$PROJECT_DIR$/parser/check_create_directories.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/processing/task_segmentation.py" beforeDir="false" afterPath="$PROJECT_DIR$/processing/task_segmentation.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/synchronization/synchronization.py" beforeDir="false" afterPath="$PROJECT_DIR$/synchronization/synchronization.py" afterDir="false" />
     </list>
@@ -85,14 +87,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1711360410072</updated>
-    </task>
-    <task id="LOCAL-00005" summary="Added corrected loading and synchronization of sensors in the same device. Saves to csv with correct column names">
-      <option name="closed" value="true" />
-      <created>1711472720221</created>
-      <option name="number" value="00005" />
-      <option name="presentableId" value="LOCAL-00005" />
-      <option name="project" value="LOCAL" />
-      <updated>1711472720221</updated>
     </task>
     <task id="LOCAL-00006" summary="Added corrected loading and synchronization of sensors in the same device. Saves to csv with correct column names">
       <option name="closed" value="true" />
@@ -478,7 +472,15 @@
       <option name="project" value="LOCAL" />
       <updated>1720543584326</updated>
     </task>
-    <option name="localTasksCounter" value="54" />
+    <task id="LOCAL-00054" summary="load txt file">
+      <option name="closed" value="true" />
+      <created>1720632960396</created>
+      <option name="number" value="00054" />
+      <option name="presentableId" value="LOCAL-00054" />
+      <option name="project" value="LOCAL" />
+      <updated>1720632960397</updated>
+    </task>
+    <option name="localTasksCounter" value="55" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -493,7 +495,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="new balancing implemented" />
     <MESSAGE value="improved balancing dataset and removal of subclasses" />
     <MESSAGE value="Added clustering" />
     <MESSAGE value="plots for feature selection" />
@@ -518,6 +519,7 @@
     <MESSAGE value="cluster all subjects" />
     <MESSAGE value="corrected some TODOs - not tested" />
     <MESSAGE value="Added one_stage and two_stage feature selection NOT TESTED" />
-    <option name="LAST_COMMIT_MESSAGE" value="Added one_stage and two_stage feature selection NOT TESTED" />
+    <MESSAGE value="load txt file" />
+    <option name="LAST_COMMIT_MESSAGE" value="load txt file" />
   </component>
 </project>
