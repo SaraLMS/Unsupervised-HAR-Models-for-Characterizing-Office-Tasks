@@ -26,7 +26,7 @@ from constants import TXT, CLASS, SUBJECT, SUBCLASS
 def feature_selector(train_set: pd.DataFrame, variance_threshold: float, correlation_threshold: float,
                      n_iterations: int, clustering_model: str,
                      output_path: str, folder_name: str = "phone_features_kmeans_plots",
-                     save_plots: bool = False) -> Tuple[List[List[str]], List[float], List[float], List[float]]:
+                     save_plots: bool = False) -> Tuple[List[List[str]], List[float], List[float]]:
     """
     This function returns the features sets that give the best clustering results for the train set
     as well as the rand index of the respective feature sets.
@@ -112,7 +112,7 @@ def feature_selector(train_set: pd.DataFrame, variance_threshold: float, correla
 
     for iteration in range(1, n_iterations + 1):
         # Reset the best accuracy for each iteration
-        best_ri = 0
+        best_ari = 0
 
         # Shuffle the column names at the beginning of each iteration
         shuffled_features = _shuffle_column_names(train_set)
@@ -142,12 +142,12 @@ def feature_selector(train_set: pd.DataFrame, variance_threshold: float, correla
             ri, ari, nmi = metrics.evaluate_clustering(true_labels, pred_labels)
 
             # if the Rand Index does not improve remove feature
-            if ri <= best_ri:
+            if ari <= best_ari:
                 iter_feature_list.remove(feature)
 
             # if Rand Index improves add the feature to the feature list
             else:
-                best_ri = ri
+                best_ari = ari
                 best_features.append(iter_feature_list.copy())
 
                 # Add results to the respective lists
@@ -155,7 +155,7 @@ def feature_selector(train_set: pd.DataFrame, variance_threshold: float, correla
                 adj_rand_scores.append(ari)
                 norm_mutual_infos.append(nmi)
 
-        # print(f"Iteration {i}: Best Features - {best_features}\n")
+        print(f"Iteration {iteration}: Best Features - {best_features}\n")
 
         # X-axis of the plot will show the features
         feature_names = ['\n'.join(features) for features in best_features]
@@ -163,7 +163,6 @@ def feature_selector(train_set: pd.DataFrame, variance_threshold: float, correla
         # last position of the list has the final feature set and correspondent rand index
         # inform user
         print(f"Best features list: {best_features[-1]}\n"
-              f"Rand Index: {accur_ri[-1]}\n"
               f"Adjusted Rand Index: {adj_rand_scores[-1]}\n"
               f"Normalized Mutual Information: {norm_mutual_infos[-1]}")
 
@@ -190,28 +189,27 @@ def feature_selector(train_set: pd.DataFrame, variance_threshold: float, correla
             # inform user
             print(f"Feature combination already tested.")
 
-    return feature_sets, feature_sets_ri, feature_sets_ari, feature_sets_nmi
+    return feature_sets, feature_sets_ari, feature_sets_nmi
 
 
 def one_stage_feature_selection(file_path: str, variance_threshold: float, correlation_threshold: float,
                                 n_iterations: int, clustering_model: str,
                                 plots_output_path: str, results_output_path: str, results_folder_name: str,
-                                results_filename_prefix: str) -> Tuple[List[str], float, float, float]:
+                                results_filename_prefix: str) -> Tuple[List[str], float, float]:
     # check path
     # load dataset and train/test split
-    train_set, _ = load.train_test_split(file_path, 0.9, 0.1)
+    train_set, _ = load.train_test_split(file_path, 0.8, 0.2)
 
     # find feature sets and respective scores
-    feature_sets, list_ri, list_ari, list_nmi = feature_selector(train_set, variance_threshold, correlation_threshold,
+    feature_sets, list_ari, list_nmi = feature_selector(train_set, variance_threshold, correlation_threshold,
                                                                  n_iterations, clustering_model, plots_output_path)
 
     # get only the feature sets with the highest rand index
-    best_feature_sets, best_ri, best_ari, best_nmi = _filter_best_feature_sets(feature_sets, list_ri, list_ari,
-                                                                               list_nmi)
+    best_feature_sets, best_ari, best_nmi = _filter_best_feature_sets(feature_sets, list_ari, list_nmi)
 
     # randomly pick one feature set if there's more than one
-    final_feature_set, final_ri, final_ari, final_nmi = _select_best_feature_set(best_feature_sets, best_ri,
-                                                                                 best_ari, best_nmi)
+    final_feature_set, final_ari, final_nmi = _select_best_feature_set(best_feature_sets,
+                                                                       best_ari, best_nmi)
 
     # get the subject ID from the file path
     subject_id = parser.get_subject_id_from_path(file_path)
@@ -226,13 +224,13 @@ def one_stage_feature_selection(file_path: str, variance_threshold: float, corre
 
     # Append results to the file
     with open(results_file_path, 'a') as file:
-        result_line = f"{subject_id};{final_feature_set};{final_ri};{final_ari};{final_nmi}\n"
+        result_line = f"{subject_id};{final_feature_set};{final_ari};{final_nmi}\n"
         file.write(result_line)
 
     # inform user
     print(f"Results from subject {subject_id} added to {results_file_path}")
 
-    return final_feature_set, final_ri, final_ari, final_nmi
+    return final_feature_set, final_ari, final_nmi
 
 
 def two_stage_feature_selection(main_path, features_folder_name, variance_threshold, corr_threshold,
@@ -258,17 +256,16 @@ def two_stage_feature_selection(main_path, features_folder_name, variance_thresh
         final_feature_set_with_axis = _get_top_features_across_all_subjects(subjects_dict, top_n)['features_with_axis']
 
         # Test the top features with axis for each subject
-        mean_ri, mean_ari, mean_nmi = _test_same_feature_set_for_all_subjects(main_path, features_folder_name,
+        mean_ari, mean_nmi = _test_same_feature_set_for_all_subjects(main_path, features_folder_name,
                                                                               clustering_model,
                                                                               final_feature_set_with_axis)
-
+        # use the adjusted rand index
         # Update the best feature set with axis if the current one is better
-        if mean_ri > best_scores_with_axis[0]:
+        if mean_ari > best_scores_with_axis[0]:
             best_feature_set_with_axis = final_feature_set_with_axis
-            best_scores_with_axis = [mean_ri, mean_ari, mean_nmi]
+            best_scores_with_axis = [mean_ari, mean_nmi]
 
         print(f"Results for features with axis:")
-        print(f"Mean Rand Index: {mean_ri}")
         print(f"Mean Adjusted Rand Index: {mean_ari}")
         print(f"Mean Normalized Mutual Information: {mean_nmi}")
 
@@ -279,28 +276,26 @@ def two_stage_feature_selection(main_path, features_folder_name, variance_thresh
         print("Results for testing different axes:")
         for axis, results in axis_test_results.items():
             print(
-                f"Axis: {axis} -> Mean RI: {results['mean_ri']}, Mean ARI: {results['mean_ari']}, Mean NMI: {results['mean_nmi']}")
+                f"Axis: {axis} -> Mean ARI: {results['mean_ari']}, Mean NMI: {results['mean_nmi']}")
 
             # Update the best feature set without axis if the current one is better
-            if results['mean_ri'] > best_scores_without_axis[0]:
+            if results['mean_ari'] > best_scores_without_axis[0]:
                 best_feature_set_without_axis = results['features']
-                best_scores_without_axis = [results['mean_ri'], results['mean_ari'], results['mean_nmi']]
+                best_scores_without_axis = [results['mean_ari'], results['mean_nmi']]
                 best_axis = axis
 
     # Print the best feature set with axis
     print("\nBest feature set with axis:")
-    print(f"Features: {best_feature_set_with_axis}")
-    print(f"Mean Rand Index: {best_scores_with_axis[0]}")
-    print(f"Mean Adjusted Rand Index: {best_scores_with_axis[1]}")
-    print(f"Mean Normalized Mutual Information: {best_scores_with_axis[2]}")
+    print(f"Best feature set with axis: {best_feature_set_with_axis}")
+    print(f"Mean Adjusted Rand Index: {best_scores_with_axis[0]}")
+    print(f"Mean Normalized Mutual Information: {best_scores_with_axis[1]}")
 
     # Print the best feature set without axis for each axis
     print("\nBest feature set without axis:")
     print(f"Axis: {best_axis}")
-    print(f"Features: {best_feature_set_without_axis}")
-    print(f"Mean Rand Index: {best_scores_without_axis[0]}")
-    print(f"Mean Adjusted Rand Index: {best_scores_without_axis[1]}")
-    print(f"Mean Normalized Mutual Information: {best_scores_without_axis[2]}")
+    print(f"Best feature set with axis: {best_feature_set_without_axis}")
+    print(f"Mean Adjusted Rand Index: {best_scores_without_axis[0]}")
+    print(f"Mean Normalized Mutual Information: {best_scores_without_axis[1]}")
 
 
 # ------------------------------------------------------------------------------------------------------------------- #
@@ -371,22 +366,21 @@ def _find_best_features_per_subject(main_path: str, features_folder_name: str, v
                     train_set, _ = load.train_test_split(dataset_path, 0.8, 0.2)
 
                     # Get the best feature sets for the subject
-                    feature_sets, ri_acc, ari_list, nmi_list = feature_selector(train_set, variance_threshold,
+                    feature_sets, ari_list, nmi_list = feature_selector(train_set, variance_threshold,
                                                                                 correlation_threshold,
                                                                                 n_iterations,
                                                                                 clustering_model, features_folder_name)
 
                     # Filter for the best feature sets and their accuracies
-                    best_feature_sets, best_acc, _, _ = _filter_best_feature_sets(feature_sets, ri_acc, ari_list,
-                                                                                  nmi_list)
+                    best_feature_sets, best_ari, best_nmi = _filter_best_feature_sets(feature_sets, ari_list, nmi_list)
 
                     # inform user
                     print("#########################################################################")
                     print(f"SUBJECT: {subject_folder}")
                     print("#########################################################################")
                     print(f"Feature sets with the highest accuracies:")
-                    for feat, acc in zip(best_feature_sets, best_acc):
-                        print(f"Features: {feat} \n Rand Index: {acc}")
+                    for feat, ari in zip(best_feature_sets, best_ari):
+                        print(f"Features: {feat} \n Adjusted Rand Index: {ari}")
 
                     # set to store the features with axis
                     unique_features = set()
@@ -409,9 +403,6 @@ def _find_best_features_per_subject(main_path: str, features_folder_name: str, v
 
                 else:
                     raise ValueError(f"Too many files: {len(feature_files)} files. Only one dataset per folder.")
-
-            else:
-                raise ValueError(f"Folder name {features_folder_name} not found.")
 
     return subjects_dict
 
@@ -468,7 +459,7 @@ def _get_top_features_across_all_subjects(subjects_dict: Dict[str, Dict[str, Set
     }
 
 
-def _test_feature_set(feature_set: List[str], file_path: str, clustering_model: str) -> Tuple[float, float, float]:
+def _test_feature_set(feature_set: List[str], file_path: str, clustering_model: str) -> Tuple[float, float]:
     """
     Tests a specific set of features for clustering.
 
@@ -519,11 +510,11 @@ def _test_feature_set(feature_set: List[str], file_path: str, clustering_model: 
     # Evaluate clustering with this feature set
     ri, ari, nmi = metrics.evaluate_clustering(true_labels, labels)
 
-    return ri, ari, nmi
+    return ari, nmi
 
 
 def _test_same_feature_set_for_all_subjects(main_path: str, features_folder_name: str, clustering_model: str,
-                                            feature_set: List[str]) -> Tuple[float, float, float]:
+                                            feature_set: List[str]) -> Tuple[float, float]:
     """
     Performs clustering and evaluates the performance across all subjects with the same feature set.
     This function goes through the main folder containing the subject folders. Inside each subject folder finds
@@ -551,7 +542,6 @@ def _test_same_feature_set_for_all_subjects(main_path: str, features_folder_name
     :return: Tuple[float, float, float]
     Mean scores of all subjects
     """
-    ri_list = []
     ari_list = []
     nmi_list = []
 
@@ -573,21 +563,17 @@ def _test_same_feature_set_for_all_subjects(main_path: str, features_folder_name
                     # only one csv file for the features folder
                     dataset_path = os.path.join(features_folder_path, feature_files[0])
 
-                    ri, ari, nmi = _test_feature_set(feature_set, dataset_path, clustering_model)
+                    ari, nmi = _test_feature_set(feature_set, dataset_path, clustering_model)
                     # print(f"RI: {ri}; ARI: {ari}; NMI: {nmi}")
 
                     # Append the results to the lists
-                    ri_list.append(ri)
                     ari_list.append(ari)
                     nmi_list.append(nmi)
 
                 else:
                     raise ValueError(f"Too many files: {len(feature_files)}")
 
-            else:
-                raise ValueError(f"Folder name {features_folder_name} not found.")
-
-    return np.round(np.mean(ri_list), 2), np.round(np.mean(ari_list), 2), np.round(np.mean(nmi_list), 2)
+    return np.round(np.mean(ari_list), 2), np.round(np.mean(nmi_list), 2)
 
 
 def _test_different_axis(subjects_dict: Dict[str, Dict[str, Set[str]]], main_path: str, features_folder_name: str,
@@ -630,17 +616,17 @@ def _test_different_axis(subjects_dict: Dict[str, Dict[str, Set[str]]], main_pat
 
         print(f"\nTest: {axis_feature_set}\n")
         # Test the feature set with the axis prefix for each subject
-        mean_ri, mean_ari, mean_nmi = _test_same_feature_set_for_all_subjects(main_path, features_folder_name,
-                                                                              clustering_model,
-                                                                              axis_feature_set)
+        mean_ari, mean_nmi = _test_same_feature_set_for_all_subjects(main_path, features_folder_name,
+                                                                     clustering_model,
+                                                                     axis_feature_set)
 
-        results[axis] = {'features': axis_feature_set, 'mean_ri': mean_ri, 'mean_ari': mean_ari, 'mean_nmi': mean_nmi}
+        results[axis] = {'features': axis_feature_set, 'mean_ari': mean_ari, 'mean_nmi': mean_nmi}
 
     return results
 
 
-def _select_best_feature_set(best_feature_sets: List[List[str]], best_ri: List[float],
-                             best_ari: List[float], best_nmi: List[float]) -> Tuple[List[str], float, float, float]:
+def _select_best_feature_set(best_feature_sets: List[List[str]], best_ari: List[float], best_nmi: List[float]) -> Tuple[
+    List[str], float, float]:
     """
     Select the best feature set based on the highest ARI. In case of ties, use the highest NMI.
     If there's still a tie, choose randomly among the remaining options.
@@ -648,17 +634,14 @@ def _select_best_feature_set(best_feature_sets: List[List[str]], best_ri: List[f
     :param best_feature_sets: List[List[str]]
     List of best feature sets.
 
-    :param best_ri: List[float]
-    List of Rand Index scores corresponding to the best feature sets.
-
     :param best_ari: List[float]
     List of Adjusted Rand Index scores corresponding to the best feature sets.
 
     :param best_nmi: List[float]
     List of Normalized Mutual Information scores corresponding to the best feature sets.
 
-    :return: Tuple[List[str], float, float, float]
-    The selected best feature set and its corresponding Rand Index, ARI, and NMI scores.
+    :return: Tuple[List[str], float, float]
+    The selected best feature set and its corresponding ARI and NMI scores.
     """
     # Find the highest ARI
     max_ari = max(best_ari)
@@ -681,7 +664,7 @@ def _select_best_feature_set(best_feature_sets: List[List[str]], best_ri: List[f
     else:
         idx = best_ari_indices[0]
 
-    return best_feature_sets[idx], best_ri[idx], best_ari[idx], best_nmi[idx]
+    return best_feature_sets[idx], best_ari[idx], best_nmi[idx]
 
 
 def _save_plot_clustering_results(feature_names: List[str], accur_ri: List[float], adj_rand_scores: List[float],
@@ -865,11 +848,11 @@ def _remove_first_letter(feature_sets: List[List[str]]) -> List[List[str]]:
     return [[feature[1:] for feature in feature_set] for feature_set in feature_sets]
 
 
-def _filter_best_feature_sets(feature_sets: List[List[str]], list_ri: List[float], list_ari: List[float],
+def _filter_best_feature_sets(feature_sets: List[List[str]], list_ari: List[float],
                               list_nmi: List[float]) \
-        -> Tuple[List[List[str]], List[float], List[float], List[float]]:
+        -> Tuple[List[List[str]], List[float], List[float]]:
     """
-    Gets the feature set(s) with the highest rand index.
+    Gets the feature set(s) with the highest adjusted rand index.
 
     :param feature_sets: List[List[str]]
     List containing lists of strings (feature sets).
@@ -878,18 +861,17 @@ def _filter_best_feature_sets(feature_sets: List[List[str]], list_ri: List[float
     List containing the rand index of the correspondent feature setxx
 
     :return: Tuple[List[List[str]], List[float]]
-    Feature sets with the highest rand index and the rand index itself
+    Feature sets with the highest adjusted rand index and the adjusted rand index itself
     """
     # Find the highest accuracy
-    highest_ri = max(list_ri)
+    highest_ari = max(list_ari)
 
     # Filter feature sets and accuracies that have the highest accuracy
-    best_feature_sets = [feature_sets[i] for i, accur in enumerate(list_ri) if accur == highest_ri]
-    best_ri = [accur for accur in list_ri if accur == highest_ri]
-    best_ari = [list_ari[i] for i, ri in enumerate(list_ri) if ri == highest_ri]
-    best_nmi = [list_nmi[i] for i, ri in enumerate(list_ri) if ri == highest_ri]
+    best_feature_sets = [feature_sets[i] for i, accur in enumerate(list_ari) if accur == highest_ari]
+    best_ari = [accur for accur in list_ari if accur == highest_ari]
+    best_nmi = [list_nmi[i] for i, ari in enumerate(list_ari) if ari == highest_ari]
 
-    return best_feature_sets, best_ri, best_ari, best_nmi
+    return best_feature_sets, best_ari, best_nmi
 
 
 def _aggregate_features(subjects_dict: Dict[str, Set[str]]) -> List[str]:

@@ -218,7 +218,7 @@ def _detect_sitting_tasks(yacc, fs, peak_height, min_distance) -> Tuple[List[int
 
     # Define the cut points
     start_1 = peaks[0] + 1500
-    end_1 = peaks[1] if len(peaks) > 1 else len(yacc)
+    end_1 = len(yacc)
 
     # Define the starts and stops
     starts = []

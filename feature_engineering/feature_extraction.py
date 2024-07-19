@@ -86,9 +86,8 @@ def load_json_file(json_path: str) -> Dict[Any, Any]:
 
 
 def feature_extractor(data_main_path: str, output_path: str, subclasses: list[str],
-                      json_path: str = "C:/Users/srale/PycharmProjects/toolbox/feature_engineering",
-                      output_filename: str = "acc_gyr_mag_phone_features_P017.csv",
-                      output_folder_name: str = "phone_features_basic_activities") -> None:
+                      output_filename: str, output_folder_name: str,
+                      json_path: str = "C:/Users/srale/PycharmProjects/toolbox/feature_engineering") -> None:
     """
     # TODO filename prefix and subject number - FILE_SUFFIX = "_feature_P{}.csv" in the constants
     file_name = prefix + FILE_SUFFIX.format(subject_num)
@@ -113,9 +112,9 @@ def feature_extractor(data_main_path: str, output_path: str, subclasses: list[st
             "standing_gestures": Standing with gestures
             "coffee": Standing while doing coffee
             "folders": Standing while moving folders inside a cabinet
-            "slow": Walking slow speed
-            "medium": Walking medium speed
-            "fast": Walking fast speed
+            "walk_slow": Walking slow speed
+            "walk_medium": Walking medium speed
+            "walk_fast": Walking fast speed
             "stairs": Going up and down the stairs
 
     :param json_path: str
@@ -394,11 +393,11 @@ def _balance_dataset(df_dict):
 
         # Special case for class 3 if stairs are present, subclass size needs adjustments
         if stairs_present and i == 2:
-            subclass_size = min_class_size // (len(signals) - 4)
+            subclass_size = min_class_size // (len(signals)-4)
         #
         # # standing class
-        # elif i == 0:
-        #     subclass_size = min_class_size // (len(signals))
+        elif i == 0:
+            subclass_size = min_class_size // (len(signals))
 
         else:
             subclass_size = min_class_size // len(signals)
