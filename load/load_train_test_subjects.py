@@ -37,6 +37,8 @@ def load_all_subjects(main_path: str, subfolder_name: str, all_data: bool, train
     :return: pd.DataFrame
     A pandas dataframe containing the data from all subjects including a new 'subject' column for subject identification
     """
+    dfs_train = []
+    dfs_test = []
     dfs = []
 
     for subject_folder in os.listdir(main_path):
@@ -52,13 +54,15 @@ def load_all_subjects(main_path: str, subfolder_name: str, all_data: bool, train
             if not all_data:
 
                 # get only the train sets from each subject
-                train_set, _ = train_test_split(csv_path, train_size, test_size)
+                train_set, test_set = train_test_split(csv_path, train_size, test_size)
 
                 # add subject column for subject identification
-                train_set[SUBJECT] = subject_folder
+                # train_set[SUBJECT] = subject_folder
+                # test_set[SUBJECT] = subject_folder
 
                 # add to the list of dataframes
-                dfs.append(train_set)
+                dfs_train.append(train_set)
+                dfs_test.append(test_set)
 
             else:
 
@@ -71,7 +75,7 @@ def load_all_subjects(main_path: str, subfolder_name: str, all_data: bool, train
                 # add to the list of dataframes
                 dfs.append(df)
 
-    return pd.concat(dfs, ignore_index=True)
+    return pd.concat(dfs_train, ignore_index=True), pd.concat(dfs_test, ignore_index=True),
 
 
 # ------------------------------------------------------------------------------------------------------------------- #

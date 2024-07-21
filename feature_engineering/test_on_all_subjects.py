@@ -2,6 +2,7 @@ from .feature_selection import  _test_feature_set
 from typing import List, Tuple
 import os
 import numpy as np
+import pandas as pd
 
 
 
@@ -34,6 +35,7 @@ def _test_same_feature_set_for_all_subjects(main_path: str, features_folder_name
     :return: Tuple[float, float, float]
     Mean scores of all subjects
     """
+    results = []
     ari_list = []
     nmi_list = []
 
@@ -56,8 +58,7 @@ def _test_same_feature_set_for_all_subjects(main_path: str, features_folder_name
                     dataset_path = os.path.join(features_folder_path, feature_files[0])
 
                     ari, nmi = _test_feature_set(feature_set, dataset_path, clustering_model)
-                    print(f"Results for subject {subject_folder}\n")
-                    print(f"ARI: {ari}; NMI: {nmi}")
+                    results.append({"Subject": subject_folder, "ARI": ari, "NMI": nmi})
 
                     # Append the results to the lists
 
@@ -66,11 +67,20 @@ def _test_same_feature_set_for_all_subjects(main_path: str, features_folder_name
 
                 else:
                     raise ValueError(f"Too many files: {len(feature_files)}")
-    print(
-        f"Avg Adjusted Rand Index: {np.round(np.mean(ari_list), 2)}\n"
-        f"Avg Normalized Mutual Information: {np.round(np.mean(nmi_list), 2)}")
 
-    return np.round(np.mean(ari_list), 2), np.round(np.mean(nmi_list), 2)
+        # Create a DataFrame from the results
+        df = pd.DataFrame(results)
+
+        excel_path = "C:/Users/srale/OneDrive - FCT NOVA/Tese/excels"
+        # Save to Excel
+        excel_path = os.path.join(excel_path, "kmeans_all_watch_noax_16.xlsx")
+        df.to_excel(excel_path, index=False)
+
+    print(
+        f"Avg Adjusted Rand Index: {np.round(np.mean(ari_list), 4)}\n"
+        f"Avg Normalized Mutual Information: {np.round(np.mean(nmi_list), 4)}")
+
+    return np.round(np.mean(ari_list), 4), np.round(np.mean(nmi_list), 4)
 
 
 

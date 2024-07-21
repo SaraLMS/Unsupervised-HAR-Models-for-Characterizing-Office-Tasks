@@ -116,7 +116,7 @@ def feature_selector(train_set: pd.DataFrame, variance_threshold: float, correla
 
         # Shuffle the column names at the beginning of each iteration
         shuffled_features = _shuffle_column_names(train_set)
-        print(f"Shuffled Features (Iteration {iteration}): {shuffled_features}")
+        # print(f"Shuffled Features (Iteration {iteration}): {shuffled_features}")
 
         # Reset the feature list for each iteration
         iter_feature_list = []
@@ -141,12 +141,9 @@ def feature_selector(train_set: pd.DataFrame, variance_threshold: float, correla
             # Evaluate clustering with this feature set
             ri, ari, nmi = metrics.evaluate_clustering(true_labels, pred_labels)
 
-            # if the Rand Index does not improve remove feature
-            if ari <= best_ari:
-                iter_feature_list.remove(feature)
+            # if adjusted Rand Index improves atleast 1%
+            if ari > best_ari + 0.01:
 
-            # if Rand Index improves add the feature to the feature list
-            else:
                 best_ari = ari
                 best_features.append(iter_feature_list.copy())
 
@@ -155,7 +152,13 @@ def feature_selector(train_set: pd.DataFrame, variance_threshold: float, correla
                 adj_rand_scores.append(ari)
                 norm_mutual_infos.append(nmi)
 
-        print(f"Iteration {iteration}: Best Features - {best_features}\n")
+            # if the Rand Index does not improve remove feature
+            # if ari <= best_ari:
+            #     iter_feature_list.remove(feature)
+            else:
+                iter_feature_list.remove(feature)
+
+        # print(f"Iteration {iteration}: Best Features - {best_features}\n")
 
         # X-axis of the plot will show the features
         feature_names = ['\n'.join(features) for features in best_features]
@@ -284,19 +287,24 @@ def two_stage_feature_selection(main_path, features_folder_name, variance_thresh
                 best_scores_without_axis = [results['mean_ari'], results['mean_nmi']]
                 best_axis = axis
 
+    ari_with_axis = best_scores_with_axis[0]
+    nmi_with_axis = best_scores_with_axis[1]
     # Print the best feature set with axis
     print("\nBest feature set with axis:")
     print(f"Best feature set with axis: {best_feature_set_with_axis}")
-    print(f"Mean Adjusted Rand Index: {best_scores_with_axis[0]}")
-    print(f"Mean Normalized Mutual Information: {best_scores_with_axis[1]}")
+    print(f"Mean Adjusted Rand Index: {ari_with_axis}")
+    print(f"Mean Normalized Mutual Information: {nmi_with_axis}")
 
+    ari_without_axis = best_scores_without_axis[0]
+    nmi_without_axis = best_scores_without_axis[1]
     # Print the best feature set without axis for each axis
     print("\nBest feature set without axis:")
     print(f"Axis: {best_axis}")
     print(f"Best feature set with axis: {best_feature_set_without_axis}")
-    print(f"Mean Adjusted Rand Index: {best_scores_without_axis[0]}")
-    print(f"Mean Normalized Mutual Information: {best_scores_without_axis[1]}")
+    print(f"Mean Adjusted Rand Index: {ari_without_axis}")
+    print(f"Mean Normalized Mutual Information: {nmi_without_axis}")
 
+    return best_feature_set_with_axis, ari_with_axis, nmi_with_axis, best_feature_set_without_axis, ari_without_axis, nmi_without_axis
 
 # ------------------------------------------------------------------------------------------------------------------- #
 # Private functions

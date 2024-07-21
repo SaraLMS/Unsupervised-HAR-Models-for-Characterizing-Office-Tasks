@@ -29,12 +29,12 @@ def evaluate_clustering(true_labels: pd.Series, predicted_labels: pd.Series) -> 
     Rand Index, Adjusted Rand Index, and Normalized Mutual Information scores.
     """
     # calculate feature_engineering accuracy
-    rand_index = np.round(rand_score(true_labels, predicted_labels), 2)
+    rand_index = np.round(rand_score(true_labels, predicted_labels), 4)
 
     # rand index adjusted for chance
-    adjusted_rand_index = np.round(adjusted_rand_score(true_labels, predicted_labels), 2)
+    adjusted_rand_index = np.round(adjusted_rand_score(true_labels, predicted_labels), 4)
 
     # mutual information
-    normalized_mutual_info = np.round(normalized_mutual_info_score(true_labels, predicted_labels), 2)
+    normalized_mutual_info = np.round(normalized_mutual_info_score(true_labels, predicted_labels), 4)
 
     return rand_index, adjusted_rand_index, normalized_mutual_info

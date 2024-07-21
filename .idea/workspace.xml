@@ -5,20 +5,15 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="3466cb1d-2559-4122-9522-f23b0d0f6b0a" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/clustering/two_tage_general_model.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/feature_engineering/test_on_all_subjects.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/feature_selection_Leonor.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/clustering/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/clustering/__init__.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/clustering/common.py" beforeDir="false" afterPath="$PROJECT_DIR$/clustering/common.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/clustering/general_model.py" beforeDir="false" afterPath="$PROJECT_DIR$/clustering/one_stage_general_model.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clustering/one_stage_general_model.py" beforeDir="false" afterPath="$PROJECT_DIR$/clustering/one_stage_general_model.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/clustering/subject_specific_model.py" beforeDir="false" afterPath="$PROJECT_DIR$/clustering/subject_specific_model.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/feature_engineering/feature_extraction.py" beforeDir="false" afterPath="$PROJECT_DIR$/feature_engineering/feature_extraction.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/feature_engineering/feature_selection.py" beforeDir="false" afterPath="$PROJECT_DIR$/feature_engineering/feature_selection.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/feature_engineering/test_on_all_subjects.py" beforeDir="false" afterPath="$PROJECT_DIR$/feature_engineering/test_on_all_subjects.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/load/load_train_test_subjects.py" beforeDir="false" afterPath="$PROJECT_DIR$/load/load_train_test_subjects.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/parser/check_create_directories.py" beforeDir="false" afterPath="$PROJECT_DIR$/parser/check_create_directories.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/processing/task_segmentation.py" beforeDir="false" afterPath="$PROJECT_DIR$/processing/task_segmentation.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/synchronization/synchronization.py" beforeDir="false" afterPath="$PROJECT_DIR$/synchronization/synchronization.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/metrics/clustering_metrics.py" beforeDir="false" afterPath="$PROJECT_DIR$/metrics/clustering_metrics.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -48,24 +43,25 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;Python tests.Python tests in test_supported_sensors.py.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.Python tests in test_sync.py.executor&quot;: &quot;Run&quot;,
-    &quot;Python.all_subjects_clustering.executor&quot;: &quot;Run&quot;,
-    &quot;Python.feature_extraction.executor&quot;: &quot;Run&quot;,
-    &quot;Python.feature_extractor.executor&quot;: &quot;Run&quot;,
-    &quot;Python.feature_selection.executor&quot;: &quot;Run&quot;,
-    &quot;Python.main.executor&quot;: &quot;Run&quot;,
-    &quot;Python.models.executor&quot;: &quot;Run&quot;,
-    &quot;Python.sync_devices_timestamps.executor&quot;: &quot;Run&quot;,
-    &quot;Python.synchronization.executor&quot;: &quot;Run&quot;,
-    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
-    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Python tests.Python tests in test_supported_sensors.py.executor": "Run",
+    "Python tests.Python tests in test_sync.py.executor": "Run",
+    "Python.all_subjects_clustering.executor": "Run",
+    "Python.feature_extraction.executor": "Run",
+    "Python.feature_extractor.executor": "Run",
+    "Python.feature_selection.executor": "Run",
+    "Python.main.executor": "Run",
+    "Python.models.executor": "Run",
+    "Python.sync_devices_timestamps.executor": "Run",
+    "Python.synchronization.executor": "Run",
+    "Python.test_on_all_subjects.executor": "Run",
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "git-widget-placeholder": "master",
+    "ignore.virus.scanning.warn.message": "true"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
       <recent name="C:\Users\srale\PycharmProjects\toolbox\load" />
@@ -90,14 +86,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1711360410072</updated>
-    </task>
-    <task id="LOCAL-00007" summary="Synchronization based on cross corr and timestamps done.&#10;Working on searching the log for starting times (_get_start_times_from_logger) in Phillip's way.">
-      <option name="closed" value="true" />
-      <created>1711563194981</created>
-      <option name="number" value="00007" />
-      <option name="presentableId" value="LOCAL-00007" />
-      <option name="project" value="LOCAL" />
-      <updated>1711563194981</updated>
     </task>
     <task id="LOCAL-00008" summary="Added new functions to filter the logger df - remove Sensor data: .... string and Noiserecorder.&#10;Changed the _get_logger_start_times function - this function now gets all starting times from the 3 devices.&#10;Added a new function _get_used_devices_start_times that gets the start times from the previous function, but only for the used devices.">
       <option name="closed" value="true" />
@@ -483,7 +471,15 @@
       <option name="project" value="LOCAL" />
       <updated>1720714454003</updated>
     </task>
-    <option name="localTasksCounter" value="56" />
+    <task id="LOCAL-00056" summary="added confusion matrix to the subject specific clustering">
+      <option name="closed" value="true" />
+      <created>1721349343625</created>
+      <option name="number" value="00056" />
+      <option name="presentableId" value="LOCAL-00056" />
+      <option name="project" value="LOCAL" />
+      <updated>1721349343627</updated>
+    </task>
+    <option name="localTasksCounter" value="57" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -498,7 +494,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Added clustering" />
     <MESSAGE value="plots for feature selection" />
     <MESSAGE value="Changes in segmentation and balancing. Added extra subclasses for stairs up, stairs down and standing still. Improved main file" />
     <MESSAGE value="corrected errors in task_segmentation and processor. Added search for most common combination of features in feature_selection.py" />
@@ -523,6 +518,7 @@
     <MESSAGE value="Added one_stage and two_stage feature selection NOT TESTED" />
     <MESSAGE value="load txt file" />
     <MESSAGE value="corrected the loading of all subjects and other changes" />
-    <option name="LAST_COMMIT_MESSAGE" value="corrected the loading of all subjects and other changes" />
+    <MESSAGE value="added confusion matrix to the subject specific clustering" />
+    <option name="LAST_COMMIT_MESSAGE" value="added confusion matrix to the subject specific clustering" />
   </component>
 </project>

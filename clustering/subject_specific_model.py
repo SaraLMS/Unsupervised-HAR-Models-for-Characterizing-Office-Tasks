@@ -14,11 +14,14 @@ from .common import cluster_subject
 # public functions
 # ------------------------------------------------------------------------------------------------------------------- #
 
-def subject_specific_clustering(main_path: str, subjects_features_path: str, clustering_model: str, features_folder_name: str):
+def subject_specific_clustering(main_path: str, subjects_features_path: str, clustering_model: str, features_folder_name: str, results_path: str):
 
     # load the csv file with the subject id's and the respective feature sets
     # columns are the subject id's and the feature set to be used for that subject
     feature_sets = pd.read_csv(subjects_features_path, delimiter=";")
+
+    # lists for holding the clustering results
+    results = []
 
     # iterate through the subject folders
     for subject_folder in os.listdir(main_path):
@@ -49,13 +52,17 @@ def subject_specific_clustering(main_path: str, subjects_features_path: str, clu
 
                         if subject_feature_set:
                             # Cluster the subject
-                            ri, ari, nmi = cluster_subject(dataset_path, clustering_model, subject_feature_set)
-
+                            ari, nmi = cluster_subject(dataset_path, clustering_model, subject_feature_set, subject_folder)
+                            results.append({
+                                "Subject ID": subject_folder,
+                                "ARI": ari,
+                                "NMI": nmi
+                            })
                             # Inform user
                             print(f"Clustering results for subject: {subject_folder}")
                             # print(f"Feature set used: {subject_feature_set_str}")
                             print(
-                                f"Rand Index: {ri}; Adjusted Rand Index: {ari}; Normalized Mutual Information: {nmi}\n")
+                                f"Adjusted Rand Index: {ari}; Normalized Mutual Information: {nmi}\n")
                         else:
                             print(f"Failed to parse feature set for subject {subject_folder}. Skipping.")
                     else:
@@ -63,7 +70,11 @@ def subject_specific_clustering(main_path: str, subjects_features_path: str, clu
 
                 else:
                     raise ValueError("Only one dataset per folder is allowed.")
-
+    # Create DataFrame from results and save to Excel
+    results_df = pd.DataFrame(results)
+    excel_path = os.path.join(results_path, "clustering_results_gmm_basic_phone.xlsx")
+    results_df.to_excel(excel_path, index=False)
+    print(f"Results saved to {excel_path}")
 
 # ------------------------------------------------------------------------------------------------------------------- #
 # private functions
