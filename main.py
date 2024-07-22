@@ -29,20 +29,21 @@ def main():
     do_generate_cfg_file = False
     do_feature_extraction = False
     # feature selection
-    do_one_subject_feature_selection = False
+    do_one_subject_feature_selection = True
     do_general_model_feature_selection = False
     do_all_subjects_feature_selection = False
     # clustering
-    do_general_model_clustering = True
+    do_general_model_clustering = False
     do_subject_specific_clustering = False
+    do_two_stage_model_clustering = False
 
     if do_synchronization:
-        raw_data_in_path = "D:/tese_backups/raw_signals_backups/acquisitions/P020"
-        sync_android_out_path = ("D:/tese_backups/subjects/P020/acc_gyr_mag_watch_phone/sync_android_P020")
-        output_path = "D:/tese_backups/subjects/P020/acc_gyr_mag_watch_phone/synchronized_P020"
-        selected_sensors = {'phone': ['acc', 'gyr', 'mag'], 'watch': ['acc', 'gyr', 'mag']}  #
-        sync_type = 'crosscorr'
-        evaluation_path = "D:/tese_backups/subjects/P020/acc_gyr_mag_watch_phone"
+        raw_data_in_path = "F:/fac/Tese/prevoccupai_sim/phone"
+        sync_android_out_path = ("F:/fac/Tese/prevoccupai_sim/sync_phone")
+        output_path = "F:/fac/Tese/prevoccupai_sim/sync_devices"
+        selected_sensors = {'phone': ['acc', 'gyr', 'mag']}  #
+        sync_type = 'timestamps'
+        evaluation_path = "F:/fac/Tese/prevoccupai_sim/sync_eval"
         synchronization.synchronization(raw_data_in_path, sync_android_out_path, selected_sensors, output_path,
                                         sync_type, evaluation_path)
 
@@ -68,66 +69,65 @@ def main():
 
     if do_one_subject_feature_selection:
         # #
-        # import os
-        # main_path = "C:/Users/srale/OneDrive - FCT NOVA/Tese/subjects_datasets"
-        # features_folder_name = "watch_features_basic_activities"
-        # # iterate through the subject folders
-        # for subject_folder in os.listdir(main_path):
-        #     subject_folder_path = os.path.join(main_path, subject_folder)
-        #
-        #     # iterate through the folders inside each subject folder
-        #     for folder_name in os.listdir(subject_folder_path):
-        #
-        #         # get the specified folder
-        #         if folder_name == features_folder_name:
-        #
-        #             # get the path to the dataset
-        #             features_folder_path = os.path.join(subject_folder_path, features_folder_name)
-        #
-        #             # check if there's only one csv file in the folder
-        #             if len(os.listdir(features_folder_path)) == 1:
-        #                 # only one csv file for the features folder
-        #                 dataset_path = os.path.join(features_folder_path, os.listdir(features_folder_path)[0])
-        #
-        #                 output_path_plots = "D:/tese_backups/subjects/P004/acc_gyr_mag_phone"
-        #                 # # train test split
-        #                 # train_set, _ = load.train_test_split(dataset_path, 0.8, 0.2)
-        #                 #
-        #                 #
-        #                 # _, _, _, _ = feature_engineering.feature_selector(train_set, 0.05, 0.99, 20,
-        #                 #                                                   "kmeans", output_path_plots)
-        #                 results_output_path = "C:/Users/srale/OneDrive - FCT NOVA/Tese/results_gmm"
-        #                 results_folder_name = "subject_specific_basic_feature_selection"
-        #                 results_filename_prefix = "watch_basic_80_20"
-        #                 feature_engineering.one_stage_feature_selection(dataset_path, 0.05, 0.99,
-        #                                                                 10, "gmm", output_path_plots,
-        #                                                                 results_output_path,
-        #                                                                 results_folder_name, results_filename_prefix)
+        import os
+        main_path = "C:/Users/srale/OneDrive - FCT NOVA/Tese/subjects_datasets"
+        features_folder_name = "watch_features_all_activities"
+        # iterate through the subject folders
+        for subject_folder in os.listdir(main_path):
+            subject_folder_path = os.path.join(main_path, subject_folder)
 
-        dataset_path = (
-            "C:/Users/srale/OneDrive - FCT NOVA/Tese/subjects_datasets/P019/phone_features_basic_activities"
-            "/acc_gyr_mag_phone_features_P019.csv")
-        output_path_plots = "D:/tese_backups/subjects/P010/acc_gyr_mag_phone"
-        # # train test split
-        # train_set, _ = load.train_test_split(dataset_path, 0.8, 0.2)
+            # iterate through the folders inside each subject folder
+            for folder_name in os.listdir(subject_folder_path):
+
+                # get the specified folder
+                if folder_name == features_folder_name:
+
+                    # get the path to the dataset
+                    features_folder_path = os.path.join(subject_folder_path, features_folder_name)
+
+                    # check if there's only one csv file in the folder
+                    if len(os.listdir(features_folder_path)) == 1:
+                        # only one csv file for the features folder
+                        dataset_path = os.path.join(features_folder_path, os.listdir(features_folder_path)[0])
+
+                        output_path_plots = "D:/tese_backups/subjects/P004/acc_gyr_mag_phone"
+                        # # train test split
+                        # train_set, _ = load.train_test_split(dataset_path, 0.8, 0.2)
+                        #
+                        #
+                        # _, _, _, _ = feature_engineering.feature_selector(train_set, 0.05, 0.99, 20,
+                        #                                                   "kmeans", output_path_plots)
+                        results_output_path = "C:/Users/srale/OneDrive - FCT NOVA/Tese/results_agg"
+                        results_folder_name = "subject_specific_all_feature_selection"
+                        results_filename_prefix = "watch_all_80_20"
+                        feature_engineering.one_stage_feature_selection(dataset_path, 0.01, 0.99,
+                                                                        6, "agglomerative", output_path_plots,
+                                                                        results_output_path,
+                                                                        results_folder_name, results_filename_prefix)
+
+        # dataset_path = (
+        #     "C:/Users/srale/OneDrive - FCT NOVA/Tese/subjects_datasets/P020/watch_phone_features_basic_activities"
+        #     "/acc_gyr_mag_watch_phone_features_P020.csv")
+        # output_path_plots = "D:/tese_backups/subjects/P010/acc_gyr_mag_phone"
+        # # # train test split
+        # # train_set, _ = load.train_test_split(dataset_path, 0.8, 0.2)
         #
-        #
-        # _, _, _, _ = feature_engineering.feature_selector(train_set, 0.05, 0.99, 20,
-        #                                                   "kmeans", output_path_plots)
-        results_output_path = "C:/Users/srale/OneDrive - FCT NOVA/Tese/results_gmm"
-        results_folder_name = "subject_specific_basic_feature_selection"
-        results_filename_prefix = "phone_basic_80_20"
-        feature_engineering.one_stage_feature_selection(dataset_path, 0.05, 0.99,
-                                                        13, "gmm", output_path_plots, results_output_path,
-                                                        results_folder_name, results_filename_prefix)
+        # # _, _, _, _ = feature_engineering.feature_selector(train_set, 0.05, 0.99, 20,
+        # #                                                   "kmeans", output_path_plots)
+        # results_output_path = "C:/Users/srale/OneDrive - FCT NOVA/Tese/results_agg"
+        # results_folder_name = "subject_specific_basic_feature_selection"
+        # results_filename_prefix = "watch_phone_basic_80_20"
+        # feature_engineering.one_stage_feature_selection(dataset_path, 0.1, 0.99,
+        #                                                 10, "agglomerative", output_path_plots, results_output_path,
+        #                                                 results_folder_name, results_filename_prefix)
 
     if do_general_model_feature_selection:
         main_path = "C:/Users/srale/OneDrive - FCT NOVA/Tese/subjects_datasets"
-        subfolder_name = "watch_phone_features_basic_activities"
+        subfolder_name = "watch_features_basic_activities"
         output_path = "D:/tese_backups/general_model"
 
-        all_train_sets = load.load_all_subjects(main_path, subfolder_name, False)
-        _, _, _ = feature_engineering.feature_selector(all_train_sets, 0.01, 0.99, 10, "gmm", output_path)
+        all_train_sets, _ = load.load_all_subjects(main_path, subfolder_name)
+        _, _, _ = feature_engineering.feature_selector(all_train_sets, 0.01, 0.99, 10, "kmeans", output_path)
 
     if do_all_subjects_feature_selection:
         main_path = "C:/Users/srale/OneDrive - FCT NOVA/Tese/subjects_datasets"
@@ -235,18 +235,29 @@ def main():
         subfolder_name = "phone_features_all_activities"
         clustering_model = "kmeans"
         results_path = "C:/Users/srale/OneDrive - FCT NOVA/Tese/excels"
-        feature_set = ['zMag_Mean', 'zAcc_Median frequency', 'xMag_Mean', 'xGyr_Spectral centroid', 'yGyr_Standard deviation', 'zGyr_Standard deviation', 'xAcc_Max', 'zGyr_Spectral entropy', 'yAcc_Spectral entropy', 'xGyr_Standard deviation', 'xGyr_Min', 'yGyr_Spectral entropy', 'xAcc_Median frequency', 'xMag_Min', 'xMag_Spectral centroid']
+        feature_set =   ['zMag_Mean', 'zAcc_Median frequency', 'xMag_Mean', 'xGyr_Spectral centroid', 'yGyr_Standard deviation', 'zGyr_Standard deviation', 'xAcc_Max', 'zGyr_Spectral entropy', 'yAcc_Spectral entropy', 'xGyr_Standard deviation', 'xGyr_Min', 'yGyr_Spectral entropy', 'xAcc_Median frequency', 'xMag_Min', 'xMag_Spectral centroid']
 
-        _, _ = clustering.general_model_clustering(main_path, subfolder_name, clustering_model, feature_set, results_path)
+        # _, _ = clustering.general_model_clustering(main_path, subfolder_name, clustering_model, feature_set, results_path)
+        clustering.one_stage_general_model_each_subject(main_path, subfolder_name, clustering_model, feature_set, results_path)
 
     if do_subject_specific_clustering:
         main_path = "C:/Users/srale/OneDrive - FCT NOVA/Tese/subjects_datasets"
         features_folder_name = "phone_features_basic_activities"
-        clustering_model = "gmm"
+        clustering_model = "kmeans"
         feature_sets_path = ("C:/Users/srale/OneDrive - FCT NOVA/Tese/results_gmm/subject_specific_basic_feature_selection"
                              "/phone_basic_80_20_feature_selection_results.txt")
         results_path = "C:/Users/srale/OneDrive - FCT NOVA/Tese/excels"
         clustering.subject_specific_clustering(main_path, feature_sets_path, clustering_model, features_folder_name, results_path)
+
+    if do_two_stage_model_clustering:
+        main_path = "C:/Users/srale/OneDrive - FCT NOVA/Tese/subjects_datasets"
+        features_folder_name = "phone_features_basic_activities"
+        clustering_model = "kmeans"
+        results_path = "C:/Users/srale/OneDrive - FCT NOVA/Tese/excels"
+        feature_set = ['zAcc_Variance', 'xAcc_Interquartile range', 'yAcc_Min', 'yGyr_Standard deviation', 'zGyr_Spectral entropy', 'yMag_Min', 'yGyr_Spectral entropy', 'xAcc_Median frequency', 'xGyr_Standard deviation', 'yMag_Mean', 'xMag_Spectral centroid', 'yMag_Max']
+
+
+        clustering.two_stage_general_model_clustering(main_path, clustering_model, features_folder_name, feature_set, results_path)
 
 
 if __name__ == "__main__":
@@ -262,19 +273,6 @@ if __name__ == "__main__":
 #
 # _test_same_feature_set_for_all_subjects(main_path, features_folder_name, "kmeans", feature_set)
 
-
-
-#
-#
-#
-#
-#
-
-#
-#
-#
-#
-#
 
 
 

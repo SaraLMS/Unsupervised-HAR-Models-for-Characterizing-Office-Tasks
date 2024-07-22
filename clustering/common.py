@@ -50,7 +50,7 @@ def cluster_data(clustering_model: str, train_set: pd.DataFrame, test_set: pd.Da
     if clustering_model == KMEANS:
         labels = models.kmeans_model(train_set, test_set, n_clusters)
     elif clustering_model == AGGLOMERATIVE:
-        labels = models.agglomerative_clustering_model(train_set, test_set, n_clusters)
+        labels = models.agglomerative_clustering_model(train_set, n_clusters)
     elif clustering_model == GAUSSIAN_MIXTURE_MODEL:
         labels = models.gaussian_mixture_model(train_set, test_set, n_clusters)
     elif clustering_model == DBSCAN:

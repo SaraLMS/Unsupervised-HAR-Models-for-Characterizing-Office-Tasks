@@ -12,7 +12,7 @@ from .dataset_split_train_test import train_test_split
 # ------------------------------------------------------------------------------------------------------------------- #
 # public functions
 # ------------------------------------------------------------------------------------------------------------------- #
-def load_all_subjects(main_path: str, subfolder_name: str, all_data: bool, train_size: float = 0.8,
+def load_all_subjects(main_path: str, subfolder_name: str, train_size: float = 0.8,
                       test_size: float = 0.2) -> pd.DataFrame:
     """
     Load subject data from CSV files into a unified dataframe. If all_data is set to True, load the complete dataset of
@@ -39,7 +39,6 @@ def load_all_subjects(main_path: str, subfolder_name: str, all_data: bool, train
     """
     dfs_train = []
     dfs_test = []
-    dfs = []
 
     for subject_folder in os.listdir(main_path):
         subject_path = os.path.join(main_path, subject_folder)
@@ -51,31 +50,23 @@ def load_all_subjects(main_path: str, subfolder_name: str, all_data: bool, train
         for csv_file in os.listdir(subfolder_path):
             csv_path = os.path.join(subfolder_path, csv_file)
 
-            if not all_data:
+            # get only the train sets from each subject
+            train_set, test_set = train_test_split(csv_path, train_size, test_size)
 
-                # get only the train sets from each subject
-                train_set, test_set = train_test_split(csv_path, train_size, test_size)
+            # add subject column for subject identification
+            # train_set[SUBJECT] = subject_folder
+            # test_set[SUBJECT] = subject_folder
 
-                # add subject column for subject identification
-                # train_set[SUBJECT] = subject_folder
-                # test_set[SUBJECT] = subject_folder
+            # add to the list of dataframes
+            dfs_train.append(train_set)
+            dfs_test.append(test_set)
 
-                # add to the list of dataframes
-                dfs_train.append(train_set)
-                dfs_test.append(test_set)
 
-            else:
+    return pd.concat(dfs_train, ignore_index=True), pd.concat(dfs_test, ignore_index=True)
 
-                # get the whole dataset from all subjects
-                df = load_data_from_csv(csv_path)
 
-                # add subject column for subject identification
-                df[SUBJECT] = subject_folder
 
-                # add to the list of dataframes
-                dfs.append(df)
 
-    return pd.concat(dfs_train, ignore_index=True), pd.concat(dfs_test, ignore_index=True),
 
 
 # ------------------------------------------------------------------------------------------------------------------- #

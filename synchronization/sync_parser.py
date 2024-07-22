@@ -30,7 +30,7 @@ def extract_date_time(file_path: str) -> Tuple[str, str]:
     return date, time
 
 
-def check_logger_file(folder_path:str) -> bool:
+def check_logger_file(folder_path: str) -> bool:
     """
     Checks if a logger file exists in the specified folder and that it is not empty.
     Assumes logger file name starts with 'opensignals_ACQUISITION_LOG_' and includes

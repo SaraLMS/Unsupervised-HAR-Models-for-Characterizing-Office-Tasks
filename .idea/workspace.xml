@@ -5,15 +5,17 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="3466cb1d-2559-4122-9522-f23b0d0f6b0a" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/clustering/random_forest.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clustering/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/clustering/__init__.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/clustering/common.py" beforeDir="false" afterPath="$PROJECT_DIR$/clustering/common.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/clustering/one_stage_general_model.py" beforeDir="false" afterPath="$PROJECT_DIR$/clustering/one_stage_general_model.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/clustering/subject_specific_model.py" beforeDir="false" afterPath="$PROJECT_DIR$/clustering/subject_specific_model.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/feature_engineering/feature_selection.py" beforeDir="false" afterPath="$PROJECT_DIR$/feature_engineering/feature_selection.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/feature_engineering/test_on_all_subjects.py" beforeDir="false" afterPath="$PROJECT_DIR$/feature_engineering/test_on_all_subjects.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clustering/two_tage_general_model.py" beforeDir="false" afterPath="$PROJECT_DIR$/clustering/two_tage_general_model.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/load/load_train_test_subjects.py" beforeDir="false" afterPath="$PROJECT_DIR$/load/load_train_test_subjects.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/metrics/clustering_metrics.py" beforeDir="false" afterPath="$PROJECT_DIR$/metrics/clustering_metrics.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/synchronization/sync_parser.py" beforeDir="false" afterPath="$PROJECT_DIR$/synchronization/sync_parser.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -48,11 +50,13 @@
     "Python tests.Python tests in test_supported_sensors.py.executor": "Run",
     "Python tests.Python tests in test_sync.py.executor": "Run",
     "Python.all_subjects_clustering.executor": "Run",
+    "Python.dataset_split_train_test.executor": "Debug",
     "Python.feature_extraction.executor": "Run",
     "Python.feature_extractor.executor": "Run",
     "Python.feature_selection.executor": "Run",
     "Python.main.executor": "Run",
     "Python.models.executor": "Run",
+    "Python.random_forest.executor": "Run",
     "Python.sync_devices_timestamps.executor": "Run",
     "Python.synchronization.executor": "Run",
     "Python.test_on_all_subjects.executor": "Run",
@@ -86,14 +90,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1711360410072</updated>
-    </task>
-    <task id="LOCAL-00008" summary="Added new functions to filter the logger df - remove Sensor data: .... string and Noiserecorder.&#10;Changed the _get_logger_start_times function - this function now gets all starting times from the 3 devices.&#10;Added a new function _get_used_devices_start_times that gets the start times from the previous function, but only for the used devices.">
-      <option name="closed" value="true" />
-      <created>1711624769828</created>
-      <option name="number" value="00008" />
-      <option name="presentableId" value="LOCAL-00008" />
-      <option name="project" value="LOCAL" />
-      <updated>1711624769828</updated>
     </task>
     <task id="LOCAL-00009" summary="Finished syncronization based on logger timestamps and the wrapper function.&#10;Created a new python package 'visualization' - no code here yet&#10;Code works but haven't checked if it's cutting the signals correctly">
       <option name="closed" value="true" />
@@ -479,7 +475,15 @@
       <option name="project" value="LOCAL" />
       <updated>1721349343627</updated>
     </task>
-    <option name="localTasksCounter" value="57" />
+    <task id="LOCAL-00057" summary="removed leave one out and changed load all subjects">
+      <option name="closed" value="true" />
+      <created>1721581476291</created>
+      <option name="number" value="00057" />
+      <option name="presentableId" value="LOCAL-00057" />
+      <option name="project" value="LOCAL" />
+      <updated>1721581476292</updated>
+    </task>
+    <option name="localTasksCounter" value="58" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -494,7 +498,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="plots for feature selection" />
     <MESSAGE value="Changes in segmentation and balancing. Added extra subclasses for stairs up, stairs down and standing still. Improved main file" />
     <MESSAGE value="corrected errors in task_segmentation and processor. Added search for most common combination of features in feature_selection.py" />
     <MESSAGE value="corrected task segmentation - stops validation" />
@@ -519,6 +522,7 @@
     <MESSAGE value="load txt file" />
     <MESSAGE value="corrected the loading of all subjects and other changes" />
     <MESSAGE value="added confusion matrix to the subject specific clustering" />
-    <option name="LAST_COMMIT_MESSAGE" value="added confusion matrix to the subject specific clustering" />
+    <MESSAGE value="removed leave one out and changed load all subjects" />
+    <option name="LAST_COMMIT_MESSAGE" value="removed leave one out and changed load all subjects" />
   </component>
 </project>

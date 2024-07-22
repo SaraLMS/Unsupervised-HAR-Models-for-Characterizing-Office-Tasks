@@ -24,9 +24,8 @@ def gaussian_mixture_model(train_set: pd.DataFrame, test_set: pd.DataFrame, n_co
     return labels_gmm
 
 
-def agglomerative_clustering_model(train_set: pd.DataFrame, test_set: pd.DataFrame, n_clusters: int) -> pd.Series:
-    agg_clustering = AgglomerativeClustering(n_clusters=n_clusters).fit(train_set)
-    labels_agg = agg_clustering.predict(test_set)
+def agglomerative_clustering_model(train_set: pd.DataFrame, n_clusters: int) -> pd.Series:
+    labels_agg = AgglomerativeClustering(n_clusters=n_clusters).fit_predict(train_set)
     return labels_agg
 
 
