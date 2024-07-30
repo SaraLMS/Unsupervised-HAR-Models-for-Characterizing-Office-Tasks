@@ -12,8 +12,8 @@ from .common import normalize_features, cluster_data, check_features
 from typing import List, Tuple
 import os
 import pandas as pd
+import joblib
 
-from .random_forest import random_forest_classifier
 
 
 # ------------------------------------------------------------------------------------------------------------------- #
@@ -54,6 +54,7 @@ def general_model_clustering(main_path: str, subfolder_name: str, clustering_mod
 
     return ari, nmi
 
+
 def one_stage_general_model_each_subject(main_path: str, features_folder_name: str, clustering_model: str,
                              feature_set: List[str], results_path: str):
     # load all subjects into a dataframe
@@ -62,34 +63,19 @@ def one_stage_general_model_each_subject(main_path: str, features_folder_name: s
     # Check if all features in the feature set exist in the dataframe columns
     check_features(all_train_set, feature_set)
 
-    train_set_true_labels = all_train_set[CLASS]
+    train_set_true_labels = all_train_set[CLASS] # y_train
 
     # Get only the wanted features in the train and test sets
     all_train_set = all_train_set[feature_set]
 
-    # Normalize the features
+    # Normalize the features - x_train
     all_train_set = normalize_features(all_train_set)
 
     # Initialize the random forest classifier
-    rf = RandomForestClassifier()
-
-    # Set up the hyperparameter grid for tuning
-    param_grid = {
-        'n_estimators': [100, 200, 300],  # Number of trees
-        'max_depth': [None, 10, 20, 30],  # Maximum depth of the tree
-        'min_samples_split': [2, 5, 10],  # Minimum number of samples required to split an internal node
-        'min_samples_leaf': [1, 2, 4]  # Minimum number of samples required to be at a leaf node
-    }
-
-    # Configure Grid Search
-    grid_search = GridSearchCV(estimator=rf, param_grid=param_grid, cv=5, verbose=2, n_jobs=-1)
+    rf = RandomForestClassifier(n_estimators=200, max_depth=10, min_samples_split=2, min_samples_leaf=2)
 
     # Fit the model
-    grid_search.fit(all_train_set, train_set_true_labels)
-
-    # Get the best estimator
-    best_rf = grid_search.best_estimator_
-
+    rf.fit(all_train_set, train_set_true_labels)
 
     # lists for holding the clustering results
     results = []
@@ -118,20 +104,20 @@ def one_stage_general_model_each_subject(main_path: str, features_folder_name: s
 
                     check_features(test_set, feature_set)
 
-                    # Get true labels for evaluation
+                    # Get true labels for evaluation - y_test
                     test_set_true_labels = test_set[CLASS]
 
                     # get only the wanted features - x_test
                     test_set = test_set[feature_set]
 
-                    # Normalize the features - y_test
+                    # Normalize the features
                     test_set = normalize_features(test_set)
 
                     # Cluster data
                     pred_labels = cluster_data(clustering_model, all_train_set, test_set, n_clusters=3)
 
                     # Predict on the test set
-                    y_pred = best_rf.predict(test_set)
+                    y_pred = rf.predict(test_set)
 
                     # Calculate the accuracy
                     accuracy = accuracy_score(test_set_true_labels, y_pred)
@@ -148,10 +134,13 @@ def one_stage_general_model_each_subject(main_path: str, features_folder_name: s
 
     # Create DataFrame from results and save to Excel
     results_df = pd.DataFrame(results)
-    excel_path = os.path.join(results_path, "1_stage_general_kmeans_all_phone.xlsx")
+    excel_path = os.path.join(results_path, "1_stage_general_kmeans_basic_watch_phone.xlsx")
     results_df.to_excel(excel_path, index=False)
     print(f"Results saved to {excel_path}")
 
+    # save_path = "C:/Users/srale/OneDrive - FCT NOVA/Tese/excels/all_activities_1_stage_general_model_RF.joblib"
+    # joblib.dump(rf, save_path)
+    # print(f"Model saved to {save_path}")
 
 
 # ------------------------------------------------------------------------------------------------------------------- #

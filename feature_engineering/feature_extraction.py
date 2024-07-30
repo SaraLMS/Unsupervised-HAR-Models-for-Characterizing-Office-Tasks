@@ -11,7 +11,8 @@ import load
 import parser
 import tsfel
 from typing import Dict, Any, List
-from constants import SUPPORTED_ACTIVITIES, CABINETS, SITTING, STANDING, WALKING, STAIRS, SEC, WEAR_PREFIX
+from constants import SUPPORTED_ACTIVITIES, CABINETS, SITTING, STANDING, WALKING, STAIRS, SEC, WEAR_PREFIX, \
+    MAGNETOMETER_PREFIX
 
 # constants supported from filenames
 COFFEE = "coffee"
@@ -158,6 +159,9 @@ def feature_extractor(data_main_path: str, output_path: str, subclasses: list[st
                 # load to a dataframe
                 df = load.load_data_from_csv(file_path)
 
+                # get magnitude of the magnetometer
+                df = _calc_mag_magnitude(df)
+
                 # inform user
                 print(f"Extract features from {folder_name}")
 
@@ -192,6 +196,33 @@ def feature_extractor(data_main_path: str, output_path: str, subclasses: list[st
 # private functions
 # ------------------------------------------------------------------------------------------------------------------- #
 
+def _calc_mag_magnitude(df):
+    phone_mag_columns = []
+    watch_mag_columns = []
+
+    # Separate the columns by device
+    for col in df.columns:
+        if MAGNETOMETER_PREFIX in col:
+            if WEAR_PREFIX in col:
+                watch_mag_columns.append(col)
+            else:
+                phone_mag_columns.append(col)
+
+    # Calculate magnitude if accelerometer data is available
+    if phone_mag_columns:
+        df['total_mag_phone'] = _calculate_magnitude(df, phone_mag_columns)
+
+    if watch_mag_columns:
+        df['total_mag_wear'] = _calculate_magnitude(df, watch_mag_columns)
+
+    # # Optionally drop the original magnetometer columns
+    # df.drop(columns=phone_mag_columns + watch_mag_columns, inplace=True)
+
+    return df
+
+
+def _calculate_magnitude(df: pd.DataFrame, columns: List[str]) -> pd.DataFrame:
+    return np.sqrt((df[columns[0]] ** 2) + (df[columns[1]] ** 2) + (df[columns[2]] ** 2))
 
 def _validate_subclasses_list(subclasses: List[str]) -> None:
     """
@@ -393,7 +424,7 @@ def _balance_dataset(df_dict):
 
         # Special case for class 3 if stairs are present, subclass size needs adjustments
         if stairs_present and i == 2:
-            subclass_size = min_class_size // (len(signals)-4)
+            subclass_size = min_class_size // (len(signals)-2)
         #
         # # standing class
         elif i == 0:

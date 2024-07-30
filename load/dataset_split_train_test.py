@@ -56,10 +56,121 @@ def train_test_split(path: str, train_size, test_size):
     return train_set, test_set
 
 
+def unbalance_dataset(df, subclass_column='subclass', target_proportions=None):
+    """
+    Unbalances the dataset by ensuring that the final proportions of the dataset
+    are 90% sitting, 5% walking, and 5% standing.
+
+    Args:
+    - subclass_dfs: List of dataframes, each corresponding to a different subclass.
+    - subclass_column: The column name identifying the subclass in each DataFrame.
+    - target_proportions: Dictionary specifying the target proportions.
+
+    Returns:
+    - A new DataFrame that is unbalanced according to the specified proportions.
+    """
+    subclass_dfs = _split_by_subclass(df)
+
+    # Default proportions if not specified
+    if target_proportions is None:
+        target_proportions = {
+            'sit': 0.90,
+            'walk_medium': 0.05,
+            'standing_still1': 0.05
+        }
+
+    # Extract and sum the rows for each subclass
+    subclass_rows = {key: None for key in target_proportions.keys()}  # initialize dictionary
+    for df in subclass_dfs:
+        subclass_name = df[subclass_column].iloc[0]  # Assume each df has a 'subclass' column
+        for key in subclass_rows:
+            if subclass_name == key:
+                subclass_rows[key] = df  # Store DataFrame under the correct category
+
+    # Check if all necessary categories are available
+    for key, value in subclass_rows.items():
+        if value is None:
+            raise ValueError(f"No data found for required subclass: {key}")
+
+    # Total 'sit' rows determine the size of other categories
+    total_sit_rows = len(subclass_rows['sit'])
+    total_final_rows = total_sit_rows / target_proportions['sit']  # Calculate total rows based on sit proportion
+
+    # Calculate needed rows for other subclasses
+    final_dataframes = [subclass_rows['sit']]  # Start with all 'sit' rows
+    for key, prop in target_proportions.items():
+        if key != 'sit':  # Already handled 'sit'
+            needed_rows = int(total_final_rows * prop)
+            if len(subclass_rows[key]) < needed_rows:
+                print(f"Warning: Not enough data for {key}. Taking all available rows.")
+                final_dataframes.append(subclass_rows[key])
+            else:
+                final_dataframes.append(subclass_rows[key].head(needed_rows))
+
+    # Concatenate all selected rows into a single DataFrame
+    result_df = pd.concat(final_dataframes, ignore_index=True)
+
+    print(result_df['subclass'].value_counts())
+
+    return result_df
+
+
+def load_basic_activities_only(path):
+
+    dict = {}
+
+    df = load_data_from_csv(path)
+
+    # separate the dataframes by subclass of movement
+    dataframes_list = _split_by_subclass(df)
+
+    for dataframe in dataframes_list:
+
+        if dataframe['subclass'].iloc[0] == "standing_still1":
+
+            dict['standing_still1'] = dataframe
+
+        elif dataframe['subclass'].iloc[0] == "standing_still2":
+
+            dict['standing_still2'] = dataframe
+
+        elif dataframe['subclass'].iloc[0] == "sit":
+
+            dict['sitting'] = dataframe
+
+        elif dataframe['subclass'].iloc[0] == "walk_medium":
+
+            dict['walking'] = dataframe
+
+        else:
+            raise ValueError("Class not supported")
+
+    # concat the standing still
+    stand_still_list = [dict['standing_still1'], dict['standing_still2']]
+    standing_df = pd.concat(stand_still_list)
+
+    # remove the stand still 1 and 2 and add the merged dataframe
+    dict.pop('standing_still1', None)
+    dict.pop('standing_still2', None)
+    dict['standing'] = standing_df
+
+    walking_df = dict['walking']
+    sitting_df = dict['sitting']
+
+    print("Check results:")
+    print(f"Sitting dataframe: len {len(sitting_df)}; class {sitting_df['class'].iloc[0]}")
+    print(f"Standing dataframe: {len(standing_df)}; class {standing_df['class'].iloc[0]}")
+    print(f"Walking dataframe: {len(walking_df)}; class {walking_df['class'].iloc[0]}")
+
+    return dict
+
+
+
 # ------------------------------------------------------------------------------------------------------------------- #
 # private functions
 # ------------------------------------------------------------------------------------------------------------------- #
 # path
+
 
 def _split_by_subclass(df, subclass_column='subclass'):
     """

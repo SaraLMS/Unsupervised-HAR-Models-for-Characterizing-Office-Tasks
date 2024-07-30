@@ -89,7 +89,7 @@ def subject_specific_clustering(main_path: str, subjects_features_path: str, clu
                     raise ValueError("Only one dataset per folder is allowed.")
     # Create DataFrame from results and save to Excel
     results_df = pd.DataFrame(results)
-    excel_path = os.path.join(results_path, "clustering_results_kmeans_basic_phone.xlsx")
+    excel_path = os.path.join(results_path, "clustering_results_kmeans_rg_all_watch_phone.xlsx")
     results_df.to_excel(excel_path, index=False)
     print(f"Results saved to {excel_path}")
 
