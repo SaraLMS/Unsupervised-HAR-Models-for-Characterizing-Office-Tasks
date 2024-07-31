@@ -21,12 +21,15 @@ plt.style.use('my_style')
 # public functions
 # ------------------------------------------------------------------------------------------------------------------- #
 
-def cluster_unbalanced_data(dataset_path: str, clustering_model: str, feature_set: List[str]):
+def cluster_basic_data(dataset_path: str, clustering_model: str, feature_set: List[str]):
     # load dataset
-    df = load.load_data_from_csv(dataset_path)
+    dict_dfs = load.load_basic_activities_only(dataset_path)
 
-    # unbalance dataset
-    df = load.unbalance_dataset(df)
+    # get the dataframes from the 3 basic activities
+    list_dfs = [dict_dfs['sitting'], dict_dfs['standing'], dict_dfs['walking']]
+
+    # concat to a dataframe
+    df = pd.concat(list_dfs, ignore_index=True)
 
     # check if the feature set exists in the columns
     check_features(df, feature_set)
@@ -46,7 +49,7 @@ def cluster_unbalanced_data(dataset_path: str, clustering_model: str, feature_se
     # Evaluate clustering
     _, ari, nmi = metrics.evaluate_clustering(true_labels, pred_labels)
 
-    return ari, nmi
+    return ari
 
 
 def normalize_features(x: pd.DataFrame) -> pd.DataFrame:

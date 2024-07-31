@@ -5,24 +5,13 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="3466cb1d-2559-4122-9522-f23b0d0f6b0a" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/clustering/unbalanced_clustering.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/prevoccupAI_sim.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/prevoccupai/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/prevoccupai/study_clusters.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/clustering/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/clustering/__init__.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/clustering/common.py" beforeDir="false" afterPath="$PROJECT_DIR$/clustering/common.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/clustering/one_stage_general_model.py" beforeDir="false" afterPath="$PROJECT_DIR$/clustering/one_stage_general_model.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/clustering/random_forest.py" beforeDir="false" afterPath="$PROJECT_DIR$/clustering/random_forest.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/clustering/subject_specific_model.py" beforeDir="false" afterPath="$PROJECT_DIR$/clustering/subject_specific_model.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/clustering/two_tage_general_model.py" beforeDir="false" afterPath="$PROJECT_DIR$/clustering/two_tage_general_model.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/feature_engineering/feature_extraction.py" beforeDir="false" afterPath="$PROJECT_DIR$/feature_engineering/feature_extraction.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/feature_engineering/test_on_all_subjects.py" beforeDir="false" afterPath="$PROJECT_DIR$/feature_engineering/test_on_all_subjects.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/feature_selection_Leonor.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/load/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/load/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clustering/unbalanced_clustering.py" beforeDir="false" afterPath="$PROJECT_DIR$/clustering/unbalanced_clustering.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/load/dataset_split_train_test.py" beforeDir="false" afterPath="$PROJECT_DIR$/load/dataset_split_train_test.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -97,14 +86,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1711360410072</updated>
-    </task>
-    <task id="LOCAL-00010" summary="added visualize_sync.py to visualize the synchronization">
-      <option name="closed" value="true" />
-      <created>1712074994316</created>
-      <option name="number" value="00010" />
-      <option name="presentableId" value="LOCAL-00010" />
-      <option name="project" value="LOCAL" />
-      <updated>1712074994316</updated>
     </task>
     <task id="LOCAL-00011" summary="Implemented sync_evaluation.py and added to the synchronization function, saving a csv file with the evaluation report.&#10;Added _check functions in synchronization.py to check for selected_sensors validity, presence of accelerometer sensor and in_path validity.&#10;Implemented unittests to test these &quot;checks&quot;.&#10;Added missing docstrings.&#10;Removed buffer size from watch timestamp in the logger file.">
       <option name="closed" value="true" />
@@ -490,7 +471,15 @@
       <option name="project" value="LOCAL" />
       <updated>1721673842241</updated>
     </task>
-    <option name="localTasksCounter" value="59" />
+    <task id="LOCAL-00059" summary="IMPLEMENTED NEW UNBALANCING">
+      <option name="closed" value="true" />
+      <created>1722366832147</created>
+      <option name="number" value="00059" />
+      <option name="presentableId" value="LOCAL-00059" />
+      <option name="project" value="LOCAL" />
+      <updated>1722366832150</updated>
+    </task>
+    <option name="localTasksCounter" value="60" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -505,7 +494,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="corrected errors in task_segmentation and processor. Added search for most common combination of features in feature_selection.py" />
     <MESSAGE value="corrected task segmentation - stops validation" />
     <MESSAGE value="testing feature selection over all subjects in main file" />
     <MESSAGE value="added best features count from main to feature selection. Not tested in feature selection (but worked on main)" />
@@ -530,6 +518,7 @@
     <MESSAGE value="added confusion matrix to the subject specific clustering" />
     <MESSAGE value="removed leave one out and changed load all subjects" />
     <MESSAGE value="random forest" />
-    <option name="LAST_COMMIT_MESSAGE" value="random forest" />
+    <MESSAGE value="IMPLEMENTED NEW UNBALANCING" />
+    <option name="LAST_COMMIT_MESSAGE" value="IMPLEMENTED NEW UNBALANCING" />
   </component>
 </project>

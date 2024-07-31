@@ -1,13 +1,14 @@
 import pandas as pd
 import load
 import numpy as np
-from .common import cluster_data, check_features, normalize_features
+from .common import cluster_data, check_features, normalize_features, cluster_basic_data
 import metrics
 from typing import List
 import os
+import random
 
 
-def unbalanced_clustering(main_path, sitting_perc, nr_iter, clustering_model, features_folder_name: str,
+def unbalanced_clustering(main_path, sitting_perc, nr_windows, clustering_model, features_folder_name: str,
                                        feature_set: List[str], results_path: str):
     # list for holding the results on each subject
     results = []
@@ -32,12 +33,12 @@ def unbalanced_clustering(main_path, sitting_perc, nr_iter, clustering_model, fe
                     # only one csv file for the features folder
                     dataset_path = os.path.join(features_folder_path, os.listdir(features_folder_path)[0])
 
-                    ari, std_ari= cluster_unbalanced_basic_activities(dataset_path, sitting_perc, nr_iter, clustering_model, feature_set)
-
+                    # ari, std_ari = cluster_unbalanced_basic_activities(dataset_path, sitting_perc, nr_windows, clustering_model, feature_set)
+                    ari = cluster_basic_data(dataset_path, clustering_model, feature_set)
                     results.append({
                         "Subject ID": subject_folder,
                         "ARI": ari,
-                        "STD": std_ari
+                        # "STD": std_ari
                     })
                     # Inform user
                     print(f"Clustering results for subject: {subject_folder}")
@@ -50,13 +51,13 @@ def unbalanced_clustering(main_path, sitting_perc, nr_iter, clustering_model, fe
 
     # Create DataFrame from results and save to Excel
     results_df = pd.DataFrame(results)
-    excel_path = os.path.join(results_path, "clustering_results_gmm_basic_watch_phone.xlsx")
+    excel_path = os.path.join(results_path, "balance_kmeans_basic_phone_.xlsx")
     results_df.to_excel(excel_path, index=False)
 
     print(f"Results saved to {excel_path}")
 
 
-def cluster_unbalanced_basic_activities(path, sitting_perc, nr_iter, clustering_model, feature_set: List[str]):
+def cluster_unbalanced_basic_activities(path, sitting_perc, nr_windows, clustering_model, feature_set: List[str]):
 
     # load dataframes from basic activities into a dictionary
     df_dict = load.load_basic_activities_only(path)
@@ -67,10 +68,10 @@ def cluster_unbalanced_basic_activities(path, sitting_perc, nr_iter, clustering_
     print(f"chunk_size: {chunk_size}")
 
     # get starts and stops for walking
-    chunk_indices_walking = extract_random_chunks(df_dict['walking'], chunk_size, nr_iter)
+    chunk_indices_walking = sliding_window(df_dict['walking'], chunk_size, nr_windows)
 
     # get start and stops for standing
-    chunk_indices_standing = extract_random_chunks(df_dict['standing'], chunk_size, nr_iter)
+    chunk_indices_standing = sliding_window(df_dict['standing'], chunk_size, nr_windows)
 
     list_walking_chunks = []
     list_standing_chunks = []
@@ -127,39 +128,87 @@ def cluster_unbalanced_basic_activities(path, sitting_perc, nr_iter, clustering_
     return mean_ari, std_ari
 
 
-def extract_random_chunks(dataframe, chunk_size, num_chunks):
+def sliding_window(df: pd.DataFrame, window_size: int, num_windows: int) -> list:
     """
-    Extracts random, non-overlapping chunks from a DataFrame using a sliding window approach.
+    Perform a sliding window approach over a pandas DataFrame.
 
     Parameters:
-    - dataframe (pd.DataFrame): The DataFrame from which to extract chunks.
-    - chunk_size (int): The size of each chunk.
-    - num_chunks (int): The number of unique chunks to extract.
+    - df: pandas.DataFrame
+        The DataFrame over which the sliding window is applied.
+    - window_size: int
+        The size of each window.
+    - num_windows: int
+        The number of windows to extract.
 
     Returns:
-    - list of tuples: Each tuple contains the start and end index of the chunks selected.
+    - list of tuples:
+        A list containing the start and stop indices of the corresponding windows.
+        Each list element is a tuple pair of the start index and the stop index.
     """
-    num_rows = len(dataframe)
+    # Total number of rows in the DataFrame
+    num_rows = len(df)
 
-    # Calculate the maximum start index for a chunk
-    max_start_index = num_rows - chunk_size + 1
+    # Calculate the total possible windows without any overlap
+    max_possible_windows = num_rows - window_size + 1
 
-    if max_start_index < 1:
-        raise ValueError("Chunk size is larger than the dataframe.")
+    if max_possible_windows <= 0:
+        raise ValueError("Window size is larger than the DataFrame length.")
 
-    # Generate all possible start indices for the chunks
-    all_start_indices = np.arange(max_start_index)
+    # Calculate the necessary overlap
+    if num_windows > max_possible_windows:
+        raise ValueError("Number of windows requested exceeds the possible number of windows.")
 
-    # Shuffle the indices to randomly select them without replacement
-    np.random.shuffle(all_start_indices)
+    # Calculate the step size (distance between the start of each window)
+    step_size = (num_rows - window_size) / (num_windows - 1) if num_windows > 1 else num_rows
 
-    # Select the first num_chunks indices from the shuffled indices (if enough are available)
-    if num_chunks > len(all_start_indices):
-        raise ValueError("The number of requested chunks exceeds the number of available unique chunks.")
+    print(f"step size: {step_size}")
 
-    selected_indices = all_start_indices[:num_chunks]
+    # Generate the start indices for the windows
+    start_indices = [round(step_size * i) for i in range(num_windows)]
 
-    # Create a list of tuples containing the start and end indices for each chunk
-    chunk_indices = [(start, start + chunk_size) for start in selected_indices]
+    # Create the list of windows
+    windows = [(start, start + window_size) for start in start_indices]
 
-    return chunk_indices
+    # If the number of windows exceeds the requested number, randomly select the necessary amount
+    if len(windows) > num_windows:
+        windows = random.sample(windows, num_windows)
+
+    return windows
+
+
+# def extract_random_chunks(dataframe, chunk_size, num_chunks):
+#     """
+#     Extracts random, non-overlapping chunks from a DataFrame using a sliding window approach.
+#
+#     Parameters:
+#     - dataframe (pd.DataFrame): The DataFrame from which to extract chunks.
+#     - chunk_size (int): The size of each chunk.
+#     - num_chunks (int): The number of unique chunks to extract.
+#
+#     Returns:
+#     - list of tuples: Each tuple contains the start and end index of the chunks selected.
+#     """
+#     num_rows = len(dataframe)
+#
+#     # Calculate the maximum start index for a chunk
+#     max_start_index = num_rows - chunk_size + 1
+#
+#     if max_start_index < 1:
+#         raise ValueError("Chunk size is larger than the dataframe.")
+#
+#     # Generate all possible start indices for the chunks
+#     all_start_indices = np.arange(max_start_index)
+#
+#     # Shuffle the indices to randomly select them without replacement
+#     np.random.shuffle(all_start_indices)
+#
+#     # Select the first num_chunks indices from the shuffled indices (if enough are available)
+#     if num_chunks > len(all_start_indices):
+#         raise ValueError("The number of requested chunks exceeds the number of available unique chunks.")
+#
+#     selected_indices = all_start_indices[:num_chunks]
+#
+#     # Create a list of tuples containing the start and end indices for each chunk
+#     chunk_indices = [(start, start + chunk_size) for start in selected_indices]
+#
+#     return chunk_indices
