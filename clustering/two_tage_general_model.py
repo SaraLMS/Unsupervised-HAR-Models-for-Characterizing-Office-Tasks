@@ -6,7 +6,7 @@ import pandas as pd
 
 import load
 from constants import CLASS, SUBCLASS
-from .common import cluster_subject, cluster_subject_basic_matrix
+from .common import cluster_subject_all_activities, cluster_subject_basic_matrix
 from typing import List
 import os
 
@@ -42,24 +42,24 @@ def two_stage_general_model_clustering(main_path: str, clustering_model: str, fe
 
                     ari, nmi = cluster_subject_basic_matrix(dataset_path, clustering_model, feature_set, subject_folder, plots_path)
 
-                    # # test random forest
-                    # # train test split
-                    # train_set, test_set = load.train_test_split(dataset_path, 0.8, 0.2)
-                    #
-                    # # x, y split
-                    # x_train = train_set.drop([CLASS, SUBCLASS], axis=1)
-                    # y_train = train_set[CLASS]
-                    # x_test = test_set.drop([CLASS, SUBCLASS], axis=1)
-                    # y_test = test_set[CLASS]
-                    #
-                    # # try random forest
-                    # accuracy_score = random_forest_classifier(x_train, x_test, y_train, y_test)
+                    # test random forest
+                    # train test split
+                    train_set, test_set = load.train_test_split(dataset_path, 0.8, 0.2)
+
+                    # x, y split
+                    x_train = train_set.drop([CLASS, SUBCLASS], axis=1)
+                    y_train = train_set[CLASS]
+                    x_test = test_set.drop([CLASS, SUBCLASS], axis=1)
+                    y_test = test_set[CLASS]
+
+                    # try random forest
+                    accuracy_score = random_forest_classifier(x_train, x_test, y_train, y_test)
 
                     results.append({
                         "Subject ID": subject_folder,
                         "ARI": ari,
                         "NMI": nmi,
-                        # "Random Forest acc": accuracy_score
+                        "Random Forest acc": accuracy_score
                     })
                     # Inform user
                     print(f"Clustering results for subject: {subject_folder}")
@@ -72,7 +72,7 @@ def two_stage_general_model_clustering(main_path: str, clustering_model: str, fe
 
     # Create DataFrame from results and save to Excel
     results_df = pd.DataFrame(results)
-    excel_path = os.path.join(results_path, "clustering_results_kmeans_rf_all_watch_phone.xlsx")
+    excel_path = os.path.join(results_path, "clustering_results_kmeans_rf_basic_phone.xlsx")
     results_df.to_excel(excel_path, index=False)
 
     print(f"Results saved to {excel_path}")

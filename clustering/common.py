@@ -108,11 +108,17 @@ def format_subclass_name(name):
     formatted_name = name.replace('_', ' ')
     if formatted_name == 'standing still':
         formatted_name = 'stand still'
+    if formatted_name == 'standing gestures':
+        formatted_name = 'stand gestures'
+    if formatted_name == 'standing coffee':
+        formatted_name = 'stand coffee'
+    if formatted_name == 'standing folders':
+        formatted_name = 'stand folders'
     return formatted_name  # Convert to title case
 
 
-def cluster_subject(dataset_path: str, clustering_model: str, feature_set: List[str], subject_id: str, plots_path: str,
-                    train_size: float = 0.8, test_size: float = 0.2):
+def cluster_subject_all_activities(dataset_path: str, clustering_model: str, feature_set: List[str], subject_id: str, plots_path: str = "C:/Users/srale/OneDrive - FCT NOVA/Tese/excels",
+                                   train_size: float = 0.8, test_size: float = 0.2):
     # Train-test split
     train_set, test_set = load.train_test_split(dataset_path, train_size, test_size)
 
@@ -160,9 +166,9 @@ def cluster_subject(dataset_path: str, clustering_model: str, feature_set: List[
 
     # Define base colors for the rows based on the class
     base_colors = {
-        'sit': '#D36336',
-        'standing': '#2F5D89',
-        'walking': '#396A59'
+        'sit': '#E59B23',
+        'standing': '#81B29A',
+        'walking': '#E07A5F'
     }
 
     # Create a mapping from subclasses to their base colors
@@ -198,14 +204,16 @@ def cluster_subject(dataset_path: str, clustering_model: str, feature_set: List[
     subclass_cluster_matrix = subclass_cluster_matrix.reindex(formatted_subclass_order)
 
     # Plot the confusion matrix with custom colors
-    plt.figure(figsize=(12, 8))
+    plt.figure(figsize=(8, 6))
     ax = sns.heatmap(subclass_cluster_matrix, annot=True, fmt='g', cbar=False,
                      yticklabels=formatted_subclass_order, linewidths=.5, linecolor='black', cmap='Greys',
-                     mask=subclass_cluster_matrix.isna())
-    title = f"Confusion_matrix: subject {subject_id}"
-    plt.title(title)
-    plt.xlabel('Cluster Labels')
-    plt.ylabel('Subclass Labels')
+                     mask=subclass_cluster_matrix.isna(), annot_kws={"weight": "bold", "fontsize": 16})
+    title = f"Subject {subject_id}"
+    plt.title(title, fontsize=18)
+    plt.xlabel('Cluster Labels', fontsize=18)
+    plt.ylabel('Subclass Labels', fontsize=18)
+
+    ax.tick_params(axis='both', which='major', labelsize=16)
 
     # Color the background of each cell
     for i in range(subclass_cluster_matrix.shape[0]):
@@ -216,12 +224,12 @@ def cluster_subject(dataset_path: str, clustering_model: str, feature_set: List[
     ax.hlines(np.arange(1, len(subclass_order)), *ax.get_xlim(), color='black', linewidth=1)
     ax.vlines(np.arange(1, subclass_cluster_matrix.shape[1]), *ax.get_ylim(), color='black', linewidth=1)
 
-    # Save the plot with high resolution if save_path is provided
-    if plots_path:
-        save_path = os.path.join(plots_path, subject_id + '.png')
-        plt.savefig(save_path, dpi=300, bbox_inches='tight')
-
-    plt.show()
+    # # Save the plot with high resolution if save_path is provided
+    # if plots_path:
+    #     save_path = os.path.join(plots_path, subject_id + '.png')
+    #     plt.savefig(save_path, dpi=1200, bbox_inches='tight')
+    #
+    # plt.show()
 
     return ari, nmi
 
@@ -311,15 +319,17 @@ def cluster_subject_basic_matrix(dataset_path: str, clustering_model: str, featu
     subclass_cluster_matrix = subclass_cluster_matrix.reindex(formatted_subclass_order)
 
     # Plot the confusion matrix with custom colors
-    plt.figure(figsize=(12, 8))
+    plt.figure(figsize=(8, 6))
     ax = sns.heatmap(subclass_cluster_matrix, annot=True, fmt='g', cbar=False,
                      yticklabels=formatted_subclass_order, linewidths=.5, linecolor='black', cmap='Greys',
                      mask=subclass_cluster_matrix.isna(),
-                     annot_kws={"weight": "bold"})  # Make numbers bold
+                     annot_kws={"weight": "bold", "fontsize": 18})  # Make numbers bold
     title = f"Subject {subject_id}"
-    plt.title(title)
-    plt.xlabel('Cluster Labels')
-    plt.ylabel('Subclass Labels')
+    plt.title(title, fontsize=18)
+    plt.xlabel('Cluster Labels', fontsize=18)
+    plt.ylabel('Subclass Labels', fontsize=18)
+
+    ax.tick_params(axis='both', which='major', labelsize=16)
 
     # Color the background of each cell
     for i in range(subclass_cluster_matrix.shape[0]):
@@ -333,7 +343,7 @@ def cluster_subject_basic_matrix(dataset_path: str, clustering_model: str, featu
     # Save the plot with high resolution if save_path is provided
     if save_path:
         save_path = os.path.join(save_path, subject_id + '.png')
-        plt.savefig(save_path, dpi=300, bbox_inches='tight')
+        plt.savefig(save_path, dpi=1200, bbox_inches='tight')
 
     plt.show()
 

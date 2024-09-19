@@ -134,7 +134,7 @@ def one_stage_general_model_each_subject(main_path: str, features_folder_name: s
 
     # Create DataFrame from results and save to Excel
     results_df = pd.DataFrame(results)
-    excel_path = os.path.join(results_path, "1_stage_general_kmeans_basic_watch_phone.xlsx")
+    excel_path = os.path.join(results_path, "1_stage_general_agg_all_phone.xlsx")
     results_df.to_excel(excel_path, index=False)
     print(f"Results saved to {excel_path}")
 

@@ -29,7 +29,7 @@ def feature_selector(train_set: pd.DataFrame, variance_threshold: float, correla
                      save_plots: bool = False) -> Tuple[List[List[str]], List[float], List[float]]:
     """
     This function returns the features sets that give the best clustering results for the train set
-    as well as the rand index of the respective feature sets.
+    as well as the adjusted rand index of the respective feature sets.
     # TODO (1) (2) (3)
 
     The first step of the feature selection is removing the low variance and highly correlated features.
@@ -60,8 +60,6 @@ def feature_selector(train_set: pd.DataFrame, variance_threshold: float, correla
         "kmeans" - KMeans clustering
         "agglomerative": Agglomerative clustering model
         "gmm": Gaussian Mixture Model
-        "dbscan": DBSCAN. Needs parameter search - not implemented
-        "birch": Birch clustering algorithm
 
     :param output_path: str
     Path to the main folder in which the plots should be saved

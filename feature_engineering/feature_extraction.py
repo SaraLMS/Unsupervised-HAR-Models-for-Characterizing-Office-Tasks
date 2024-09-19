@@ -186,7 +186,7 @@ def feature_extractor(data_main_path: str, output_path: str, subclasses: list[st
     file_path = os.path.join(output_path, output_filename)
     #
     # save data to csv file
-    all_data_df.to_csv(file_path)
+    # all_data_df.to_csv(file_path)
 
     # inform user
     print(f"Data saved to {file_path}")

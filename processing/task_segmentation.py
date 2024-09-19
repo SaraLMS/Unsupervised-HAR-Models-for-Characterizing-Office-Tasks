@@ -51,7 +51,7 @@ def segment_tasks(folder_name: str, data: pd.DataFrame, watch_only: bool = False
     if SITTING in folder_name:
 
         # get starts and stops for the task
-        starts, stops = _detect_sitting_tasks(acc_series, fs=100, peak_height=11, min_distance=10000)
+        starts, stops = _detect_sitting_tasks(acc_series, fs=100, peak_height=7, min_distance=15000)
 
         # cut the task
         tasks_sitting = _cut_segments(data, starts, stops, 3000)
@@ -341,7 +341,7 @@ def _detect_standing_tasks(yacc, fs, peak_height, min_distance):
         raise ValueError("Too many peaks were detected for the standing activity. Adjust the peak detection parameters")
 
     # Define the cut points - for standing there's 4, can be 3 if a sensor stops early
-    # if it's less then 3,this signal is trash
+
     first_start = peaks[0] + 1500
     first_stop = peaks[1] - 500
     second_start = peaks[1] + 500

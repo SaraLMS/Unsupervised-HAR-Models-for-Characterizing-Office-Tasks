@@ -8,7 +8,7 @@ import os
 import load
 # internal imports
 from constants import CLASS, SUBJECT_ID, FEATURE_SET, SUBCLASS
-from .common import cluster_subject, normalize_features
+from .common import cluster_subject_all_activities, normalize_features
 from .random_forest import random_forest_classifier
 
 
@@ -54,26 +54,26 @@ def subject_specific_clustering(main_path: str, subjects_features_path: str, clu
 
                         if subject_feature_set:
                             # Cluster the subject
-                            ari, nmi = cluster_subject(dataset_path, clustering_model, subject_feature_set, subject_folder)
+                            ari, nmi = cluster_subject_all_activities(dataset_path, clustering_model, subject_feature_set, subject_folder)
 
-                            # train test split
-                            train_set, test_set = load.train_test_split(dataset_path, 0.8, 0.2)
+                            # # train test split
+                            # train_set, test_set = load.train_test_split(dataset_path, 0.8, 0.2)
 
 
-                            # x, y split
-                            x_train = train_set.drop([CLASS, SUBCLASS], axis=1)
-                            y_train = train_set[CLASS]
-                            x_test = test_set.drop([CLASS, SUBCLASS], axis=1)
-                            y_test = test_set[CLASS]
-
-                            # try random forest
-                            accuracy_score = random_forest_classifier(x_train, x_test, y_train, y_test)
+                            # # x, y split
+                            # x_train = train_set.drop([CLASS, SUBCLASS], axis=1)
+                            # y_train = train_set[CLASS]
+                            # x_test = test_set.drop([CLASS, SUBCLASS], axis=1)
+                            # y_test = test_set[CLASS]
+                            #
+                            # # try random forest
+                            # accuracy_score = random_forest_classifier(x_train, x_test, y_train, y_test)
 
                             results.append({
                                 "Subject ID": subject_folder,
                                 "ARI": ari,
                                 "NMI": nmi,
-                                "Random Forest acc": accuracy_score
+                                # "Random Forest acc": accuracy_score
                             })
                             # Inform user
                             print(f"Clustering results for subject: {subject_folder}")
@@ -96,6 +96,8 @@ def subject_specific_clustering(main_path: str, subjects_features_path: str, clu
 # ------------------------------------------------------------------------------------------------------------------- #
 # private functions
 # ------------------------------------------------------------------------------------------------------------------- #
+
+
 def _parse_feature_set(feature_set_str):
     """
     Parses the feature set string into a list of features.

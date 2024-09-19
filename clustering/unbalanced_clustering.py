@@ -51,7 +51,7 @@ def unbalanced_clustering(main_path, sitting_perc, nr_windows, clustering_model,
 
     # Create DataFrame from results and save to Excel
     results_df = pd.DataFrame(results)
-    excel_path = os.path.join(results_path, "balance_kmeans_basic_phone_.xlsx")
+    excel_path = os.path.join(results_path, "balance_agg_basic_phone_.xlsx")
     results_df.to_excel(excel_path, index=False)
 
     print(f"Results saved to {excel_path}")

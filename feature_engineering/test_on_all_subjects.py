@@ -73,7 +73,7 @@ def _test_same_feature_set_for_all_subjects(main_path: str, features_folder_name
 
         excel_path = "C:/Users/srale/OneDrive - FCT NOVA/Tese/excels"
         # Save to Excel
-        excel_path = os.path.join(excel_path, "agg_basic_phone6.xlsx")
+        excel_path = os.path.join(excel_path, "8_all_kmeans.xlsx")
         df.to_excel(excel_path, index=False)
 
     print(

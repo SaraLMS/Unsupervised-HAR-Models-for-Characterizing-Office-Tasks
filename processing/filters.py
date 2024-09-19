@@ -14,7 +14,7 @@ from scipy import signal
 
 def median_and_lowpass_filter(sensor_data: np.ndarray, fs: int, medfilt_window_length=11) -> np.ndarray:
     """
-    First a median filter is applied and then a 3rd order butterworth lowpass
+    First a median filter is applied and then a
     filter with a cutoff frequency of 20 Hz is applied.
     The processing scheme is based on:
     "A Public Domain Dataset for Human Activity Recognition Using Smartphones"
