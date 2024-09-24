@@ -61,7 +61,7 @@ def main():
 
     if do_feature_extraction:
         subclasses = ['standing_still', 'walk_medium',
-                      'sit']  #, 'standing_gestures', 'stairs', 'walk_fast', 'walk_slow', 'coffee', 'folders'
+                      'sit']  # , 'standing_gestures', 'stairs', 'walk_fast', 'walk_slow', 'coffee', 'folders'
         main_path = "D:/tese_backups/subjects/P019/acc_gyr_mag_phone/filtered_tasks_P019"
         output_path = "C:/Users/srale/OneDrive - FCT NOVA/Tese/porfavor_deus/P019"
         output_filename = "acc_gyr_mag_phone_features_P019.csv"
@@ -69,43 +69,6 @@ def main():
         feature_engineering.feature_extractor(main_path, output_path, subclasses, output_filename, output_folder_name)
 
     if do_one_subject_feature_selection:
-        # #
-        # import os
-        # main_path = "C:/Users/srale/OneDrive - FCT NOVA/Tese/subjects_datasets"
-        # features_folder_name = "watch_phone_features_all_activities"
-        # # iterate through the subject folders
-        # for subject_folder in os.listdir(main_path):
-        #     subject_folder_path = os.path.join(main_path, subject_folder)
-        #
-        #     # iterate through the folders inside each subject folder
-        #     for folder_name in os.listdir(subject_folder_path):
-        #
-        #         # get the specified folder
-        #         if folder_name == features_folder_name:
-        #
-        #             # get the path to the dataset
-        #             features_folder_path = os.path.join(subject_folder_path, features_folder_name)
-        #
-        #             # check if there's only one csv file in the folder
-        #             if len(os.listdir(features_folder_path)) == 1:
-        #                 # only one csv file for the features folder
-        #                 dataset_path = os.path.join(features_folder_path, os.listdir(features_folder_path)[0])
-        #
-        #                 output_path_plots = "D:/tese_backups/subjects/P004/acc_gyr_mag_phone"
-        #                 # # train test split
-        #                 # train_set, _ = load.train_test_split(dataset_path, 0.8, 0.2)
-        #                 #
-        #                 #
-        #                 # _, _, _, _ = feature_engineering.feature_selector(train_set, 0.05, 0.99, 20,
-        #                 #                                                   "kmeans", output_path_plots)
-        #                 results_output_path = "C:/Users/srale/OneDrive - FCT NOVA/Tese/results_agg"
-        #                 results_folder_name = "subject_specific_all_feature_selection"
-        #                 results_filename_prefix = "watch_phone_all_80_20"
-        #                 feature_engineering.one_stage_feature_selection(dataset_path, 0.01, 0.99,
-        #                                                                 5, "agglomerative", output_path_plots,
-        #                                                                 results_output_path,
-        #                                                                 results_folder_name, results_filename_prefix)
-
         dataset_path = (
             "C:/Users/srale/OneDrive - FCT NOVA/Tese/subjects_datasets/P019/phone_features_basic_activities"
             "/acc_gyr_mag_phone_features_P019.csv")
@@ -140,101 +103,20 @@ def main():
         top_1n = 8  # Number of top features to select
         nr_iterations = 4
 
-        (best_feature_set_with_axis16, ari_with_axis16, nmi_with_axis16, best_feature_set_without_axis16,
-         ari_without_axis16,
-         nmi_without_axis16) = feature_engineering.two_stage_feature_selection(main_path, features_folder_name,
-                                                                               variance_threshold,
-                                                                               correlation_threshold,
-                                                                               feature_selection_iterations,
-                                                                               clustering_model, nr_iterations,
-                                                                               top_1n)
-
-        # # ####
-        # top_2n = 8
-        # (best_feature_set_with_axis18, ari_with_axis18, nmi_with_axis18,  best_feature_set_without_axis18, ari_without_axis18,
-        #  nmi_without_axis18) = feature_engineering.two_stage_feature_selection(main_path, features_folder_name,
-        #                                                                        variance_threshold,
-        #                                                                        correlation_threshold,
-        #                                                                        feature_selection_iterations,
-        #                                                                        clustering_model, nr_iterations,
-        #                                                                        top_2n)
-        #
-        # top_n3 = 10
-        # (best_feature_set_with_axis6, ari_with_axis6, nmi_with_axis6, best_feature_set_without_axis6,
-        #  ari_without_axis6,
-        #  nmi_without_axis6) = feature_engineering.two_stage_feature_selection(main_path, features_folder_name,
-        #                                                                        variance_threshold,
-        #                                                                        correlation_threshold,
-        #                                                                        feature_selection_iterations,
-        #                                                                        clustering_model, nr_iterations,
-        #                                                                        top_n3)
-        # top_n4 = 12
-        # (best_feature_set_with_axisx, ari_with_axisx, nmi_with_axisx, best_feature_set_without_axisx,
-        #  ari_without_axisx,
-        #  nmi_without_axisx) = feature_engineering.two_stage_feature_selection(main_path, features_folder_name,
-        #                                                                       variance_threshold,
-        #                                                                       correlation_threshold,
-        #                                                                       feature_selection_iterations,
-        #                                                                       clustering_model, nr_iterations,
-        #                                                                       top_n4)
-        #
-        # top_n5 = 14
-        # (best_feature_set_with_axisy, ari_with_axisy, nmi_with_axisy, best_feature_set_without_axisy,
-        #  ari_without_axisy,
-        #  nmi_without_axisy) = feature_engineering.two_stage_feature_selection(main_path, features_folder_name,
-        #                                                                       variance_threshold,
-        #                                                                       correlation_threshold,
-        #                                                                       feature_selection_iterations,
-        #                                                                       clustering_model, nr_iterations,
-        #                                                                       top_n5)
-
-        print("RESULTS IN ORDER")
-        print(top_1n)
-        print(f"best feature set with axis {best_feature_set_with_axis16}")
-        print(f"ARI {ari_with_axis16}")
-        print(f"NMI {nmi_with_axis16}")
-        print(f"best feature set with axis {best_feature_set_without_axis16}")
-        print(f"ARI {ari_without_axis16}")
-        print(f"NMI {nmi_without_axis16}\n")
-
-        # print(top_2n)
-        # print(f"best feature set with axis {best_feature_set_with_axis18}")
-        # print(f"ARI {ari_with_axis18}")
-        # print(f"NMI {nmi_with_axis18}")
-        # print(f"best feature set with axis {best_feature_set_without_axis18}")
-        # print(f"ARI {ari_without_axis18}")
-        # print(f"NMI {nmi_without_axis18}\n")
-        #
-        # print(top_n3)
-        # print(f"best feature set with axis {best_feature_set_with_axis6}")
-        # print(f"ARI {ari_with_axis6}")
-        # print(f"NMI {nmi_with_axis6}")
-        # print(f"best feature set with axis {best_feature_set_without_axis6}")
-        # print(f"ARI {ari_without_axis6}")
-        # print(f"NMI {nmi_without_axis6}\n")
-        #
-        # print(top_n4)
-        # print(f"best feature set with axis {best_feature_set_with_axisx}")
-        # print(f"ARI {ari_with_axisx}")
-        # print(f"NMI {nmi_with_axisx}")
-        # print(f"best feature set with axis {best_feature_set_without_axisx}")
-        # print(f"ARI {ari_without_axisx}")
-        # print(f"NMI {nmi_without_axisx}\n")
-        #
-        # print(top_n5)
-        # print(f"best feature set with axis {best_feature_set_with_axisy}")
-        # print(f"ARI {ari_with_axisy}")
-        # print(f"NMI {nmi_with_axisy}")
-        # print(f"best feature set with axis {best_feature_set_without_axisy}")
-        # print(f"ARI {ari_without_axisy}")
-        # print(f"NMI {nmi_without_axisy}\n")
+        _, _, _, _, _, _ = feature_engineering.two_stage_feature_selection(main_path, features_folder_name,
+                                                                           variance_threshold,
+                                                                           correlation_threshold,
+                                                                           feature_selection_iterations,
+                                                                           clustering_model, nr_iterations,
+                                                                           top_1n)
 
     if do_general_model_clustering:
         main_path = "C:/Users/srale/OneDrive - FCT NOVA/Tese/subjects_datasets"
         subfolder_name = "phone_features_all_activities"
         clustering_model = "agglomerative"
         results_path = "C:/Users/srale/OneDrive - FCT NOVA/Tese/excels"
-        feature_set = ['xGyr_Standard deviation', 'yAcc_Interquartile range', 'zMag_Max', 'xGyr_Spectral entropy', 'yGyr_Min', 'xMag_Spectral centroid']
+        feature_set = ['xGyr_Standard deviation', 'yAcc_Interquartile range', 'zMag_Max', 'xGyr_Spectral entropy',
+                       'yGyr_Min', 'xMag_Spectral centroid']
 
         clustering.one_stage_general_model_each_subject(main_path, subfolder_name, clustering_model, feature_set,
                                                         results_path)
@@ -258,8 +140,6 @@ def main():
         confusion_matrix_path = "D:/tese_backups/RESULTS/kmeans/clustering/confusion_matrix_2_stage/basic_phone"
         feature_set = ['xMag_Max', 'yAcc_Interquartile range', 'zMag_Max', 'xAcc_Min', 'yAcc_Min']
 
-
-
         clustering.two_stage_general_model_clustering(main_path, clustering_model, features_folder_name, feature_set,
                                                       results_path, confusion_matrix_path)
 
@@ -269,7 +149,6 @@ def main():
         clustering_model = "agglomerative"
         results_path = "C:/Users/srale/OneDrive - FCT NOVA/Tese/excels"
         feature_set = ['yAcc_Max', 'zAcc_Interquartile range', 'zMag_Max', 'yMag_Max']
-
 
         sitting_perc = 0.9
         nr_chunks = 20
@@ -289,5 +168,3 @@ if __name__ == "__main__":
 # feature_set =  ['yAcc_Standard deviation', 'xMag_wear_Max', 'xAcc_Standard deviation', 'yGyr_Standard deviation', 'zGyr_wear_Standard deviation', 'xGyr_Min', 'yMag_wear_Spectral centroid', 'yAcc_Max']
 #
 # _test_same_feature_set_for_all_subjects(main_path, features_folder_name, "kmeans", feature_set)
-
-

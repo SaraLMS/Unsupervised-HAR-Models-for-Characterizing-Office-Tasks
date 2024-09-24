@@ -5,24 +5,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="3466cb1d-2559-4122-9522-f23b0d0f6b0a" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/run_experiment1.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/run_experiment2.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/run_experiment3.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/clustering/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/clustering/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/clustering/common.py" beforeDir="false" afterPath="$PROJECT_DIR$/clustering/common.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/clustering/one_stage_general_model.py" beforeDir="false" afterPath="$PROJECT_DIR$/clustering/one_stage_general_model.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/clustering/subject_specific_model.py" beforeDir="false" afterPath="$PROJECT_DIR$/clustering/subject_specific_model.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/clustering/two_tage_general_model.py" beforeDir="false" afterPath="$PROJECT_DIR$/clustering/two_tage_general_model.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/clustering/unbalanced_clustering.py" beforeDir="false" afterPath="$PROJECT_DIR$/clustering/unbalanced_clustering.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/feature_engineering/feature_extraction.py" beforeDir="false" afterPath="$PROJECT_DIR$/feature_engineering/feature_extraction.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/feature_engineering/feature_selection.py" beforeDir="false" afterPath="$PROJECT_DIR$/feature_engineering/feature_selection.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/feature_engineering/test_on_all_subjects.py" beforeDir="false" afterPath="$PROJECT_DIR$/feature_engineering/test_on_all_subjects.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/prevoccupAI_sim.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/processing/filters.py" beforeDir="false" afterPath="$PROJECT_DIR$/processing/filters.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/processing/task_segmentation.py" beforeDir="false" afterPath="$PROJECT_DIR$/processing/task_segmentation.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/synchronization/synchronization.py" beforeDir="false" afterPath="$PROJECT_DIR$/synchronization/synchronization.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -98,14 +83,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1711360410072</updated>
-    </task>
-    <task id="LOCAL-00012" summary="Added some constants (only changed this in synchronization.py). &#10;Corrected an error in sync_evaluation.py (in the precedes and lags part).&#10;Added another layer of checks for synchronization to check for acc files and if acc is present for every device if cross corr is chosen. Synchronization in pair is assured with len(selected_sensors).">
-      <option name="closed" value="true" />
-      <created>1712246851411</created>
-      <option name="number" value="00012" />
-      <option name="presentableId" value="LOCAL-00012" />
-      <option name="project" value="LOCAL" />
-      <updated>1712246851411</updated>
     </task>
     <task id="LOCAL-00013" summary="added checks for timestamps in the logger file">
       <option name="closed" value="true" />
@@ -491,7 +468,15 @@
       <option name="project" value="LOCAL" />
       <updated>1722453038042</updated>
     </task>
-    <option name="localTasksCounter" value="61" />
+    <task id="LOCAL-00061" summary="changed name">
+      <option name="closed" value="true" />
+      <created>1726750381997</created>
+      <option name="number" value="00061" />
+      <option name="presentableId" value="LOCAL-00061" />
+      <option name="project" value="LOCAL" />
+      <updated>1726750381998</updated>
+    </task>
+    <option name="localTasksCounter" value="62" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -506,7 +491,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="testing feature selection over all subjects in main file" />
     <MESSAGE value="added best features count from main to feature selection. Not tested in feature selection (but worked on main)" />
     <MESSAGE value="added drop correlated features. Changed the search for the best feature set for all subjects" />
     <MESSAGE value="docstrings" />
@@ -531,6 +515,7 @@
     <MESSAGE value="random forest" />
     <MESSAGE value="IMPLEMENTED NEW UNBALANCING" />
     <MESSAGE value="changes to the new imbalance" />
-    <option name="LAST_COMMIT_MESSAGE" value="changes to the new imbalance" />
+    <MESSAGE value="changed name" />
+    <option name="LAST_COMMIT_MESSAGE" value="changed name" />
   </component>
 </project>
