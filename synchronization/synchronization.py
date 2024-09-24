@@ -47,13 +47,13 @@ def synchronization(raw_data_in_path: str, sync_android_out_path: str, selected_
         Prefix do add to the generated filenames.
 
         raw_data_in_path (str):
-        Main folder path containing subfolders with raw sensor data.
+        Path to the main folder containing subfolders with raw sensor data (i.e., ../main_folder/subfolders/sensor_data.txt)
 
         sync_android_out_path (str):
-        Path to the location where the synchronized android sensor data will be saved
+        Path to the location where the synchronized android sensor data, within each device, will be stored.
 
         selected_sensors (Dict[str, List[str]):
-        Dictionary containing the devices and sensors chosen to be loaded and synchronized.
+        Dictionary containing the devices and sensors to be loaded and synchronized.
         Devices supported are:
             "watch": smartwatch
             "phone": smartphone
@@ -67,7 +67,7 @@ def synchronization(raw_data_in_path: str, sync_android_out_path: str, selected_
             "noise": ambient noise (phone only)
 
         output_path (str):
-        Path to the location where the file containing the synchronized data should be saved.
+        Path to the location where the file containing the synchronized data, from the multiple devices, should be saved.
 
         sync_type (str):
         Method for synchronizing data between devices. Supported methods:
@@ -78,7 +78,7 @@ def synchronization(raw_data_in_path: str, sync_android_out_path: str, selected_
         Path to save the synchronization evaluation.
 
         evaluation_filename (str):
-        Name of the file containing the sync evaluation report.
+        Name of the file which will contain the synchronization evaluation report.
 
         save_intermediate_files (bool): Default = True.
         Keep the csv files generated after synchronizing android
