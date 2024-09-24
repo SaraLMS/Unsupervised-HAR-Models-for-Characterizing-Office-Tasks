@@ -16,7 +16,7 @@ learning models.
 
 ## Synchronization
 
-![Diagram](./figures/synchronization_before_after.png)
+![Diagram](./Figures/synchronization_before_after.png)
 
 
 There are two stages to synchronize multiple android sensors from different devices:

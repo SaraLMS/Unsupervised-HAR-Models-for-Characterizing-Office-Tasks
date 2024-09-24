@@ -4,11 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="3466cb1d-2559-4122-9522-f23b0d0f6b0a" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/synchronization/synchronization.py" beforeDir="false" afterPath="$PROJECT_DIR$/synchronization/synchronization.py" afterDir="false" />
-    </list>
+    <list default="true" id="3466cb1d-2559-4122-9522-f23b0d0f6b0a" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -61,11 +57,11 @@
 }</component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\srale\PycharmProjects\toolbox\Figures" />
       <recent name="C:\Users\srale\PycharmProjects\toolbox\load" />
       <recent name="C:\Users\srale\PycharmProjects\toolbox\feature_engineering" />
       <recent name="C:\Users\srale\PycharmProjects\toolbox" />
       <recent name="C:\Users\srale\PycharmProjects\toolbox\tsfel" />
-      <recent name="C:\Users\srale\PycharmProjects\toolbox\tsfel\utils" />
     </key>
   </component>
   <component name="SharedIndexes">
@@ -83,14 +79,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1711360410072</updated>
-    </task>
-    <task id="LOCAL-00014" summary="Corrected sync_evaluation (when logger file can't be used). Added prefix parameter in synchronization.py">
-      <option name="closed" value="true" />
-      <created>1713185771826</created>
-      <option name="number" value="00014" />
-      <option name="presentableId" value="LOCAL-00014" />
-      <option name="project" value="LOCAL" />
-      <updated>1713185771826</updated>
     </task>
     <task id="LOCAL-00015" summary="started filters">
       <option name="closed" value="true" />
@@ -476,7 +464,15 @@
       <option name="project" value="LOCAL" />
       <updated>1727207654710</updated>
     </task>
-    <option name="localTasksCounter" value="63" />
+    <task id="LOCAL-00063" summary="changing read me file">
+      <option name="closed" value="true" />
+      <created>1727208708390</created>
+      <option name="number" value="00063" />
+      <option name="presentableId" value="LOCAL-00063" />
+      <option name="project" value="LOCAL" />
+      <updated>1727208708390</updated>
+    </task>
+    <option name="localTasksCounter" value="64" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
