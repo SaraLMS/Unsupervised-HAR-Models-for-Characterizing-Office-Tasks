@@ -15,7 +15,6 @@ FEATURE_SET = "feature_set"
 TXT = ".txt"
 CSV = ".csv"
 
-
 # ------------------------------------------------------------------------------------------------------------------- #
 # synchronization constants
 # ------------------------------------------------------------------------------------------------------------------- #
@@ -24,7 +23,6 @@ BUFFER_SIZE_SECONDS = 0.5
 # synchronization methods
 CROSSCORR = "crosscorr"
 TIMESTAMPS = "timestamps"
-
 
 # ------------------------------------------------------------------------------------------------------------------- #
 # supported sensors and devices
@@ -75,6 +73,23 @@ STAIRS = "stairs"
 SUPPORTED_ACTIVITIES = [WALKING, STANDING, SITTING, CABINETS, STAIRS]
 
 # ------------------------------------------------------------------------------------------------------------------- #
+# supported segment suffixes
+# ------------------------------------------------------------------------------------------------------------------- #
+
+WALKING_SUFFIXES = ['_slow', '_medium', '_fast']
+
+STAIRS_4SUFFIXES = ['_stairsup1', '_stairsdown1', '_stairsup2', '_stairsdown2']
+
+STAIRS_8SUFFIXES = ['_stairsup1', '_stairsdown1', '_stairsup2', '_stairsdown2',
+                    '_stairsup3', '_stairsdown3', '_stairsup4', '_stairsdown4']
+
+STANDING_SUFFIXES = ['_stand_still1', '_gestures', '_stand_still2']
+
+CABINETS_SUFFIXES = ['_coffee', '_folders']
+
+SITTING_SUFFIXES = ['_sit']
+
+# ------------------------------------------------------------------------------------------------------------------- #
 # supported clustering models
 # ------------------------------------------------------------------------------------------------------------------- #
 
@@ -84,5 +99,3 @@ GAUSSIAN_MIXTURE_MODEL = "gmm"
 DBSCAN = "dbscan"
 BIRCH = "birch"
 SUPPORTED_MODELS = [KMEANS, AGGLOMERATIVE, GAUSSIAN_MIXTURE_MODEL, DBSCAN, BIRCH]
-
-

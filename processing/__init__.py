@@ -1,5 +1,5 @@
 
-from .pre_processing import processor
+from .pre_processing import processor, process_all
 
 __all__ = [
 

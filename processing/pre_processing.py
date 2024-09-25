@@ -3,13 +3,15 @@
 # ------------------------------------------------------------------------------------------------------------------- #
 import pandas as pd
 import os
-from typing import Dict, List
+from typing import List
+import re
 
 # internal imports
 import load
 import parser
 from constants import (WALKING, CABINETS, STANDING, SITTING, SUPPORTED_ACTIVITIES, STAIRS, CSV,
-                       ACCELEROMETER_PREFIX, SUPPORTED_PREFIXES)
+                       ACCELEROMETER_PREFIX, SUPPORTED_PREFIXES, WALKING_SUFFIXES, CABINETS_SUFFIXES, STANDING_SUFFIXES,
+                       SITTING_SUFFIXES, STAIRS_4SUFFIXES, STAIRS_8SUFFIXES)
 from .filters import median_and_lowpass_filter, gravitational_filter
 from .task_segmentation import segment_tasks
 
@@ -17,33 +19,110 @@ from .task_segmentation import segment_tasks
 # ------------------------------------------------------------------------------------------------------------------- #
 # public functions
 # ------------------------------------------------------------------------------------------------------------------- #
+def process_all(main_input_path: str, output_base_path: str, device_sensors_foldername: str) -> None:
+    """
+    Signal pre-processing function. See more details in the processor function bellow
 
-def processor(sync_data_path: str, output_path: str, raw_folder_name: str, filtered_folder_name: str,
+    :param main_input_path: str
+    Path to the main folder containing subfolders with synchronized sensor data
+    (i.e., ../main_folder/subfolders/sensor_data.txt). The sub folders should have the following structure:
+    four characters, starting with an upper case letter, and followed by three digits (i.e., P001)
+
+    :param output_base_path: str
+    Path to the location where the file containing the synchronized data should be saved.
+
+    :param device_sensors_foldername: str
+    Name of the folder containing the loaded sensors and devices (i.e., acc_gyr_mag_phone_watch)
+
+    :return: None
+    """
+
+    # Compile the regular expression for valid subfolder names
+    pattern = re.compile(r'^[A-Z]\d{3}$')
+
+    for sub_folder in os.listdir(main_input_path):
+
+        if pattern.match(sub_folder):
+            raw_data_in_path = os.path.join(main_input_path, sub_folder)
+
+            for devices_sensors_folders in os.listdir(raw_data_in_path):
+
+                if devices_sensors_folders == device_sensors_foldername:
+
+                    # check the which devices and sensor data to load and process based on the folder name
+                    raw_data_in_path = os.path.join(raw_data_in_path, devices_sensors_folders)
+
+                    # Check if 'sync_devices' or 'sync_android_sensors' exist
+                    if 'sync_devices' in os.listdir(raw_data_in_path):
+                        sync_folder = 'sync_devices'
+                    elif 'sync_android_sensors' in os.listdir(raw_data_in_path):
+                        sync_folder = 'sync_android_sensors'
+                    else:
+                        # Raise an exception if neither folder is found
+                        raise ValueError(
+                            f"Neither 'sync_devices' nor 'sync_android_sensors' were found in {raw_data_in_path}")
+
+                    # create the path to the folder with the synchronized data
+                    sync_data_in_path = os.path.join(raw_data_in_path, sync_folder)
+
+                    print(sync_data_in_path)
+                    processor(sync_data_in_path, output_base_path, device_sensors_foldername, sub_folder)
+
+
+def processor(sync_data_path: str, output_base_path: str, device_sensors_foldername: str, sub_folder: str,
+              raw_folder_name: str = "raw_tasks", filtered_folder_name: str = "filtered_tasks",
               save_raw_tasks: bool = True, fs: int = 100, impulse_response_samples: int = 200) -> None:
     """
-    Processes and filters signal data from csv files in a directory structure,
-     storing the results in a dictionary.
+    This function goes through each subfolder in the given directory path, segments and filters the signals
 
-    This function goes through each subfolder in the given directory path, applies median and low pass filters to
-    accelerometer and gyroscope data and removes the gravitational component in accelerometer data.
+    Segment different tasks within the same recording. Onset-based segmentation for walking signals and peak-based
+    segmentation for sitting and standing signals.
 
-    Parameters:
-        sync_data_path (str): The path to the directory containing folders of synchronized signal data files.
-        filtered_output_path (str): Path where the data should be saved
-        fs (int, optional): The sampling frequency used for the processing process. Defaults to 100 Hz.
+    For filtering, applies median and low pass filters to accelerometer and gyroscope data and removes
+    the gravitational component from accelerometer data.
 
-    Returns:
-        Dict[str, pd.DataFrame]: A dictionary where each key is the folder name and each value is a DataFrame
-        containing the filtered data from that folder.
+    :param sync_data_path: str
+    Path to the folder (i.e., sync_devices) containing the synchronized data main_folder/subfolder/sync_devices/sync_data.csv
 
+    :param output_base_path: str
+    Path to the base path were the raw segments and filtered segments should be saved
+
+    :param device_sensors_foldername: str
+    Name of the folder containing the loaded sensors and devices (i.e., acc_gyr_mag_phone_watch)
+
+    :param sub_folder: str
+    Name of the subfolder which contains the synchronized data main_folder/subfolder/sync_devices/sync_data.csv
+
+    :param raw_folder_name: str (default = raw_tasks)
+    Name of the folder where to store the raw signal segments
+
+    :param filtered_folder_name: str (default = filtered_tasks)
+    Name of the folder where to store the filtered signal segments
+
+    :param save_raw_tasks: bool (default = True)
+    Save the raw signal segments. False not to save
+
+    :param fs: int
+    Sampling frequency
+
+    :param impulse_response_samples: int
+    Number of samples to be cut at the start of each segment to remove the impulse response of the filters
+
+    :return: None
     """
     # check path
     parser.check_in_path(sync_data_path, CSV)
 
-    # create output paths
-    raw_output_path = parser.create_dir(output_path, raw_folder_name)
-    filtered_output_path = parser.create_dir(output_path, filtered_folder_name)
+    # add the sub folder to the base (main) path
+    output_base_path = os.path.join(output_base_path, sub_folder, device_sensors_foldername)
 
+    # create directories with the new folder names for the raw and filtered segments
+    raw_output_path = parser.create_dir(output_base_path, raw_folder_name)
+    filtered_output_path = parser.create_dir(output_base_path, filtered_folder_name)
+
+    print(f"Pre-processing {sub_folder} signals")
+
+    # iterate through the sub folders
     for folder_name in os.listdir(sync_data_path):
 
         folder_path = os.path.join(sync_data_path, folder_name)
@@ -92,7 +171,7 @@ def processor(sync_data_path: str, output_path: str, raw_folder_name: str, filte
                 parser.save_data_to_csv(output_filename, df, filtered_output_path, folder_name)
 
         # inform user
-        print(f"Segment and filter{folder_name} tasks")
+        print(f"Segmented and filtered {folder_name} tasks")
 
 
 # ------------------------------------------------------------------------------------------------------------------- #
@@ -106,12 +185,14 @@ def _apply_filters(data: pd.DataFrame, fs: int) -> pd.DataFrame:
     This function processes each sensor data column in the file, applying median and lowpass filters.
     For accelerometer data, it additionally removes the gravitational component.
 
-    Parameters:
-        data (pd.DataFrame): DataFrame containing the sensor data.
-        fs (int): The sampling frequency of the sensor data.
+    :param data: pd.DataFrame
+    Pandas DataFrame containing the sensor data
 
-    Returns:
-        pd.DataFrame: A DataFrame containing the filtered sensor data, with the same structure as the input file.
+    :param fs: int
+    Sampling frequency
+
+    :return: pd.DataFrame
+    A DataFrame containing the filtered sensor data, with the same structure as the input file.
     """
 
     filtered_data = data.copy()
@@ -158,30 +239,29 @@ def _generate_task_filenames(folder_name: str, filename: str, nr_stairs_segments
     # split .csv from the filename
     base_filename, extension = os.path.splitext(filename)
 
-    # TODO suffixes in constants, pass suffixes as parameter check nr of segments and suffixes
+    # TODO pass suffixes as parameter check nr of segments and suffixes (I dont remember what this was about)
     # get the suffixes to be added according to the activity
     if WALKING in folder_name:
-        suffixes = ['_slow', '_medium', '_fast']
+        suffixes = WALKING_SUFFIXES
 
     elif CABINETS in folder_name:
-        suffixes = ['_coffee', '_folders']
+        suffixes = CABINETS_SUFFIXES
 
     elif STANDING in folder_name:
-        suffixes = ['_stand_still1', '_gestures', '_stand_still2']
+        suffixes = STANDING_SUFFIXES
 
     elif SITTING in folder_name:
-        suffixes = ['_sit']
+        suffixes = SITTING_SUFFIXES
 
     elif STAIRS in folder_name:
 
         if nr_stairs_segments == 4:
             # 2 segments going up and 2 segments going down
-            suffixes = ['_stairsup1', '_stairsdown1', '_stairsup2', '_stairsdown2']
+            suffixes = STAIRS_4SUFFIXES
 
         elif nr_stairs_segments == 8:
             # 4 segments going up and 4 segments going down
-            suffixes = ['_stairsup1', '_stairsdown1', '_stairsup2', '_stairsdown2',
-                        '_stairsup3', '_stairsdown3', '_stairsup4', '_stairsdown4']
+            suffixes = STAIRS_8SUFFIXES
 
         else:
             raise ValueError(f"Incorrect number of stairs segments: Can only be 4 or 8.")

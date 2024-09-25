@@ -5,14 +5,14 @@ import json
 import os
 import numpy as np
 import pandas as pd
-from sklearn.preprocessing import StandardScaler
-
-import load
-import parser
 import tsfel
 from typing import Dict, Any, List
+
+# internal imports
+import load
+import parser
 from constants import SUPPORTED_ACTIVITIES, CABINETS, SITTING, STANDING, WALKING, STAIRS, SEC, WEAR_PREFIX, \
-    MAGNETOMETER_PREFIX
+    MAGNETOMETER_PREFIX, CSV
 
 # constants supported from filenames
 COFFEE = "coffee"
@@ -50,25 +50,6 @@ SUPPORTED_INPUT_SUBCLASSES = [SIT, COFFEE, FOLDERS, STANDING_STILL, STANDING_GES
 # ------------------------------------------------------------------------------------------------------------------- #
 # public functions
 # ------------------------------------------------------------------------------------------------------------------- #
-
-def generate_cfg_file(path: str) -> None:
-    """
-    Generates the json file from TSFEL.
-
-    :param path: str
-        Path to save the json file
-
-    :return: None
-    """
-    # generate dictionary with all the features
-    cfg = tsfel.get_features_by_domain()
-    # path = "C:/Users/srale/PycharmProjects/toolbox/feature_extraction"
-    # specify the full path to save the file
-    file_path = os.path.join(path, "cfg_file.json")
-    # save to json file
-    with open(file_path, "w") as fp:
-        json.dump(cfg, fp, indent=4)
-
 
 def load_json_file(json_path: str) -> Dict[Any, Any]:
     """
@@ -134,7 +115,7 @@ def feature_extractor(data_main_path: str, output_path: str, subclasses: list[st
     _validate_subclasses_list(subclasses)
 
     # check directory
-    parser.check_in_path(data_main_path, '.csv')
+    parser.check_in_path(data_main_path, CSV)
 
     # load dictionary with chosen features
     features_dict = load_json_file(json_path)
@@ -196,7 +177,16 @@ def feature_extractor(data_main_path: str, output_path: str, subclasses: list[st
 # private functions
 # ------------------------------------------------------------------------------------------------------------------- #
 
-def _calc_mag_magnitude(df):
+def _calc_mag_magnitude(df:pd.DataFrame) -> pd.DataFrame:
+    """
+    Calculates the magnitude of the magnetometer for both the smartphone and smartwatch
+
+    :param df: pd.DataFrame
+    pandas DataFrame containing the MAG signals
+
+    :return: pd.DataFrame
+    A pandas DataFrame containing the new columns with the MAG magnenitude
+    """
     phone_mag_columns = []
     watch_mag_columns = []
 
@@ -221,8 +211,21 @@ def _calc_mag_magnitude(df):
     return df
 
 
-def _calculate_magnitude(df: pd.DataFrame, columns: List[str]) -> pd.DataFrame:
+def _calculate_magnitude(df: pd.DataFrame, columns: List[str]) -> np.ndarray:
+    """
+    Calculate magnitude of sensor data
+
+    :param df: pd.DataFrame
+    pandas DataFrame containing the sensor data
+
+    :param columns: List[str]
+    list with column names to calculate the magnitude
+
+    :return: np.ndarray
+    A numpy array containing the magnitude of the chosen columns of the input dataframe
+    """
     return np.sqrt((df[columns[0]] ** 2) + (df[columns[1]] ** 2) + (df[columns[2]] ** 2))
+
 
 def _validate_subclasses_list(subclasses: List[str]) -> None:
     """
@@ -244,19 +247,21 @@ def _validate_subclasses_list(subclasses: List[str]) -> None:
                              f"Supported subclasses are: {SUPPORTED_INPUT_SUBCLASSES}")
 
 
-def _remove_keys_from_dict(df_dict: Dict[str, pd.DataFrame], subclasses: List[str]) -> Dict[str, pd.DataFrame]:
-    # Collect keys to be removed
-    keys_to_remove = [key for key in df_dict.keys() if not any(key.startswith(subclass) for subclass in subclasses)]
-    print(f"Subclasses removed: {keys_to_remove}")
-
-    # Drop the keys/subclasses that weren't chosen
-    for key in keys_to_remove:
-        df_dict.pop(key)
-
-    return df_dict
-
-
 def _extract_features_from_signal(df: pd.DataFrame, features_dict: Dict[Any, Any]) -> pd.DataFrame:
+    """
+    Remove the time column ('sec') and extract features from sensor data contained in the columns of a pandas DataFrame,
+     using TSFEL.
+
+    :param df: pd.DataFrame
+    pandas DataFrame containing the signals in each column
+
+    :param features_dict: Dict[Any, Any]
+    Dictionary containing the features to be extracted. For more info check TSFEL documentation
+    (https://tsfel.readthedocs.io/en/latest/descriptions/get_started.html#set-up-the-feature-extraction-config-file)
+
+    :return: pd.DataFrame
+    A pandas DataFrame with the extracted features. Each row is an instance and columns are the features
+    """
     # drop time column
     if SEC in df.columns:
         df.drop(columns=[SEC], inplace=True)
@@ -268,6 +273,24 @@ def _extract_features_from_signal(df: pd.DataFrame, features_dict: Dict[Any, Any
 
 
 def _add_class_and_subclass_column(df: pd.DataFrame, folder_name: str, filename: str) -> pd.DataFrame:
+    """
+    Adds a class column based on the folder name where the signals are stored and a subclass column
+    based on the filename.
+
+    :param df: pd.DataFrame
+    pandas DataFrame containing the features in the columns and instances in the rows
+
+    :param folder_name: str
+    Name of the folder (i.e., WALKING) from which the signals are loaded
+    (i.e. main_folder/subfolder/acc_gyr_mag_phone/P001/WALKING/segment_signals.csv)
+
+    :param filename: str
+    Name of the file containing the sensor data (i.e. segment_signals.csv)
+    (i.e. main_folder/subfolder/acc_gyr_mag_phone/P001/WALKING/segment_signals.csv)
+
+    :return: pd.DataFrame
+    A pandas DataFrame containing the new class and subclass columns
+    """
     # attribute class and subclass numbers according to the activity and tasks
     if CABINETS in folder_name or STANDING in folder_name:
         class_number = 1
@@ -295,6 +318,16 @@ def _add_class_and_subclass_column(df: pd.DataFrame, folder_name: str, filename:
 
 
 def _check_subclass(filename: str) -> str:
+    """
+    Check which subclass the signal belongs to based on the suffixes on the filename
+
+    :param filename: str
+    Name of the file containing the sensor data (i.e. segment_signals.csv)
+    (i.e. main_folder/subfolder/acc_gyr_mag_phone/P001/WALKING/segment_signals.csv)
+
+    :return: str
+    Subclass name based on the suffix found on the filename
+    """
     # check subclass
     if COFFEE in filename:
         subclass_str = "standing_coffee"
@@ -371,7 +404,18 @@ def _balance_subclasses(signals: List[pd.DataFrame], subclass_size: int) -> List
     return balanced_class
 
 
-def _calculate_class_lengths(signals_classes):
+def _calculate_class_lengths(signals_classes: List[List[pd.DataFrame]]) -> List[int]:
+    """
+    Calculates the number of instances from each class by counting the instances of each subclass belonging to the
+    class.
+
+    :param signals_classes: List[List[pd.DataFrame]]
+    List containing lists of all the signals belonging to the same class.
+    (i.e., [[walk_slow_df, walk_medium_df, walk_fast_df], [stand_still_df, stand_gestures_df], [sit_df]]
+
+    :return: List[int]
+    A list of integers representing the number of instances from each class
+    """
     class_lengths = []
     for signals in signals_classes:
         class_length = sum(len(df) for df in signals)
@@ -379,8 +423,20 @@ def _calculate_class_lengths(signals_classes):
     return class_lengths
 
 
-def _balance_dataset(df_dict):
-    # TODO - PUT THIS IN A FUCNTION MAYBE ?
+def _balance_dataset(df_dict: Dict[str, pd.DataFrame]):
+    """
+    Balances the dataset so that there's roughly the same amount of instances from the same class, and inside each
+    class, there's the same amount of instances from the same subclass. After balancing, joins all the data into one
+    single dataframe
+
+    :param df_dict: Dict[str, pd.DataFrame]
+    Dictionary where the keys are the subclass names and the values are the dataframes containing the features extracted
+    from the respective signals.
+
+    :return: pd.DataFrame
+    A pandas DataFrame containing the balanced classes and subclasses
+    """
+
     # lists to store dataframes from the same class
     signals_standing = []
     signals_sitting = []

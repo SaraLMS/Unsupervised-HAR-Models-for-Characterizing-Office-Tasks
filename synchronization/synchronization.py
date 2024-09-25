@@ -146,11 +146,14 @@ def synchronization(raw_data_in_path: str, selected_sensors: Dict[str, List[str]
     # check if in path is valid and contains txt files inside
     parser.check_in_path(raw_data_in_path, TXT)
 
+    # generate folder name with the sensors and devices loaded
+    sensors_devices_foldername = _generate_folder_name_based_on_selected_sensors(selected_sensors)
+
     # generate output path for the synchronized android sensors
-    sync_android_out_path = os.path.join(output_base_path, sub_folder_name, sync_android_output_filename)
+    sync_android_out_path = os.path.join(output_base_path, sub_folder_name, sensors_devices_foldername, sync_android_output_filename)
 
     # generate output path for the synchronized devices
-    sync_devices_output_path = os.path.join(output_base_path, sub_folder_name, sync_devices_output_filename)
+    sync_devices_output_path = os.path.join(output_base_path, sub_folder_name, sensors_devices_foldername, sync_devices_output_filename)
 
     # inform user
     print(f"Synchronizing signals from {sub_folder_name}")
@@ -185,7 +188,8 @@ def synchronization(raw_data_in_path: str, selected_sensors: Dict[str, List[str]
 
             elif sync_type == TIMESTAMPS:
                 # synchronize data based on timestamps
-                sync_timestamps(sub_folder_name, raw_folder_path, sync_folder_path, sync_devices_output_path, selected_sensors)
+                sync_timestamps(sub_folder_name, raw_folder_path, sync_folder_path, sync_devices_output_path,
+                                selected_sensors)
 
                 # inform user
                 print("Signals synchronized based on timestamps")
@@ -194,7 +198,6 @@ def synchronization(raw_data_in_path: str, selected_sensors: Dict[str, List[str]
             evaluation_df_array.append(sync_report_df)
 
         if not save_intermediate_files:
-
             # remove the folder containing the csv files generated when synchronizing android sensors
             shutil.rmtree(sync_android_out_path)
 
@@ -205,7 +208,7 @@ def synchronization(raw_data_in_path: str, selected_sensors: Dict[str, List[str]
         evaluation_filename = f"{evaluation_filename}{CSV}"
 
         # define output path
-        evaluation_output_path = os.path.join(output_base_path, sub_folder_name, evaluation_filename)
+        evaluation_output_path = os.path.join(output_base_path, sub_folder_name, sensors_devices_foldername, evaluation_filename)
 
         # save csv file containing sync evaluation
         combined_df.to_csv(evaluation_output_path, index=False)
@@ -220,7 +223,7 @@ def _check_supported_sensors(selected_sensors: Dict[str, List[str]]):
     Check if the selected sensors are supported for the chosen devices
     and if the sensors and devices chosen are valid.
 
-    :param: selected_sensors: Dict[str, List[str]]
+    :param selected_sensors: Dict[str, List[str]]
     Dictionary containing the devices and sensors chosen to be loaded and synchronized.
 
     :return: None
@@ -257,7 +260,7 @@ def _check_acc_sensor_selected(selected_sensors: Dict[str, List[str]]) -> None:
     """
     Checks if the accelerometer (acc) sensor is selected for each device.
 
-    :param: selected_sensors: Dict[str, List[str]]:
+    :param selected_sensors: Dict[str, List[str]]:
     Dictionary containing the devices and sensors chosen to be loaded and synchronized.
 
     :return: None
@@ -274,10 +277,10 @@ def _check_acc_file(folder_path: str, selected_sensors: Dict[str, List[str]]) ->
     Checks for the presence of accelerometer data files for each selected device in the specified folder. Raises an
     error if accelerometer data is missing for any device selected for synchronization.
 
-    :param: folder_path: str
+    :param folder_path: str
     Path to the folder containing the sensor data files (.txt files)
 
-    :param: selected_sensors: Dict[str, List[str]]
+    :param selected_sensors: Dict[str, List[str]]
     A dictionary where keys are device types and values are lists of sensors selected for each device type.
 
     :return: None
@@ -321,7 +324,6 @@ def _check_if_mban_selected(selected_sensors: Dict[str, List[str]]) -> None:
 
     # check if the mban is in the selected sensors
     if MBAN in selected_sensors:
-
         # if the user chooses the mban raise exception
         raise ValueError("The device 'MuscleBAN' has not been implemented.")
 
@@ -344,7 +346,44 @@ def _check_if_acc_selected_for_crosscorr(selected_sensors: Dict[str, List[str]],
 
     # check the sync type
     if sync_type == CROSSCORR:
-
         # if cross corr, check if the accelerometer from the two devices was chosen
         _check_acc_sensor_selected(selected_sensors)
 
+
+def _generate_folder_name_based_on_selected_sensors(selected_sensors: Dict[str, List[str]]) -> str:
+    """
+    Generate a folder name based on selected sensors and their associated devices.
+
+    The folder name is constructed by concatenating unique sensor names (in the order they are first encountered)
+    from the provided dictionary, followed by the names of the devices. The sensor names and device names are
+    separated by underscores.
+
+    :param selected_sensors:
+    A dictionary where keys are device names (str) and values are lists of sensor names (List[str]) selected for each
+    device. Example: {'phone': ['acc', 'gyr', 'mag'], 'watch': ['acc', 'gyr', 'mag']}
+
+    :return: str
+    A string representing the combined folder name in the format 'sensor1_sensor2_..._device1_device2_...'
+    (e.g., 'acc_gyr_mag_phone_watch')
+    """
+    # Create a list to hold unique sensor names while preserving order
+    sensor_list = []
+    seen_sensors = set()  # To keep track of seen sensors
+
+    # Iterate over the dictionary
+    for sensors in selected_sensors.values():
+        for sensor in sensors:
+            if sensor not in seen_sensors:
+                seen_sensors.add(sensor)
+                sensor_list.append(sensor)
+
+    # Create a string of unique sensors separated by underscores
+    sensor_string = "_".join(sensor_list)
+
+    # Add the device names to the end
+    device_names = "_".join(selected_sensors.keys())
+
+    # Combine the sensor string and device names
+    final_string = f"{sensor_string}_{device_names}"
+
+    return final_string

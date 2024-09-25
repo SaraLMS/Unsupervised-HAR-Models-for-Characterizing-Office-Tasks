@@ -18,9 +18,8 @@ import load
 #
 # filtered_data.to_csv(path_filt)
 
-do_synchronization = True
-do_processing = False
-do_generate_cfg_file = False
+do_synchronization = False
+do_processing = True
 do_feature_extraction = False
 # feature selection
 do_one_subject_feature_selection = False
@@ -44,19 +43,13 @@ def main():
         synchronization.synchronize_all(raw_data_in_path, selected_sensors, sync_type, output_path)
 
     if do_processing:
-        output_path = "D:/tese_backups/subjects/P020/acc_gyr_mag_watch_phone"
-        filtered_folder_name = "filtered_tasks_P020"
-        raw_folder_name = "raw_tasks_P020"
-        sync_data_path = "D:/tese_backups/subjects/P020/acc_gyr_mag_watch_phone/synchronized_P020"
-        processing.processor(sync_data_path, output_path, raw_folder_name, filtered_folder_name)
-
-    if do_generate_cfg_file:
-        cfg_path = "C:/Users/srale/PycharmProjects/toolbox/feature_extraction"
-        feature_engineering.generate_cfg_file(cfg_path)
+        output_path = "D:/tese_backups/test_new_synchronization"
+        sync_data_path = "D:/tese_backups/test_new_synchronization"
+        devices_sensors_foldername = "acc_gyr_mag_phone_watch"
+        processing.process_all(sync_data_path, output_path, devices_sensors_foldername)
 
     if do_feature_extraction:
-        subclasses = ['standing_still', 'walk_medium',
-                      'sit']  # , 'standing_gestures', 'stairs', 'walk_fast', 'walk_slow', 'coffee', 'folders'
+        subclasses = ['standing_still', 'walk_medium', 'sit']  # , 'standing_gestures', 'stairs', 'walk_fast', 'walk_slow', 'coffee', 'folders'
         main_path = "D:/tese_backups/subjects/P019/acc_gyr_mag_phone/filtered_tasks_P019"
         output_path = "C:/Users/srale/OneDrive - FCT NOVA/Tese/porfavor_deus/P019"
         output_filename = "acc_gyr_mag_phone_features_P019.csv"
