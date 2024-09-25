@@ -2,13 +2,15 @@
 # imports
 # ------------------------------------------------------------------------------------------------------------------- #
 import shutil
+import re
 from typing import Dict, List
 import os
 import parser
 import pandas as pd
 
+# internal imports
 from constants import CROSSCORR, TIMESTAMPS, ACCELEROMETER, WEAR_ACCELEROMETER, WATCH, PHONE, SUPPORTED_DEVICES, MBAN, \
-    SUPPORTED_PHONE_SENSORS, SUPPORTED_WATCH_SENSORS, SUPPORTED_MBAN_SENSORS, ACC, TXT
+    SUPPORTED_PHONE_SENSORS, SUPPORTED_WATCH_SENSORS, SUPPORTED_MBAN_SENSORS, ACC, TXT, CSV
 from .sync_android_sensors import sync_all_classes
 from .sync_devices_crosscorr import sync_crosscorr
 from .sync_devices_timestamps import sync_timestamps
@@ -19,10 +21,60 @@ from .evaluation import sync_evaluation
 # public functions
 # ------------------------------------------------------------------------------------------------------------------- #
 
-def synchronization(raw_data_in_path: str, sync_android_out_path: str, selected_sensors: Dict[str, List[str]],
-                    output_path: str, sync_type: str, evaluation_output_path: str,
-                    evaluation_filename: str = "evaluation_report.csv", save_intermediate_files: bool = True,
-                    prefix: str = "P007") -> None:
+def synchronize_all(main_folder_in_path: str, selected_sensors: Dict[str, List[str]], sync_type: str,
+                    output_base_path: str, sync_android_output_filename: str = "sync_android_sensors",
+                    sync_devices_output_filename: str = "sync_devices") -> None:
+    """
+    Synchronizes all signals present in a main directory. Check synchronization function bellow for more details.
+
+    :param main_folder_in_path: str
+    Path to the main folder containing subfolders with raw sensor data (i.e., ../main_folder/subfolders/sensor_data.txt)
+    The sub folders should have the following structure: four characters, starting with an upper case letter, and
+    followed by three digits (i.e., P001)
+
+    :param selected_sensors: Dict[str, List[str]
+    Dictionary containing the devices and sensors to be loaded and synchronized.
+
+    :param sync_type: str
+    Method for synchronizing data between devices.
+
+    :param output_base_path: str
+    Path to the location where the file containing the synchronized data should be saved.
+
+    :param sync_android_output_filename: str
+    Name of the folder where to store the csv files from the synchronization of Android sensors within a device.
+
+    :param sync_devices_output_filename: str
+    Name of the folder where to store the csv files from the synchronization between devices.
+
+    :return: None
+    """
+
+    # check if selected sensors are valid
+    _check_supported_sensors(selected_sensors)
+
+    # check if the MuscleBAN was selected
+    _check_if_mban_selected(selected_sensors)
+
+    # check if ACC sensor is selected for both devices if cross correlation is chosen
+    _check_if_acc_selected_for_crosscorr(selected_sensors, sync_type)
+
+    # Compile the regular expression for valid subfolder names
+    pattern = re.compile(r'^[A-Z]\d{3}$')
+
+    for sub_folder in os.listdir(main_folder_in_path):
+
+        if pattern.match(sub_folder):
+            raw_data_in_path = os.path.join(main_folder_in_path, sub_folder)
+
+            synchronization(raw_data_in_path, selected_sensors, output_base_path, sync_android_output_filename,
+                            sync_devices_output_filename, sync_type, sub_folder)
+
+
+def synchronization(raw_data_in_path: str, selected_sensors: Dict[str, List[str]], output_base_path: str,
+                    sync_android_output_filename: str, sync_devices_output_filename: str, sync_type: str,
+                    sub_folder_name: str, evaluation_filename: str = "evaluation_report",
+                    save_intermediate_files: bool = True) -> None:
     """
     Synchronizes android sensor data and between two different devices. Two different synchronization methods are
     supported: cross correlation and timestamps. Generates a new csv file containing all the synchronized sensor data
@@ -42,60 +94,70 @@ def synchronization(raw_data_in_path: str, sync_android_out_path: str, selected_
     cross correlation and timestamps (logger file and filename start times); being the cross correlation the
     reference method since, if followed the jumps protocol and with the correct window size, presents the best results.
 
-    Parameters:
-        prefix (str):
-        Prefix do add to the generated filenames.
+    :param raw_data_in_path: str
+    Path to the sub folder containing other sub_folders with raw sensor data
+    (i.e., ../main_folder/sub folder/sub_folders/sensor_data.txt)
 
-        raw_data_in_path (str):
-        Path to the main folder containing subfolders with raw sensor data (i.e., ../main_folder/subfolders/sensor_data.txt)
+    :param selected_sensors: Dict[str, List[str]
+    Dictionary containing the devices and sensors to be loaded and synchronized.
+    Devices supported are:
+        "watch": smartwatch
+        "phone": smartphone
+        "mban" : MuscleBAN - To implement later
+    Supported sensors include:
+        "acc": accelerometer
+        "gyr": gyroscope
+        "mag": magnetometer
+        "rotvec": rotation vector
+        "wearheartrate": heart rate (watch only)
+        "noise": ambient noise (phone only)
 
-        sync_android_out_path (str):
-        Path to the location where the synchronized android sensor data, within each device, will be stored.
+    :param output_base_path: str
+    Path to the location where the file containing the synchronized data should be saved.
 
-        selected_sensors (Dict[str, List[str]):
-        Dictionary containing the devices and sensors to be loaded and synchronized.
-        Devices supported are:
-            "watch": smartwatch
-            "phone": smartphone
-            "mban" : MuscleBAN - To implement later
-        Supported sensors include:
-            "acc": accelerometer
-            "gyr": gyroscope
-            "mag": magnetometer
-            "rotvec": rotation vector
-            "wearheartrate": heart rate (watch only)
-            "noise": ambient noise (phone only)
+    :param sync_android_output_filename: str
+    Name of the folder where to store the csv files from the synchronization of Android sensors within a device.
 
-        output_path (str):
-        Path to the location where the file containing the synchronized data, from the multiple devices, should be saved.
+    :param sync_devices_output_filename: str
+    Name of the folder where to store the csv files from the synchronization between devices.
 
-        sync_type (str):
-        Method for synchronizing data between devices. Supported methods:
-            "crosscorr": Cross correlation:
-            "timestamps": Start times in the sensor files
+    :param sync_type: str
+    Method for synchronizing data between devices. Supported methods:
+        "crosscorr": Cross correlation between the ACC signals from the device
+        (y-axis for the phone and -x-axis for the watch)
 
-        evaluation_output_path (str):
-        Path to save the synchronization evaluation.
+        "timestamps": Start times in the logger file. If this file does not exist or does not have the needed timestamps
+        the start times in the raw data filenames will be used instead.
 
-        evaluation_filename (str):
-        Name of the file which will contain the synchronization evaluation report.
+    :param sub_folder_name: str
+    Name of the sub folder containing the raw data files (.txt)
 
-        save_intermediate_files (bool): Default = True.
-        Keep the csv files generated after synchronizing android
-        sensors. False to delete. If there's only signals from one device, these files are not deleted.
+    :param evaluation_filename: str (default = evalution_report)
+    Name of the file which will contain the synchronization evaluation report.
+
+    :param save_intermediate_files: bool (default = True)
+    Keep the csv files generated after synchronizing android sensors. False to delete.
+    If there's only signals from one device, these files are not deleted.
+
+    :return: None
     """
-    # check if in path is valid
+
+    # TODO check if the chosen sensors exist!
+    # check if in path is valid and contains txt files inside
     parser.check_in_path(raw_data_in_path, TXT)
 
-    # check if selected sensors are valid
-    _check_supported_sensors(selected_sensors)
+    # generate output path for the synchronized android sensors
+    sync_android_out_path = os.path.join(output_base_path, sub_folder_name, sync_android_output_filename)
 
-    # TODO check if the chosen sensors exist!!!!!!!!!!!!!
+    # generate output path for the synchronized devices
+    sync_devices_output_path = os.path.join(output_base_path, sub_folder_name, sync_devices_output_filename)
 
-    # TODO check if mban was selected - raise exception
+    # inform user
+    print(f"Synchronizing signals from {sub_folder_name}")
+
     # synchronize android sensors
     # if there's only one device, sync android sensors and save csv files
-    sync_all_classes(prefix, raw_data_in_path, sync_android_out_path, selected_sensors)
+    sync_all_classes(sub_folder_name, raw_data_in_path, sync_android_out_path, selected_sensors)
 
     # synchronize in pairs of devices
     if len(selected_sensors) == 2:
@@ -111,21 +173,19 @@ def synchronization(raw_data_in_path: str, sync_android_out_path: str, selected_
             raw_folder_path = os.path.join(raw_data_in_path, raw_folder)
 
             if sync_type == CROSSCORR:
-                # check if accelerometer is selected for every device
-                _check_acc_sensor_selected(selected_sensors)
 
                 # check if accelerometer files exist
                 _check_acc_file(raw_folder_path, selected_sensors)
 
                 # synchronize data based on cross correlation
-                sync_crosscorr(prefix, sync_folder_path, output_path)
+                sync_crosscorr(sub_folder_name, sync_folder_path, sync_devices_output_path)
 
                 # inform user
                 print("Signals synchronized based on cross correlation")
 
             elif sync_type == TIMESTAMPS:
                 # synchronize data based on timestamps
-                sync_timestamps(prefix, raw_folder_path, sync_folder_path, output_path, selected_sensors)
+                sync_timestamps(sub_folder_name, raw_folder_path, sync_folder_path, sync_devices_output_path, selected_sensors)
 
                 # inform user
                 print("Signals synchronized based on timestamps")
@@ -134,22 +194,21 @@ def synchronization(raw_data_in_path: str, sync_android_out_path: str, selected_
             evaluation_df_array.append(sync_report_df)
 
         if not save_intermediate_files:
+
             # remove the folder containing the csv files generated when synchronizing android sensors
             shutil.rmtree(sync_android_out_path)
 
         # concat dataframes in array to one
         combined_df = pd.concat(evaluation_df_array, ignore_index=True)
 
-        # create dir
-        evaluation_output_path = parser.create_dir(evaluation_output_path, folder_name="sync_evaluation_"+prefix)
+        # add csv suffix
+        evaluation_filename = f"{evaluation_filename}{CSV}"
+
         # define output path
-        evaluation_output_path = os.path.join(evaluation_output_path, evaluation_filename)
+        evaluation_output_path = os.path.join(output_base_path, sub_folder_name, evaluation_filename)
 
         # save csv file containing sync evaluation
         combined_df.to_csv(evaluation_output_path, index=False)
-
-    if len(selected_sensors) > 2:
-        print("MuscleBANs not implemented yet. Available devices: phone and watch")
 
 
 # ------------------------------------------------------------------------------------------------------------------- #
@@ -161,15 +220,11 @@ def _check_supported_sensors(selected_sensors: Dict[str, List[str]]):
     Check if the selected sensors are supported for the chosen devices
     and if the sensors and devices chosen are valid.
 
-    Parameters:
-    selected_sensors (Dict[str, List[str]]):
+    :param: selected_sensors: Dict[str, List[str]]
     Dictionary containing the devices and sensors chosen to be loaded and synchronized.
 
-    Raises:
-    ValueError: If any selected sensor is not supported for the corresponding device,
-    or if any device name or sensor name is invalid.
+    :return: None
     """
-
     supported_devices = SUPPORTED_DEVICES
     supported_sensors = {
         PHONE: SUPPORTED_PHONE_SENSORS,
@@ -200,14 +255,12 @@ def _check_supported_sensors(selected_sensors: Dict[str, List[str]]):
 
 def _check_acc_sensor_selected(selected_sensors: Dict[str, List[str]]) -> None:
     """
-    Checks if the accelerometer ("acc") sensor is selected for each device.
+    Checks if the accelerometer (acc) sensor is selected for each device.
 
-    Parameters:
-    selected_sensors (Dict[str, List[str]]):
+    :param: selected_sensors: Dict[str, List[str]]:
     Dictionary containing the devices and sensors chosen to be loaded and synchronized.
 
-    Raises:
-    ValueError: If the accelerometer sensor is not selected for any of the devices, listing all such devices.
+    :return: None
     """
     devices_missing_acc = [device for device, sensors in selected_sensors.items() if ACC not in sensors]
 
@@ -221,13 +274,13 @@ def _check_acc_file(folder_path: str, selected_sensors: Dict[str, List[str]]) ->
     Checks for the presence of accelerometer data files for each selected device in the specified folder. Raises an
     error if accelerometer data is missing for any device selected for synchronization.
 
-    Parameters:
-    - folder_path (str): The path to the folder containing the data files.
-    - selected_sensors (Dict[str, List[str]]): A dictionary where keys are device types and values are lists of sensors
-      selected for each device type.
+    :param: folder_path: str
+    Path to the folder containing the sensor data files (.txt files)
 
-    Raises:
-    - ValueError: If accelerometer data is missing for any of the selected devices.
+    :param: selected_sensors: Dict[str, List[str]]
+    A dictionary where keys are device types and values are lists of sensors selected for each device type.
+
+    :return: None
     """
     # Map device types to the expected substring in the accelerometer file names
     acc_file_identifiers = {
@@ -254,3 +307,44 @@ def _check_acc_file(folder_path: str, selected_sensors: Dict[str, List[str]]) ->
     if missing_devices:
         missing_str = ", ".join(missing_devices)
         raise ValueError(f"Missing accelerometer data file(s) for device(s): {missing_str}")
+
+
+def _check_if_mban_selected(selected_sensors: Dict[str, List[str]]) -> None:
+    """
+    Check if the MuscleBAN device was chosen to load and synchronize. If so, raise a Value Error exception.
+
+    :param selected_sensors:  Dict[str, List[str]]
+    A dictionary where keys are device types and values are lists of sensors
+
+    :return: None
+    """
+
+    # check if the mban is in the selected sensors
+    if MBAN in selected_sensors:
+
+        # if the user chooses the mban raise exception
+        raise ValueError("The device 'MuscleBAN' has not been implemented.")
+
+
+def _check_if_acc_selected_for_crosscorr(selected_sensors: Dict[str, List[str]], sync_type: str) -> None:
+    """
+    Check if the acceleromenter sensor was selected for both devices if the synchronization method chosen is cross
+    correlation. If not, raise value error exception.
+
+    :param selected_sensors: Dict[str, List[str]]
+    A dictionary where keys are device types and values are lists of sensors
+
+    :param sync_type: str
+    Method for synchronizing data between devices. Supported methods:
+        "crosscorr": Cross correlation:
+        "timestamps": Start times in the sensor files
+
+    :return: None
+    """
+
+    # check the sync type
+    if sync_type == CROSSCORR:
+
+        # if cross corr, check if the accelerometer from the two devices was chosen
+        _check_acc_sensor_selected(selected_sensors)
+

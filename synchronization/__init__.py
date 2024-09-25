@@ -1,5 +1,6 @@
-from .synchronization import synchronization
+from .synchronization import synchronization, synchronize_all
 
 __all__ = [
-    "synchronization"
+    "synchronization",
+    "synchronize_all"
 ]

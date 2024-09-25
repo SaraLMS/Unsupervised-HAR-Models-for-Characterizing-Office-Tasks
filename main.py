@@ -4,8 +4,6 @@ import synchronization
 import clustering
 from processing.pre_processing import _apply_filters
 import load
-
-
 # #
 # path ="D:/tese_backups/subjects/P020/acc_gyr_mag_watch_phone/raw_tasks_P020/walking/P020_synchronized_phone_watch_walking_2024-07-15_10_50_26_crosscorr_slow.csv"
 # # load data to csv
@@ -20,33 +18,30 @@ import load
 #
 # filtered_data.to_csv(path_filt)
 
+do_synchronization = True
+do_processing = False
+do_generate_cfg_file = False
+do_feature_extraction = False
+# feature selection
+do_one_subject_feature_selection = False
+do_general_model_feature_selection = False
+do_all_subjects_feature_selection = False
+# clustering
+do_general_model_clustering = False
+do_subject_specific_clustering = False
+do_two_stage_model_clustering = False
+do_two_stage_model_unbalanced_clustering = False
+
 
 def main():
-    # Set these booleans to True or False depending on which steps to run
-
-    do_synchronization = True
-    do_processing = False
-    do_generate_cfg_file = False
-    do_feature_extraction = False
-    # feature selection
-    do_one_subject_feature_selection = False
-    do_general_model_feature_selection = False
-    do_all_subjects_feature_selection = False
-    # clustering
-    do_general_model_clustering = False
-    do_subject_specific_clustering = False
-    do_two_stage_model_clustering = False
-    do_two_stage_model_unbalanced_clustering = False
+    # Set these booleans to True or False depending on which steps to ru
 
     if do_synchronization:
-        raw_data_in_path = "D:/tese_backups/raw_signals_backups/acquisitions/P007"
-        sync_android_out_path = "D:/tese_backups/P007/sync_android"
-        output_path = "D:/tese_backups/P007/sync_devices"
-        selected_sensors = {'phone': ['acc', 'gyr', 'mag'], 'watch': ['acc', 'gyr', 'mag']}  #
+        raw_data_in_path = "D:/tese_backups/raw_signals_backups/acquisitions"
+        output_path = "D:/tese_backups/test_new_synchronization"
+        selected_sensors = {'phone': ['acc', 'gyr', 'mag'], 'watch': ['acc', 'gyr', 'mag']}
         sync_type = 'crosscorr'
-        evaluation_path = "D:/tese_backups/P007/sync_android"
-        synchronization.synchronization(raw_data_in_path, sync_android_out_path, selected_sensors, output_path,
-                                        sync_type, evaluation_path)
+        synchronization.synchronize_all(raw_data_in_path, selected_sensors, sync_type, output_path)
 
     if do_processing:
         output_path = "D:/tese_backups/subjects/P020/acc_gyr_mag_watch_phone"
