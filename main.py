@@ -19,8 +19,8 @@ import load
 # filtered_data.to_csv(path_filt)
 
 do_synchronization = False
-do_processing = True
-do_feature_extraction = False
+do_processing = False
+do_feature_extraction = True
 # feature selection
 do_one_subject_feature_selection = False
 do_general_model_feature_selection = False
@@ -33,7 +33,7 @@ do_two_stage_model_unbalanced_clustering = False
 
 
 def main():
-    # Set these booleans to True or False depending on which steps to ru
+    # Set these booleans to True or False depending on which steps to run
 
     if do_synchronization:
         raw_data_in_path = "D:/tese_backups/raw_signals_backups/acquisitions"
@@ -50,11 +50,10 @@ def main():
 
     if do_feature_extraction:
         subclasses = ['standing_still', 'walk_medium', 'sit']  # , 'standing_gestures', 'stairs', 'walk_fast', 'walk_slow', 'coffee', 'folders'
-        main_path = "D:/tese_backups/subjects/P019/acc_gyr_mag_phone/filtered_tasks_P019"
-        output_path = "C:/Users/srale/OneDrive - FCT NOVA/Tese/porfavor_deus/P019"
-        output_filename = "acc_gyr_mag_phone_features_P019.csv"
-        output_folder_name = "phone_features_all_activities"
-        feature_engineering.feature_extractor(main_path, output_path, subclasses, output_filename, output_folder_name)
+        main_path = "D:/tese_backups/test_new_synchronization"
+        output_path = "D:/tese_backups/test_new_synchronization/datasets"
+        devices_folder_name = "acc_gyr_mag_phone_watch"
+        feature_engineering.feature_extraction_all(main_path, devices_folder_name, output_path, subclasses)
 
     if do_one_subject_feature_selection:
         dataset_path = (

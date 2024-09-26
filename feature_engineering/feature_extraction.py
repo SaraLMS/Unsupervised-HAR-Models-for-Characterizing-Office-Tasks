@@ -3,6 +3,7 @@
 # ------------------------------------------------------------------------------------------------------------------- #
 import json
 import os
+import re
 import numpy as np
 import pandas as pd
 import tsfel
@@ -51,6 +52,37 @@ SUPPORTED_INPUT_SUBCLASSES = [SIT, COFFEE, FOLDERS, STANDING_STILL, STANDING_GES
 # public functions
 # ------------------------------------------------------------------------------------------------------------------- #
 
+def feature_extraction_all(main_path: str, devices_folder_name: str, output_path: str, subclasses,
+                           prefix: str = "features_basic") -> None:
+    # Compile the regular expression for valid subfolder names
+    pattern = re.compile(r'^[A-Z]\d{3}$')
+
+    for sub_folder in os.listdir(main_path):
+
+        print(sub_folder)
+        # find the folders with the correct pattern
+        if pattern.match(sub_folder):
+            data_in_path = os.path.join(main_path, sub_folder)
+            suffix = sub_folder
+
+            # iterate through the folders
+            for devices_sensors_folders in os.listdir(data_in_path):
+                print(devices_folder_name)
+
+                # find the folder the user chose to load
+                if devices_sensors_folders == devices_folder_name:
+                    data_in_path = os.path.join(data_in_path, devices_sensors_folders)
+
+                    for folder in os.listdir(data_in_path):
+                        print(folder)
+
+                        # find the "filtered_tasks" folder
+                        if folder == 'filtered_tasks':
+                            data_in_path = os.path.join(data_in_path, folder)
+
+                            feature_extractor(data_in_path, output_path, subclasses, prefix, suffix, devices_folder_name)
+
+
 def load_json_file(json_path: str) -> Dict[Any, Any]:
     """
     Loads the json file containing the features from TSFEL to a dictionary
@@ -67,8 +99,8 @@ def load_json_file(json_path: str) -> Dict[Any, Any]:
     return features_dict
 
 
-def feature_extractor(data_main_path: str, output_path: str, subclasses: list[str],
-                      output_filename: str, output_folder_name: str,
+def feature_extractor(data_main_path: str, output_path: str, subclasses: list[str], prefix: str, suffix: str,
+                      devices_folder_name: str,
                       json_path: str = "C:/Users/srale/PycharmProjects/toolbox/feature_engineering") -> None:
     """
     # TODO filename prefix and subject number - FILE_SUFFIX = "_feature_P{}.csv" in the constants
@@ -163,11 +195,17 @@ def feature_extractor(data_main_path: str, output_path: str, subclasses: list[st
     print(all_data_df['class'].value_counts())
     print(all_data_df['subclass'].value_counts())
 
+    output_folder_name = f"{prefix}_{devices_folder_name}"
+
     output_path = parser.create_dir(output_path, output_folder_name)
+
+    output_filename = f"{prefix}_{devices_folder_name}_{suffix}"
     file_path = os.path.join(output_path, output_filename)
-    #
+
+    print(f"Output filename: {output_filename}")
+
     # save data to csv file
-    all_data_df.to_csv(file_path)
+    # all_data_df.to_csv(file_path)
 
     # inform user
     print(f"Data saved to {file_path}")

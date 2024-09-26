@@ -6,13 +6,9 @@
   <component name="ChangeListManager">
     <list default="true" id="3466cb1d-2559-4122-9522-f23b0d0f6b0a" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/constants.py" beforeDir="false" afterPath="$PROJECT_DIR$/constants.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/feature_engineering/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/feature_engineering/__init__.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/feature_engineering/feature_extraction.py" beforeDir="false" afterPath="$PROJECT_DIR$/feature_engineering/feature_extraction.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/processing/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/processing/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/processing/pre_processing.py" beforeDir="false" afterPath="$PROJECT_DIR$/processing/pre_processing.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/synchronization/synchronization.py" beforeDir="false" afterPath="$PROJECT_DIR$/synchronization/synchronization.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -88,14 +84,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1711360410072</updated>
-    </task>
-    <task id="LOCAL-00017" summary="Implementing the task_segmentation. Not working, it's not cropping the actuall signal?">
-      <option name="closed" value="true" />
-      <created>1713369456734</created>
-      <option name="number" value="00017" />
-      <option name="presentableId" value="LOCAL-00017" />
-      <option name="project" value="LOCAL" />
-      <updated>1713369456734</updated>
     </task>
     <task id="LOCAL-00018" summary="Implementing the task_segmentation. All cutting functions. No testing">
       <option name="closed" value="true" />
@@ -481,7 +469,15 @@
       <option name="project" value="LOCAL" />
       <updated>1727265326380</updated>
     </task>
-    <option name="localTasksCounter" value="66" />
+    <task id="LOCAL-00066" summary="some changes to sync, changed the pre-processing, added missing docstrings to feature extraction">
+      <option name="closed" value="true" />
+      <created>1727282317916</created>
+      <option name="number" value="00066" />
+      <option name="presentableId" value="LOCAL-00066" />
+      <option name="project" value="LOCAL" />
+      <updated>1727282317916</updated>
+    </task>
+    <option name="localTasksCounter" value="67" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -496,7 +492,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="docstrings" />
     <MESSAGE value="tried pick random instead of n common in feature selection" />
     <MESSAGE value="changed feature selection to sets" />
     <MESSAGE value="Added the random picking of the features with the same occurence" />
@@ -521,6 +516,7 @@
     <MESSAGE value="changed name" />
     <MESSAGE value="changing read me file" />
     <MESSAGE value="changed synchronization (user friendly)" />
-    <option name="LAST_COMMIT_MESSAGE" value="changed synchronization (user friendly)" />
+    <MESSAGE value="some changes to sync, changed the pre-processing, added missing docstrings to feature extraction" />
+    <option name="LAST_COMMIT_MESSAGE" value="some changes to sync, changed the pre-processing, added missing docstrings to feature extraction" />
   </component>
 </project>
