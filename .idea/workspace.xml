@@ -6,9 +6,8 @@
   <component name="ChangeListManager">
     <list default="true" id="3466cb1d-2559-4122-9522-f23b0d0f6b0a" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/feature_engineering/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/feature_engineering/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/feature_engineering/feature_extraction.py" beforeDir="false" afterPath="$PROJECT_DIR$/feature_engineering/feature_extraction.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/run_experiment1.py" beforeDir="false" afterPath="$PROJECT_DIR$/run_experiment1.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -84,14 +83,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1711360410072</updated>
-    </task>
-    <task id="LOCAL-00018" summary="Implementing the task_segmentation. All cutting functions. No testing">
-      <option name="closed" value="true" />
-      <created>1714036169561</created>
-      <option name="number" value="00018" />
-      <option name="presentableId" value="LOCAL-00018" />
-      <option name="project" value="LOCAL" />
-      <updated>1714036169561</updated>
     </task>
     <task id="LOCAL-00019" summary="task segmentation and filtering implemented. NOT TESTED YET!">
       <option name="closed" value="true" />
@@ -477,7 +468,15 @@
       <option name="project" value="LOCAL" />
       <updated>1727282317916</updated>
     </task>
-    <option name="localTasksCounter" value="67" />
+    <task id="LOCAL-00067" summary="changed feature extraction">
+      <option name="closed" value="true" />
+      <created>1727355815471</created>
+      <option name="number" value="00067" />
+      <option name="presentableId" value="LOCAL-00067" />
+      <option name="project" value="LOCAL" />
+      <updated>1727355815471</updated>
+    </task>
+    <option name="localTasksCounter" value="68" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -492,7 +491,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="tried pick random instead of n common in feature selection" />
     <MESSAGE value="changed feature selection to sets" />
     <MESSAGE value="Added the random picking of the features with the same occurence" />
     <MESSAGE value="used __init__ files. Added loading all subjects and train/test subjects - not tested yet. Deleted tsfel package. Added metrics package" />
@@ -517,6 +515,7 @@
     <MESSAGE value="changing read me file" />
     <MESSAGE value="changed synchronization (user friendly)" />
     <MESSAGE value="some changes to sync, changed the pre-processing, added missing docstrings to feature extraction" />
-    <option name="LAST_COMMIT_MESSAGE" value="some changes to sync, changed the pre-processing, added missing docstrings to feature extraction" />
+    <MESSAGE value="changed feature extraction" />
+    <option name="LAST_COMMIT_MESSAGE" value="changed feature extraction" />
   </component>
 </project>

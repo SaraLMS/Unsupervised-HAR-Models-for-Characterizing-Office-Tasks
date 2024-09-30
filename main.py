@@ -20,8 +20,9 @@ import load
 
 do_synchronization = False
 do_processing = False
-do_feature_extraction = True
+do_feature_extraction = False
 # feature selection
+run_experiment1 = False
 do_one_subject_feature_selection = False
 do_general_model_feature_selection = False
 do_all_subjects_feature_selection = False
@@ -55,47 +56,10 @@ def main():
         devices_folder_name = "acc_gyr_mag_phone_watch"
         feature_engineering.feature_extraction_all(main_path, devices_folder_name, output_path, subclasses)
 
-    if do_one_subject_feature_selection:
-        dataset_path = (
-            "C:/Users/srale/OneDrive - FCT NOVA/Tese/subjects_datasets/P019/phone_features_basic_activities"
-            "/acc_gyr_mag_phone_features_P019.csv")
-        output_path_plots = "D:/tese_backups/subjects/P010/acc_gyr_mag_phone"
-        # # train test split
-        # train_set, _ = load.train_test_split(dataset_path, 0.8, 0.2)
-
-        # _, _, _, _ = feature_engineering.feature_selector(train_set, 0.05, 0.99, 20,
-        #                                                   "kmeans", output_path_plots)
-        results_output_path = "C:/Users/srale/OneDrive - FCT NOVA/Tese/RESULTS/gmm"
-        results_folder_name = "subject_specific_basic_feature_selection"
-        results_filename_prefix = "phone_basic_80_20"
-        feature_engineering.one_stage_feature_selection(dataset_path, 0.05, 0.99,
-                                                        10, "gmm", output_path_plots, results_output_path,
-                                                        results_folder_name, results_filename_prefix)
-
-    if do_general_model_feature_selection:
-        main_path = "C:/Users/srale/OneDrive - FCT NOVA/Tese/subjects_datasets"
-        subfolder_name = "watch_features_all_activities"
-        output_path = "D:/tese_backups/general_model"
-
-        all_train_sets, _ = load.load_all_subjects(main_path, subfolder_name)
-        _, _, _ = feature_engineering.feature_selector(all_train_sets, 0.01, 0.99, 5, "gmm", output_path)
-
-    if do_all_subjects_feature_selection:
-        main_path = "C:/Users/srale/OneDrive - FCT NOVA/Tese/subjects_datasets"
-        features_folder_name = "watch_phone_features_all_activities"
-        clustering_model = "kmeans"
-        feature_selection_iterations = 4
-        variance_threshold = 0.05
-        correlation_threshold = 0.99
-        top_1n = 8  # Number of top features to select
-        nr_iterations = 4
-
-        _, _, _, _, _, _ = feature_engineering.two_stage_feature_selection(main_path, features_folder_name,
-                                                                           variance_threshold,
-                                                                           correlation_threshold,
-                                                                           feature_selection_iterations,
-                                                                           clustering_model, nr_iterations,
-                                                                           top_1n)
+    if run_experiment1:
+        with open('run_experiment1.py') as f:
+            code = f.read()
+            exec(code)
 
     if do_general_model_clustering:
         main_path = "C:/Users/srale/OneDrive - FCT NOVA/Tese/subjects_datasets"
