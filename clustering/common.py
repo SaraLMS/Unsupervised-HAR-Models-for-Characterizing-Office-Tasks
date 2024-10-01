@@ -8,12 +8,14 @@ import seaborn as sns
 from matplotlib.colors import to_hex, LinearSegmentedColormap
 import re
 import os
-from typing import List
+from typing import List, Tuple
 import numpy as np
 import load
 import metrics
 import models
-from constants import KMEANS, AGGLOMERATIVE, GAUSSIAN_MIXTURE_MODEL, DBSCAN, BIRCH, SUPPORTED_MODELS, CLASS, SUBCLASS
+from constants import KMEANS, AGGLOMERATIVE, GAUSSIAN_MIXTURE_MODEL, SUPPORTED_MODELS, CLASS, SUBCLASS
+
+# set text font to palatino
 plt.style.use('my_style')
 
 
@@ -21,7 +23,31 @@ plt.style.use('my_style')
 # public functions
 # ------------------------------------------------------------------------------------------------------------------- #
 
-def cluster_basic_data(dataset_path: str, clustering_model: str, feature_set: List[str]):
+def cluster_basic_data(dataset_path: str, clustering_model: str, nr_clusters: int, feature_set: List[str]) -> float:
+    """
+    Clusters basic activities, 'sitting', 'standing', and 'walking_medium' for experiment 3. For this experiment, all
+    100 % of the available data is used for clustering. The feature set used is provided by the user (feature_set) and
+    features are scaled using sklearn min_max_scaler.
+
+    :param dataset_path: str
+    Path to the dataset (csv file) with the columns as features and rows as instances.
+
+    :param clustering_model: str
+    Unsupervised learning model used for clustering. Supported models are:
+        "kmeans" - KMeans clustering
+        "agglomerative": Agglomerative clustering model
+        "gmm": Gaussian Mixture Model
+
+    :param nr_clusters: int
+    Number of clusters to find
+
+    :param feature_set: List[str]
+    List containing the feature names to be used for clustering
+
+    :return: float
+    The adjusted rand index (ari) for this clustering.
+
+    """
     # load dataset
     dict_dfs = load.load_basic_activities_only(dataset_path)
 
@@ -40,11 +66,20 @@ def cluster_basic_data(dataset_path: str, clustering_model: str, feature_set: Li
     # get only the set of features
     df = df[feature_set]
 
-    # normalize features
-    df = normalize_features(df)
+    # Initialize scaler
+    scaler = MinMaxScaler()
+
+    # scale the train set
+    df = scaler.fit_transform(df)
+
+    # put the train and test sets back into a pandas dataframe
+    df = pd.DataFrame(df, columns=feature_set)
 
     # Cluster data
-    pred_labels = cluster_data(clustering_model, df, df, n_clusters=3)
+    if clustering_model == AGGLOMERATIVE:
+        pred_labels = cluster_data(clustering_model, df, nr_clusters)
+    else:
+        pred_labels = cluster_data(clustering_model, df, nr_clusters, df)
 
     # Evaluate clustering
     _, ari, nmi = metrics.evaluate_clustering(true_labels, pred_labels)
@@ -52,50 +87,61 @@ def cluster_basic_data(dataset_path: str, clustering_model: str, feature_set: Li
     return ari
 
 
-def normalize_features(x: pd.DataFrame) -> pd.DataFrame:
+def cluster_data(clustering_model: str, train_set: pd.DataFrame, n_clusters: int, test_set: pd.DataFrame = None) -> pd.Series:
     """
-    Standardizes the features of a DataFrame using MinMaxscaler from sklearn.
+    This function does the following:
+    (1) clustering on the train_set.
+    (2) test_set instances are then appointed to the preformed clusters.
 
-    This function applies Min-Max scaling to the features of the input DataFrame, transforming the values to a range
-    between 0 and 1.
+    If only step (1) is needed, pass the same dataframe to the train_set and test_set parameters.
 
-    :param x: pd.DataFrame
-    The input DataFrame containing the features to be standardized.
+    :param clustering_model: str
+    Unsupervised learning model used for clustering. Supported models are:
+        "kmeans" - KMeans clustering
+        "agglomerative": Agglomerative clustering model
+        "gmm": Gaussian Mixture Model
 
-    :return: pd.DataFrame
-    A DataFrame with the standardized feature values
+    :param train_set: pd.DataFrame
+    pandas DataFrame containing the training data. Columns are features and rows are data instances, with the column
+    names being the feature names.
+
+    :param test_set: pd.DataFrame
+    pandas DataFrame containing the testing data. Columns are features and rows are data instances, with the column
+    names being the feature names.
+
+    :param n_clusters: int
+    Number of clusters to find
+
+    :return: pd.Series
+    A pandas series containing the predicted labels
     """
-    # get new column names
-    x_column_names = x.columns
-
-    # standardize the features
-    x = MinMaxScaler().fit_transform(x)
-
-    # new dataframe without class and subclass column
-    x = pd.DataFrame(x, columns=x_column_names)
-
-    return x
-
-
-def cluster_data(clustering_model: str, train_set: pd.DataFrame, test_set: pd.DataFrame, n_clusters: int) -> pd.Series:
     # Perform clustering based on the selected model
     if clustering_model == KMEANS:
         labels = models.kmeans_model(train_set, test_set, n_clusters)
+
+    # if AGG clustering, the model takes only the train set, as it does not allow for predicting new data
     elif clustering_model == AGGLOMERATIVE:
         labels = models.agglomerative_clustering_model(train_set, n_clusters)
+
     elif clustering_model == GAUSSIAN_MIXTURE_MODEL:
         labels = models.gaussian_mixture_model(train_set, test_set, n_clusters)
-    elif clustering_model == DBSCAN:
-        labels = models.dbscan_model(train_set, test_set, 0.4, 10)
-    elif clustering_model == BIRCH:
-        labels = models.birch_model(train_set, test_set, n_clusters)
     else:
         raise ValueError(f"The model {clustering_model} is not supported. "
                          f"Supported models are: {SUPPORTED_MODELS}")
     return labels
 
 
-def normalize_subclass(subclass):
+def normalize_subclass(subclass: str) -> str:
+    """
+    Remove numeric indices from the subclass names (i.e., 'stand_still1' to 'stand_still'). Remove the 'up' and 'down'
+    form 'stairs' instances. This function is used for the confusion matrix.
+
+    :param subclass: str
+    A str pertaining to the subclass names
+
+    :return: pd.Series
+    Modified subclass name
+    """
     # Normalize all variations of 'stairs' to 'stairs'
     if subclass.startswith('stairs'):
         return 'stairs'
@@ -103,9 +149,19 @@ def normalize_subclass(subclass):
     return re.sub(r'\d+', '', subclass)
 
 
-def format_subclass_name(name):
+def format_subclass_name(subclass_name: str) -> str:
+    """
+    Removes underscores and changes names to uniformize all subclass names
+
+    :param subclass_name: str
+    A string pertaining to the subclass name
+
+    :return: str
+    Modified subclass name
+
+    """
     # Replace underscores with spaces and handle specific cases
-    formatted_name = name.replace('_', ' ')
+    formatted_name = subclass_name.replace('_', ' ')
     if formatted_name == 'standing still':
         formatted_name = 'stand still'
     if formatted_name == 'standing gestures':
@@ -114,11 +170,56 @@ def format_subclass_name(name):
         formatted_name = 'stand coffee'
     if formatted_name == 'standing folders':
         formatted_name = 'stand folders'
-    return formatted_name  # Convert to title case
+    return formatted_name
 
 
-def cluster_subject_all_activities(dataset_path: str, clustering_model: str, feature_set: List[str], subject_id: str, plots_path: str = "C:/Users/srale/OneDrive - FCT NOVA/Tese/excels",
-                                   train_size: float = 0.8, test_size: float = 0.2):
+def cluster_subject_all_activities(dataset_path: str, clustering_model: str, nr_clusters: int, feature_set: List[str],
+                                   subject_id: str, plots_path: str = None, save_confusion_matrix: bool = True,
+                                   train_size: float = 0.8, test_size: float = 0.2) -> Tuple[float, float]:
+    """
+    This function does the following:
+    (1) clustering on the train_set.
+    (2) test_set instances are then appointed to the preformed clusters.
+    If only step (1) is needed, pass the same dataframe to the train_set and test_set parameters.
+
+    This function also generates a confusion matrix that can be saved to plots_path if save_confusion_matrix is set
+    to True. This function can only be used for 'all' activities since the confusion matrices are build specifically
+    for it. 'all' activities are: 'sitting', 'standing_still', 'walking_medium', 'standing_gestures', 'stairs',
+    'walk_fast', 'walk_slow', 'coffee', 'folders'.
+
+    :param dataset_path: str
+    Path to the dataset (csv file) with the columns as features and rows as instances.
+
+    :param clustering_model: str
+    Unsupervised learning model used for clustering. Supported models are:
+        "kmeans" - KMeans clustering
+        "agglomerative": Agglomerative clustering model
+        "gmm": Gaussian Mixture Model
+
+    :param nr_clusters: int
+    Number of clusters to find
+
+    :param feature_set: List[str]
+    List containing the feature names to be used for clustering
+
+    :param subject_id: str
+    Identification fo the subject or of the dataset. Used for the confusion matrix only
+
+    :param save_confusion_matrix: bool (default = True)
+    Save the confusion matrix as PNG. False not to save.
+
+    :param plots_path: str
+    Path to the location in which to store the confusion matrix
+
+    :param train_size: float
+    Train size ratio, between 0 and 1
+
+    :param test_size: float
+    Test size ration, between 0 and 1
+
+    :return: Tuple[float, float]
+    The adjusted rand index and normalized mutual information results.
+    """
     # Train-test split
     train_set, test_set = load.train_test_split(dataset_path, train_size, test_size)
 
@@ -139,22 +240,35 @@ def cluster_subject_all_activities(dataset_path: str, clustering_model: str, fea
     train_set = train_set[feature_set]
     test_set = test_set[feature_set]
 
-    # Normalize the features
-    train_set = normalize_features(train_set)
-    test_set = normalize_features(test_set)
+    # Initialize scaler
+    scaler = MinMaxScaler()
+
+    # scale the train set
+    train_set = scaler.fit_transform(train_set)
+
+    # scale the test set with the same normalization parameters as the train set
+    test_set = scaler.transform(test_set)
+
+    # put the train and test sets back into a pandas dataframe
+    train_set = pd.DataFrame(train_set, columns=feature_set)
+    test_set = pd.DataFrame(test_set, columns=feature_set)
 
     # Cluster data
-    pred_labels = cluster_data(clustering_model, train_set, test_set, n_clusters=3)
+    if clustering_model == AGGLOMERATIVE:
+        pred_labels = cluster_data(clustering_model, test_set, nr_clusters)
+
+    else:
+        pred_labels = cluster_data(clustering_model, train_set, nr_clusters, test_set)
 
     # Evaluate clustering
     ri, ari, nmi = metrics.evaluate_clustering(true_labels, pred_labels)
+
+    ############### BUILD CONFUSION MATRIX #######################
 
     # Results dataframe
     results_df = pd.DataFrame(
         {'class': true_labels, 'subclass': subclass_column, 'normalized_subclass': normalized_subclass_column,
          'predicted_labels': pred_labels})
-
-    ############### BUILD HEAT MAP #######################
 
     # Order subclasses
     subclass_order = ['sit', 'standing_still', 'standing_gestures', 'standing_coffee', 'standing_folders',
@@ -224,12 +338,12 @@ def cluster_subject_all_activities(dataset_path: str, clustering_model: str, fea
     ax.hlines(np.arange(1, len(subclass_order)), *ax.get_xlim(), color='black', linewidth=1)
     ax.vlines(np.arange(1, subclass_cluster_matrix.shape[1]), *ax.get_ylim(), color='black', linewidth=1)
 
-    # # Save the plot with high resolution if save_path is provided
-    # if plots_path:
-    #     save_path = os.path.join(plots_path, subject_id + '.png')
-    #     plt.savefig(save_path, dpi=1200, bbox_inches='tight')
-    #
-    # plt.show()
+    # Save the plot with high resolution if save_path is provided
+    if save_confusion_matrix and plots_path is not None:
+        save_path = os.path.join(plots_path, subject_id + '.png')
+        plt.savefig(save_path, dpi=1200, bbox_inches='tight')
+
+    plt.show()
 
     return ari, nmi
 
@@ -240,8 +354,52 @@ def check_features(dataframe, feature_set):
         raise ValueError(f"The following features are missing from the dataframe columns: {missing_features}")
 
 
-def cluster_subject_basic_matrix(dataset_path: str, clustering_model: str, feature_set: List[str], subject_id: str,
-                                 save_path: str, train_size: float = 0.8, test_size: float = 0.2):
+def cluster_subject_basic_matrix(dataset_path: str, clustering_model: str, nr_clusters: int, feature_set: List[str],
+                                 subject_id: str, save_path: str = None, save_confusion_matrix: bool = True,
+                                 train_size: float = 0.8, test_size: float = 0.2) -> Tuple[float, float]:
+    """
+    This function does the following:
+    (1) clustering on the train_set.
+    (2) test_set instances are then appointed to the preformed clusters.
+    If only step (1) is needed, pass the same dataframe to the train_set and test_set parameters.
+
+    This function also generates a confusion matrix that can be saved to plots_path if save_confusion_matrix is set
+    to True. This function can only be used for 'basic' activities since the confusion matrices are build specifically
+    for it. 'basic' activities are: 'sitting', 'standing_still', and 'walking_medium'.
+
+    :param dataset_path: str
+    Path to the dataset (csv file) with the columns as features and rows as instances.
+
+    :param clustering_model: str
+    Unsupervised learning model used for clustering. Supported models are:
+        "kmeans" - KMeans clustering
+        "agglomerative": Agglomerative clustering model
+        "gmm": Gaussian Mixture Model
+
+    :param nr_clusters: int
+    Number of clusters to find
+
+    :param feature_set: List[str]
+    List containing the feature names to be used for clustering
+
+    :param subject_id: str
+    Identification fo the subject or of the dataset. Used for the confusion matrix only
+
+    :param save_confusion_matrix: bool (default = True)
+    Save the confusion matrix as PNG. False not to save.
+
+    :param save_path: str
+    Path to the location in which to store the confusion matrix
+
+    :param train_size: float
+    Train size ratio, between 0 and 1
+
+    :param test_size: float
+    Test size ration, between 0 and 1
+
+    :return: Tuple[float, float]
+    The adjusted rand index and normalized mutual information results.
+    """
     # Train-test split
     train_set, test_set = load.train_test_split(dataset_path, train_size, test_size)
 
@@ -262,21 +420,35 @@ def cluster_subject_basic_matrix(dataset_path: str, clustering_model: str, featu
     train_set = train_set[feature_set]
     test_set = test_set[feature_set]
 
-    # Normalize the features
-    train_set = normalize_features(train_set)
-    test_set = normalize_features(test_set)
+    # Initialize scaler
+    scaler = MinMaxScaler()
+
+    # scale the train set
+    train_set = scaler.fit_transform(train_set)
+
+    # scale the test set with the same normalization parameters as the train set
+    test_set = scaler.transform(test_set)
+
+    # put the train and test sets back into a pandas dataframe
+    train_set = pd.DataFrame(train_set, columns=feature_set)
+    test_set = pd.DataFrame(test_set, columns=feature_set)
 
     # Cluster data
-    pred_labels = cluster_data(clustering_model, train_set, test_set, n_clusters=3)
+    if clustering_model == AGGLOMERATIVE:
+        pred_labels = cluster_data(clustering_model, test_set, nr_clusters)
+
+    else:
+        pred_labels = cluster_data(clustering_model, train_set, nr_clusters, test_set)
 
     # Evaluate clustering
-    ri, ari, nmi = metrics.evaluate_clustering(true_labels, pred_labels)
+    _, ari, nmi = metrics.evaluate_clustering(true_labels, pred_labels)
+
+    ############### BUILD CONFUSION MATRIX #######################
 
     # Results dataframe
     results_df = pd.DataFrame(
         {'class': true_labels, 'subclass': subclass_column, 'normalized_subclass': normalized_subclass_column,
          'predicted_labels': pred_labels})
-
 
     # Order subclasses
     subclass_order = ['sit', 'standing_still', 'walk_medium']
@@ -341,10 +513,14 @@ def cluster_subject_basic_matrix(dataset_path: str, clustering_model: str, featu
     ax.vlines(np.arange(1, subclass_cluster_matrix.shape[1]), *ax.get_ylim(), color='black', linewidth=1)
 
     # Save the plot with high resolution if save_path is provided
-    if save_path:
+    if save_confusion_matrix and save_path is not None:
         save_path = os.path.join(save_path, subject_id + '.png')
         plt.savefig(save_path, dpi=1200, bbox_inches='tight')
 
     plt.show()
 
     return ari, nmi
+
+
+
+
