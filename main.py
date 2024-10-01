@@ -11,7 +11,7 @@ run_experiment1 = False
 # experiment 2
 run_experiment2 = False
 # experiment 3
-do_two_stage_model_unbalanced_clustering = False
+run_experiment3 = False
 
 
 def main():
@@ -47,18 +47,10 @@ def main():
             code = f.read()
             exec(code)
 
-    if do_two_stage_model_unbalanced_clustering:
-        main_path = "C:/Users/srale/OneDrive - FCT NOVA/Tese/subjects_datasets"
-        features_folder_name = "phone_features_basic_activities"
-        clustering_model = "agglomerative"
-        results_path = "C:/Users/srale/OneDrive - FCT NOVA/Tese/excels"
-        feature_set = ['yAcc_Max', 'zAcc_Interquartile range', 'zMag_Max', 'yMag_Max']
-
-        sitting_perc = 0.9
-        nr_chunks = 20
-
-        clustering.unbalanced_clustering(main_path, sitting_perc, nr_chunks, clustering_model, features_folder_name,
-                                         feature_set, results_path)
+    if run_experiment3:
+        with open('run_experiment3.py') as f:
+            code = f.read()
+            exec(code)
 
 
 if __name__ == "__main__":

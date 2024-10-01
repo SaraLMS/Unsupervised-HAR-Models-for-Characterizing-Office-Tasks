@@ -6,12 +6,8 @@
   <component name="ChangeListManager">
     <list default="true" id="3466cb1d-2559-4122-9522-f23b0d0f6b0a" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/clustering/common.py" beforeDir="false" afterPath="$PROJECT_DIR$/clustering/common.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/clustering/one_stage_general_model.py" beforeDir="false" afterPath="$PROJECT_DIR$/clustering/one_stage_general_model.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/clustering/subject_specific_model.py" beforeDir="false" afterPath="$PROJECT_DIR$/clustering/subject_specific_model.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/clustering/two_tage_general_model.py" beforeDir="false" afterPath="$PROJECT_DIR$/clustering/two_tage_general_model.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/constants.py" beforeDir="false" afterPath="$PROJECT_DIR$/constants.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/run_experiment2.py" beforeDir="false" afterPath="$PROJECT_DIR$/run_experiment2.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clustering/unbalanced_clustering.py" beforeDir="false" afterPath="$PROJECT_DIR$/clustering/unbalanced_clustering.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/run_experiment3.py" beforeDir="false" afterPath="$PROJECT_DIR$/run_experiment3.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -87,14 +83,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1711360410072</updated>
-    </task>
-    <task id="LOCAL-00020" summary="Segmentation and filtering implemented and working. Added docstrings and checks for directories">
-      <option name="closed" value="true" />
-      <created>1714397013484</created>
-      <option name="number" value="00020" />
-      <option name="presentableId" value="LOCAL-00020" />
-      <option name="project" value="LOCAL" />
-      <updated>1714397013484</updated>
     </task>
     <task id="LOCAL-00021" summary="Corrected segmentation and implemented feature extraction">
       <option name="closed" value="true" />
@@ -480,7 +468,15 @@
       <option name="project" value="LOCAL" />
       <updated>1727704823530</updated>
     </task>
-    <option name="localTasksCounter" value="69" />
+    <task id="LOCAL-00069" summary="completed run_experiment2.py and docstrings and minor changes to the functions">
+      <option name="closed" value="true" />
+      <created>1727785558061</created>
+      <option name="number" value="00069" />
+      <option name="presentableId" value="LOCAL-00069" />
+      <option name="project" value="LOCAL" />
+      <updated>1727785558063</updated>
+    </task>
+    <option name="localTasksCounter" value="70" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -495,7 +491,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Added the random picking of the features with the same occurence" />
     <MESSAGE value="used __init__ files. Added loading all subjects and train/test subjects - not tested yet. Deleted tsfel package. Added metrics package" />
     <MESSAGE value="added clustering" />
     <MESSAGE value="automatic best feature sets in main file" />
@@ -520,6 +515,7 @@
     <MESSAGE value="some changes to sync, changed the pre-processing, added missing docstrings to feature extraction" />
     <MESSAGE value="changed feature extraction" />
     <MESSAGE value="completed run_experiment1.py and changed main file" />
-    <option name="LAST_COMMIT_MESSAGE" value="completed run_experiment1.py and changed main file" />
+    <MESSAGE value="completed run_experiment2.py and docstrings and minor changes to the functions" />
+    <option name="LAST_COMMIT_MESSAGE" value="completed run_experiment2.py and docstrings and minor changes to the functions" />
   </component>
 </project>

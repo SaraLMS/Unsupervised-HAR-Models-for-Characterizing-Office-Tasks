@@ -1,15 +1,26 @@
-import pandas as pd
-import load
-import numpy as np
-from .common import cluster_data, check_features, normalize_features, cluster_basic_data
-import metrics
-from typing import List
+# ------------------------------------------------------------------------------------------------------------------- #
+# imports
+# ------------------------------------------------------------------------------------------------------------------- #
+from typing import List, Tuple
 import os
 import random
+import pandas as pd
+from sklearn.preprocessing import MinMaxScaler
+import numpy as np
+
+# internal imports
+from constants import AGGLOMERATIVE
+from .common import cluster_data, check_features, cluster_basic_data
+import metrics
+import load
 
 
-def unbalanced_clustering(main_path, sitting_perc, nr_windows, clustering_model, features_folder_name: str,
-                                       feature_set: List[str], results_path: str):
+# ------------------------------------------------------------------------------------------------------------------- #
+# public functions
+# ------------------------------------------------------------------------------------------------------------------- #
+
+def unbalanced_clustering(main_path, sitting_perc, nr_windows, clustering_model, nr_clusters, features_folder_name: str,
+                          feature_set: List[str], results_path: str):
     # list for holding the results on each subject
     results = []
 
@@ -33,12 +44,13 @@ def unbalanced_clustering(main_path, sitting_perc, nr_windows, clustering_model,
                     # only one csv file for the features folder
                     dataset_path = os.path.join(features_folder_path, os.listdir(features_folder_path)[0])
 
-                    # ari, std_ari = cluster_unbalanced_basic_activities(dataset_path, sitting_perc, nr_windows, clustering_model, feature_set)
-                    ari = cluster_basic_data(dataset_path, clustering_model, feature_set)
+                    ari, std_ari = _cluster_unbalanced_basic_activities(dataset_path, sitting_perc, nr_windows,
+                                                                        clustering_model, nr_clusters, feature_set)
+                    # ari = cluster_basic_data(dataset_path, clustering_model, nr_clusters, feature_set)
                     results.append({
                         "Subject ID": subject_folder,
                         "ARI": ari,
-                        # "STD": std_ari
+                        "STD": std_ari
                     })
                     # Inform user
                     print(f"Clustering results for subject: {subject_folder}")
@@ -57,21 +69,26 @@ def unbalanced_clustering(main_path, sitting_perc, nr_windows, clustering_model,
     print(f"Results saved to {excel_path}")
 
 
-def cluster_unbalanced_basic_activities(path, sitting_perc, nr_windows, clustering_model, feature_set: List[str]):
+# ------------------------------------------------------------------------------------------------------------------- #
+# private functions
+# ------------------------------------------------------------------------------------------------------------------- #
 
+
+def _cluster_unbalanced_basic_activities(path, sitting_perc, nr_windows, clustering_model, nr_clusters,
+                                         feature_set: List[str]) -> Tuple[float, float]:
     # load dataframes from basic activities into a dictionary
     df_dict = load.load_basic_activities_only(path)
 
     # calculate chunk size based on len(sitting_df) and the sitting_percentage - divided by 2 for walking and standing
-    chunk_size = int((len(df_dict['sitting'])/sitting_perc - len(df_dict['sitting'])) // 2)
+    chunk_size = int((len(df_dict['sitting']) / sitting_perc - len(df_dict['sitting'])) // 2)
 
     print(f"chunk_size: {chunk_size}")
 
     # get starts and stops for walking
-    chunk_indices_walking = sliding_window(df_dict['walking'], chunk_size, nr_windows)
+    chunk_indices_walking = _sliding_window(df_dict['walking'], chunk_size, nr_windows)
 
     # get start and stops for standing
-    chunk_indices_standing = sliding_window(df_dict['standing'], chunk_size, nr_windows)
+    chunk_indices_standing = _sliding_window(df_dict['standing'], chunk_size, nr_windows)
 
     list_walking_chunks = []
     list_standing_chunks = []
@@ -110,11 +127,20 @@ def cluster_unbalanced_basic_activities(path, sitting_perc, nr_windows, clusteri
         # get only the feature set
         temp_dataset = temp_dataset[feature_set]
 
-        # normalize features
-        temp_dataset = normalize_features(temp_dataset)
+        # Initialize scaler
+        scaler = MinMaxScaler()
+
+        # scale the train set
+        temp_dataset = scaler.fit_transform(temp_dataset)
+
+        # put the train and test sets back into a pandas dataframe
+        temp_dataset = pd.DataFrame(temp_dataset, columns=feature_set)
 
         # cluster
-        cluster_labels = cluster_data(clustering_model, temp_dataset, temp_dataset, 3)
+        if clustering_model == AGGLOMERATIVE:
+            cluster_labels = cluster_data(clustering_model, temp_dataset, nr_clusters)
+        else:
+            cluster_labels = cluster_data(clustering_model, temp_dataset, nr_clusters, temp_dataset)
 
         # evaluate
         _, ari, _ = metrics.evaluate_clustering(true_labels, cluster_labels)
@@ -128,7 +154,7 @@ def cluster_unbalanced_basic_activities(path, sitting_perc, nr_windows, clusteri
     return mean_ari, std_ari
 
 
-def sliding_window(df: pd.DataFrame, window_size: int, num_windows: int) -> list:
+def _sliding_window(df: pd.DataFrame, window_size: int, num_windows: int) -> List[Tuple[int, int]]:
     """
     Perform a sliding window approach over a pandas DataFrame.
 
@@ -174,7 +200,6 @@ def sliding_window(df: pd.DataFrame, window_size: int, num_windows: int) -> list
         windows = random.sample(windows, num_windows)
 
     return windows
-
 
 # def extract_random_chunks(dataframe, chunk_size, num_chunks):
 #     """
