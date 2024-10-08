@@ -33,6 +33,7 @@ def unbalanced_clustering(main_path, sitting_perc, nr_windows, clustering_model,
         # iterate through the folders inside each subject folder
         for folder_name in os.listdir(subject_folder_path):
 
+            print(os.listdir(subject_folder_path))
             # get the specified folder
             if folder_name == features_folder_name:
 
@@ -61,9 +62,10 @@ def unbalanced_clustering(main_path, sitting_perc, nr_windows, clustering_model,
                 else:
                     raise ValueError("Only one dataset per folder is allowed.")
 
+    print("It ran")
     # Create DataFrame from results and save to Excel
     results_df = pd.DataFrame(results)
-    excel_path = os.path.join(results_path, "balance_agg_basic_phone_.xlsx")
+    excel_path = os.path.join(results_path, "test_1_chunk_90.xlsx")
     results_df.to_excel(excel_path, index=False)
 
     print(f"Results saved to {excel_path}")
@@ -109,8 +111,13 @@ def _cluster_unbalanced_basic_activities(path, sitting_perc, nr_windows, cluster
 
     list_ari = []
 
+    # initialize chunk counter
+    chunk_counter = 0
+
     # build different datasets with the different chunks
     for walking_chunk, standing_chunk in zip(list_walking_chunks, list_standing_chunks):
+
+        chunk_counter += 1
 
         # Reset temp_list for each new dataset combination
         temp_list = [df_dict['sitting'], walking_chunk, standing_chunk]
@@ -135,6 +142,15 @@ def _cluster_unbalanced_basic_activities(path, sitting_perc, nr_windows, cluster
 
         # put the train and test sets back into a pandas dataframe
         temp_dataset = pd.DataFrame(temp_dataset, columns=feature_set)
+
+        df_to_save = pd.concat([temp_dataset, true_labels], axis=1)
+
+        filename = f"P020_chunk_{chunk_counter}_90_imbalance.csv"
+
+        path = f"D:/tese_backups/imbalanced_datasets/90/P020/{filename}"
+
+        # save dataset
+        df_to_save.to_csv(path)
 
         # cluster
         if clustering_model == AGGLOMERATIVE:

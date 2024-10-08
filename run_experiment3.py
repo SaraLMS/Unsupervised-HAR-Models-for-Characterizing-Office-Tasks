@@ -10,11 +10,11 @@ import clustering
 # ------------------------------------------------------------------------------------------------------------------- #
 
 
-main_path = "C:/Users/srale/OneDrive - FCT NOVA/Tese/subjects_datasets"
+main_path = "D:/tese_backups/datasets_P002"
 features_folder_name = "phone_features_basic_activities"
-clustering_model = "agglomerative"
+clustering_model = "kmeans"
 results_path = "C:/Users/srale/OneDrive - FCT NOVA/Tese/excels"
-feature_set = ['yAcc_Max', 'zAcc_Interquartile range', 'zMag_Max', 'yMag_Max']
+feature_set = ['xMag_Max', 'yAcc_Interquartile range', 'zMag_Max', 'xAcc_Min', 'yAcc_Min']
 
 sitting_perc = 0.9
 nr_chunks = 20

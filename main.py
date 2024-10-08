@@ -11,7 +11,7 @@ run_experiment1 = False
 # experiment 2
 run_experiment2 = False
 # experiment 3
-run_experiment3 = False
+run_experiment3 = True
 
 
 def main():
