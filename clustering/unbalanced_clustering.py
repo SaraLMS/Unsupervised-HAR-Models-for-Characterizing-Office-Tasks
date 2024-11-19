@@ -65,7 +65,7 @@ def unbalanced_clustering(main_path, sitting_perc, nr_windows, clustering_model,
     print("It ran")
     # Create DataFrame from results and save to Excel
     results_df = pd.DataFrame(results)
-    excel_path = os.path.join(results_path, "test_1_chunk_90.xlsx")
+    excel_path = os.path.join(results_path, "please_Please.xlsx")
     results_df.to_excel(excel_path, index=False)
 
     print(f"Results saved to {excel_path}")
@@ -143,14 +143,14 @@ def _cluster_unbalanced_basic_activities(path, sitting_perc, nr_windows, cluster
         # put the train and test sets back into a pandas dataframe
         temp_dataset = pd.DataFrame(temp_dataset, columns=feature_set)
 
-        df_to_save = pd.concat([temp_dataset, true_labels], axis=1)
-
-        filename = f"P020_chunk_{chunk_counter}_90_imbalance.csv"
-
-        path = f"D:/tese_backups/imbalanced_datasets/90/P020/{filename}"
-
-        # save dataset
-        df_to_save.to_csv(path)
+        # df_to_save = pd.concat([temp_dataset, true_labels], axis=1)
+        #
+        # filename = f"P020_chunk_{chunk_cdounter}_50_imbalance.csv"
+        #
+        # path = f"D:/tese_backups/imbalanced_datasets/50/P020/{filename}"
+        #
+        # # save dataset
+        # df_to_save.to_csv(path)
 
         # cluster
         if clustering_model == AGGLOMERATIVE:

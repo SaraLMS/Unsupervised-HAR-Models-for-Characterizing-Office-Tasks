@@ -11,19 +11,31 @@
   - [Experiment 3 - Cluster Imbalance](#experiment3)
 
 ## About 
-This project focuses on Human Activity Recognition (HAR) using unsupervised 
-learning models.
+The python code available in this project is part of the methods for the Master Thesis
+"Unsupervised Human Activity Recognition Models for Characterizing Office Work Tasks".
+In the following sections, the synchronization, pre-processing, and feature extraction pipelines utilized in this work will be explained.
+For Human Activity Recognition (HAR) in office environments, three experiments were conducted: feature selection, cluster stability, and data imbalance.
+
+In this thesis, data was acquired from 19 subjects performing 9 different tasks. The tasks were analysed hierarchically as follows:
+![Diagram](./Figures/hier_HAR.png)
+
+Five acquisition sessions were devised, grouping similar tasks within the same recording. At the start of each acquisition, subjects performed ten vertical short jumps to later synchronize the signals from the different devices. Short segments were performed in between tasks to later allow for segmentation.
+The y-axis accelerometer signals of the five sessions are shown bellow:
+
+![Diagram](./Figures/Acquisition_protocol_plot.png)
 
 ## Synchronization
 
 ![Diagram](./Figures/synchronization_before_after.png)
 
+The "**synchronization**" function loads, synchronizes android sensors from the same device, resamples the signals, and synchronizes between two devices. To use the following code effectively, data should be acquired using the PrevOccupAI APP.
 
 There are two stages to synchronize multiple android sensors from different devices:
-1. Synchronize android sensors within the same device. Using the timestamps of the first sensor to start and the last to stop acquiring;
-2. Synchronize sensors between devices. The following methods are supported:
-   + Cross-correlation: synchronizes based on the maximum cross-correlation from the Accelerometer (ACC) signals from the two devices: y-axis for the smartphone and -x-axis for the smartwatch. For this method to work correctly, for each acquisition the subject must perform an initial segment of vertical short jumps, with the arms straight and parallel to the body.
-   + Timestamps: synchronizes the signals based on the timestamps of the  first sample received from each device, contained in the logger file (opensignals). If this file does not exist or does not have the necessary timestamps, the timestamps in the filenames are used.
+1. **Synchronize android sensors within the same device**. Using the timestamps of the first sensor to start and the last to stop acquiring;
+2. **Synchronize sensors between devices**. The following methods are supported:
+   + *Cross-correlation*: synchronizes based on the maximum cross-correlation from the Accelerometer (ACC) signals from the two devices: y-axis for the smartphone and -x-axis for the smartwatch. For this method to work correctly, for each acquisition the subject must perform an initial segment of vertical short jumps, with the arms straight and parallel to the body.
+   
+   + *Timestamps*: synchronizes the signals based on the timestamps of the  first sample received from each device, contained in the logger file (opensignals). If this file does not exist or does not have the necessary timestamps, the timestamps in the filenames are used.
 
 
 This is done using the *synchronization* function. This function allows the user to choose
@@ -39,8 +51,31 @@ device, only these are synchronized. This function has the following parameters:
 + save_intermediate_files (bool): keep the csv files generated after synchronizing android
         sensors. False to delete. If there's only signals from one device, these files are not deleted.
 
+## Signal Pre-processing
+
+The *processing* package has three python files: task_segmentation, filters, and pre_processing. The *processor* or *process_all* functions in the *pre_processing* file apply the task segmentation method and the filters to the signals.
+This function attributes filenames depending on the segment being segmented.
+
+For task segmentation, the tasks performed within the same recording are segmented if the user performs ten-second stops between different walking activities and ten-second stops with a jump in the middle for standing activities.
+
+To segment walking tasks, an onset-based task segmentation was implemented, while for standing and walking tasks, a peak-based approach was implemented. Some thresholds in the *segment_tasks* function in *task_segmentation.py* might need adjustments.
+
+For filtering, the *apply_filters* in *pre_processing.py* applies a Butterworth lowpass filter to remove high frequency noise, a median filter for smoothing, and another lowpass filter to isolate the gravitational component which is then subtracted from the ACC signals. The cutoff frequencies and window lengths can be adjusted in the functions in *filters.py*.
 
 
+The *processor* function has the following parameters:
+
++ sync_data_path (str): Path to the folder (i.e., sync_devices) containing the synchronized data main_folder/subfolder/sync_devices/sync_data.csv
++ output_base_path(str): Path to the base path were the raw segments and filtered segments should be saved
++ device_sensors_foldername (str): Name of the folder containing the loaded sensors and devices (i.e., acc_gyr_mag_phone_watch)
++ sub_folder (str): Name of the subfolder which contains the synchronized data main_folder/subfolder/sync_devices/sync_data.csv
++ raw_folder_name (str): (default = raw_tasks) Name of the folder where to store the raw signal segments
++ filtered_folder_name (str): (default = filtered_tasks) Name of the folder where to store the filtered signal segments
++ save_raw_tasks (bool): (default = True) Save the raw signal segments. False not to save
++ fs (int): sampling frequency
++ impulse_response_samples (int): Number of samples to be cut at the start of each segment to remove the impulse response of the filters
+
+## Feature Extraction
 
 
 

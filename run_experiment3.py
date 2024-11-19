@@ -10,7 +10,7 @@ import clustering
 # ------------------------------------------------------------------------------------------------------------------- #
 
 
-main_path = "D:/tese_backups/datasets_P002"
+main_path = "D:/tese_backups/subjects_datasets"
 features_folder_name = "phone_features_basic_activities"
 clustering_model = "kmeans"
 results_path = "C:/Users/srale/OneDrive - FCT NOVA/Tese/excels"

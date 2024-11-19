@@ -5,10 +5,12 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="3466cb1d-2559-4122-9522-f23b0d0f6b0a" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/Figures/Acquisition_protocol_plot.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Figures/hier_HAR.png" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/clustering/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/clustering/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/clustering/unbalanced_clustering.py" beforeDir="false" afterPath="$PROJECT_DIR$/clustering/unbalanced_clustering.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/processing/pre_processing.py" beforeDir="false" afterPath="$PROJECT_DIR$/processing/pre_processing.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/run_experiment3.py" beforeDir="false" afterPath="$PROJECT_DIR$/run_experiment3.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -51,6 +53,7 @@
     &quot;Python.main.executor&quot;: &quot;Run&quot;,
     &quot;Python.models.executor&quot;: &quot;Run&quot;,
     &quot;Python.random_forest.executor&quot;: &quot;Run&quot;,
+    &quot;Python.run_experiment3.executor&quot;: &quot;Run&quot;,
     &quot;Python.sync_devices_timestamps.executor&quot;: &quot;Run&quot;,
     &quot;Python.synchronization.executor&quot;: &quot;Run&quot;,
     &quot;Python.test_on_all_subjects.executor&quot;: &quot;Run&quot;,
@@ -85,14 +88,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1711360410072</updated>
-    </task>
-    <task id="LOCAL-00022" summary="corrected Sec column and index">
-      <option name="closed" value="true" />
-      <created>1715001923361</created>
-      <option name="number" value="00022" />
-      <option name="presentableId" value="LOCAL-00022" />
-      <option name="project" value="LOCAL" />
-      <updated>1715001923361</updated>
     </task>
     <task id="LOCAL-00023" summary="cut first 200 samples after filtering">
       <option name="closed" value="true" />
@@ -478,7 +473,15 @@
       <option name="project" value="LOCAL" />
       <updated>1727800099576</updated>
     </task>
-    <option name="localTasksCounter" value="71" />
+    <task id="LOCAL-00071" summary="corrected error in clustering.__init__">
+      <option name="closed" value="true" />
+      <created>1728404629355</created>
+      <option name="number" value="00071" />
+      <option name="presentableId" value="LOCAL-00071" />
+      <option name="project" value="LOCAL" />
+      <updated>1728404629356</updated>
+    </task>
+    <option name="localTasksCounter" value="72" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -493,7 +496,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="added clustering" />
     <MESSAGE value="automatic best feature sets in main file" />
     <MESSAGE value="corrected clustering" />
     <MESSAGE value="changes to clustering and docstrings" />
@@ -518,6 +520,7 @@
     <MESSAGE value="completed run_experiment1.py and changed main file" />
     <MESSAGE value="completed run_experiment2.py and docstrings and minor changes to the functions" />
     <MESSAGE value="implemented run_experiment3.py. Missing docstings for experiment 3 functions" />
-    <option name="LAST_COMMIT_MESSAGE" value="implemented run_experiment3.py. Missing docstings for experiment 3 functions" />
+    <MESSAGE value="corrected error in clustering.__init__" />
+    <option name="LAST_COMMIT_MESSAGE" value="corrected error in clustering.__init__" />
   </component>
 </project>

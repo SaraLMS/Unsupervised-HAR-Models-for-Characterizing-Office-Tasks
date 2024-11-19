@@ -73,7 +73,8 @@ def processor(sync_data_path: str, output_base_path: str, device_sensors_foldern
               raw_folder_name: str = "raw_tasks", filtered_folder_name: str = "filtered_tasks",
               save_raw_tasks: bool = True, fs: int = 100, impulse_response_samples: int = 200) -> None:
     """
-    This function goes through each subfolder in the given directory path, segments and filters the signals
+    This function goes through each subfolder in the given directory path, segments and filters the signals and saves
+    new csv files with the segmented and filtered signals.
 
     Segment different tasks within the same recording. Onset-based segmentation for walking signals and peak-based
     segmentation for sitting and standing signals.
