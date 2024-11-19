@@ -3,8 +3,8 @@
 ## Table of Contents
 - [About](#about)
 - [Synchronization](#synchronization)
-- [Signal Pre-processing](#processing)
-- [Feature Extraction](#feature_extraction)
+- [Signal Pre-processing](#Signal_Preprocessing)
+- [Feature Extraction](#Feature_Extraction)
 - [Experiments](#experiments)
   - [Experiment 1 - Feature Selection](#experiment1)
   - [Experiment 2 - Cluster Stability](#experiment2)
@@ -51,7 +51,7 @@ device, only these are synchronized. This function has the following parameters:
 + save_intermediate_files (bool): keep the csv files generated after synchronizing android
         sensors. False to delete. If there's only signals from one device, these files are not deleted.
 
-## Signal Pre-processing
+## Signal_Preprocessing
 
 The *processing* package has three python files: task_segmentation, filters, and pre_processing. The *processor* or *process_all* functions in the *pre_processing* file apply the task segmentation method and the filters to the signals.
 This function attributes filenames depending on the segment being segmented.
@@ -75,7 +75,45 @@ The *processor* function has the following parameters:
 + fs (int): sampling frequency
 + impulse_response_samples (int): Number of samples to be cut at the start of each segment to remove the impulse response of the filters
 
-## Feature Extraction
+## Feature_Extraction
+
+The TSFEL package (https://tsfel.readthedocs.io/en/latest/) was utilized for windowing and feature extraction. 
+The *feature_extractor* function in *feature_engineering.feature_extraction.py* extracts features from sensor data files contained within the sub-folders of a main directory, as follows:
+    main_dir/subfolders/sync_signals.csv.
+1. Loads the signals to a pandas dataframe
+2. Applies a sliding window on the columns of the dataframe (signals) and extracts the features chosen in the
+    cfg_file.json. Check TSFEL documentation here: https://tsfel.readthedocs.io/en/latest/
+3. Adds a class and subclass column based on the original file name
+4. Balances the dataset to ensure the same amount of data from each class. Within each class, the subclass instances
+    are also balanced to ensure, approximately, the same amount of data from each subclass. Each subclass should be
+    equally sampled inside their respective class (the signals from each subclass should have the same duration) for
+    this function to work correctly.
+5. Saves the dataframe to a csv file where the columns are the feature names and the class and subclass, and the
+    rows are the data points. The file name is generated automatically with addition to the prefix and suffix.
+
+This function has the following parameters:
+
++ data_main_path (str): Path to the folder. Signals are contained in the sub folders inside the main path. For example:
+        devices_folder_name/*folder*/subfolders/sync_signals.csv
++ output_path (str): Path to the folder where the csv file should be saved.
++ subclasses (List[str]): List containing the name of the subclasses to load and extract features. Supported subclasses:
+            "sit": sitting
+            "standing_still": Standing still
+            "standing_gestures": Standing with gestures
+            "coffee": Standing while doing coffee
+            "folders": Standing while moving folders inside a cabinet
+            "walk_slow": Walking slow speed
+            "walk_medium": Walking medium speed
+            "walk_fast": Walking fast speed
+            "stairs": Going up and down the stairs
++ json_path (str): Path to the json file containing the features to be extracted using TSFEL
++ Prefix (str): String to be added at the start of the output filename
++ Suffix (str): NString to be added at the end of the output filename
++ devices_folder_name (str): String to be used to form the output filename. Should be indicative of the sensors and devices used. If using "feature_extraction_all" this should be the name of the main folder as follows:
+        *devices_folder_name*/folder/subfolders/sync_signals.csv
+        *acc_gyr_mag_phone*/filtered_tasks/walking/walk_slow_signals_filename.csv
+
+
 
 
 

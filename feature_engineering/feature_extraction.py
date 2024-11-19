@@ -105,16 +105,30 @@ def feature_extractor(data_main_path: str, output_path: str, subclasses: list[st
     """
     # TODO filename prefix and subject number - FILE_SUFFIX = "_feature_P{}.csv" in the constants
     file_name = prefix + FILE_SUFFIX.format(subject_num)
-    # TODO doctsring sucks
+    # TODO doctsring improve
 
-    Extracts features from sensor data files contained within the sub-folders of a main directory, adds class and subclass
-    columns based on the filenames, and saves the extracted features into a CSV file. This function also balances the
-    dataset so that there's the same number of samples from each class, and for each class there's the same number of
-    samples from each subclass. Each subclass should be equally sampled inside their respective class for this function
-    to work correctly.
+    Extracts features from sensor data files contained within the sub-folders of a main directory, as follows:
+    main_dir/subfolders/sync_signals.csv
+
+    (1) Loads the signals to a pandas dataframe
+
+    (2) Applies a sliding window on the columns of the dataframe (signals) and extracts the features chosen in the
+    cfg_file.json. Check TSFEL documentation here: https://tsfel.readthedocs.io/en/latest/
+
+    (3) Adds a class and subclass column based on the original file name
+
+    (4) Balances the dataset to ensure the same amount of data from each class. Within each class, the subclass instances
+    are also balanced to ensure, approximately, the same amount of data from each subclass. Each subclass should be
+    equally sampled inside their respective class (the signals from each subclass should have the same duration) for
+    this function to work correctly.
+
+    (5) Saves the dataframe to a csv file where the columns are the feature names and the class and subclass, and the
+    rows are the data points. The file name is generated automatically with addition to the prefix and suffix.
 
     :param data_main_path: str
-        Path to the main folder. Signals are contained in the sub folders inside the main path. EXAMPLE
+        Path to the folder. Signals are contained in the sub folders inside the main path. For example:
+        devices_folder_name/*folder*/subfolders/sync_signals.csv
+        acc_gyr_mag_phone/*filtered_tasks*/walking/walk_slow_signals_filename.csv
 
     :param output_path: str
         Path to the folder where the csv file should be saved.
@@ -134,11 +148,17 @@ def feature_extractor(data_main_path: str, output_path: str, subclasses: list[st
     :param json_path: str
         Path to the json file containing the features to be extracted using TSFEL
 
-    :param output_filename: str
-        Name of the file containing the EXTRACTED features
+    :param prefix: str
+        String to be added at the start of the output filename
 
-    :param output_folder_name: str
-        Name of the folder in which to store the dataset
+    :param suffix: str
+        String to be added at the end of the filename
+
+    :param devices_folder_name: str
+        String to be used to form the output filename. Should be indicative of the sensors and devices used. If using
+        "feature_extraction_all" this should be the name of the main folder as follows:
+        *devices_folder_name*/folder/subfolders/sync_signals.csv
+        *acc_gyr_mag_phone*/filtered_tasks/walking/walk_slow_signals_filename.csv
 
     :return: None
 
@@ -169,7 +189,7 @@ def feature_extractor(data_main_path: str, output_path: str, subclasses: list[st
                 # get the path to the csv with the signals from that subclass
                 file_path = os.path.join(folder_path, filename)
 
-                # load to a dataframe
+                # (1) load to a dataframe
                 df = load.load_data_from_csv(file_path)
 
                 # get magnitude of the magnetometer
@@ -178,10 +198,10 @@ def feature_extractor(data_main_path: str, output_path: str, subclasses: list[st
                 # inform user
                 print(f"Extract features from {folder_name}")
 
-                # extract the features
+                # (2) windowing and feature extraction using TSFEL package
                 df = _extract_features_from_signal(df, features_dict)
 
-                # add class and subclass columns
+                # (3) add class and subclass columns
                 df = _add_class_and_subclass_column(df, folder_name, filename)
 
                 # save in dict
