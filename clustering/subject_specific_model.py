@@ -19,7 +19,6 @@ from .random_forest import random_forest_classifier
 def subject_specific_clustering(main_path: str, subjects_features_path: str, clustering_model: str, nr_clusters: int,
                                 features_folder_name: str, results_path: str):
     """
-    This function implements experiment 2 for the subject specific models. For more information check README file.
     In this experiment, clustering is performed on the train set and the test set instances are appointed to the
     preformed clusters. If Agglomerative Clustering is chosen, clustering is performed on 20 % of the data.
     This function also trains a random forest with the same feature sets used for the clustering.

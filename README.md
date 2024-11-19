@@ -8,7 +8,7 @@
 - [Experiments](#Experiments)
   - [Experiment 1 - Feature Selection](#Experiment1_Feature_Selection)
   - [Experiment 2 - Cluster Stability](#Experiment2_Cluster_Stability)
-  - [Experiment 3 - Cluster Imbalance](Experiment3_Cluster_Imbalance)
+  - [Experiment 3 - Cluster Imbalance](#Experiment3_Cluster_Imbalance)
 
 ## About 
 The python code available in this project is part of the methods for the Master Thesis
@@ -23,6 +23,8 @@ Five acquisition sessions were devised, grouping similar tasks within the same r
 The y-axis accelerometer signals of the five sessions are shown bellow:
 
 ![Diagram](./Figures/Acquisition_protocol_plot.png)
+
+Check *main.py*, *run_experiment1.py*, *run_experiment2.py*, and *run_experiment3.py* for examples.
 
 ## Synchronization
 
@@ -178,13 +180,56 @@ For the 2GM, a two-stage feature selection method is implemented, which consists
 from the subject-specific sets, the most common features are selected to form the final feature set. The used selects how many
 features the final feature set should have. The *two_stage_feature_selection* function is used for this model.
 
+## Experiment2_Cluster_Stability
 
+In this experiment, clustering is performed on the train set and the test set instances are appointed to the
+preformed clusters. If Agglomerative Clustering is chosen, clustering is performed on 20 % of the data.
+Similar to experiment 1, this run experiment 2 as follows:
 
+    with open('run_experiment2.py') as f:
+        code = f.read()
+        exec(code)
 
+In *run_experiment3.py*, select the booleans to True depending on which model to run (SSM, 1GM, and 2GM).
+For the SSM, *subject_specific_clustering* function does the following:
+The feature sets used for this model are specific for each subject (or dataset) and are loaded from a txt file
+(subjects_features_path) which has two columns: the first is the subject id, and the second is the best feature
+set found for the respective subject in experiment 1, separated by ';' (i.e., P001; ['xAcc_Mean', 'zMag_Max'])
+This function saves the adjusted rand index, normalized mutual information, and accuracy score (random forest)
+results in an Excel sheet. This function has the following parameters:
 
++ main_path (str): Path to the main_folder containing subfolders which have the datasets. The directory scheme is the following
+    main_folder/folder/subfolder/dataset.csv
+    (i.e., datasets/features_basic_acc_gyr_mag_phone_watch/P001/features_basic_acc_gyr_mag_phone_watch_P001.csv)
++ subjects_features_path (str): Path to the txt file containing the features sets for each subject. These should match the same conditions of the
+    dataset which will be used for this experiment (i.e., if clustering all activities, the path should be to the
+    feature sets found for all activities). Otherwise, this the results obtained will not be correct.
++ clustering_model (str): Unsupervised learning model used for clustering. Supported models are:
+        "kmeans" - KMeans clustering
+        "agglomerative": Agglomerative clustering model
+        "gmm": Gaussian Mixture Model
++ nr_clusters (int): Number of clusters to find
++ features_folder_name: str:  Path to the folder[*] identifying which datasets to load. The directory scheme is the following
+    folder[*]/subfolder/dataset.csv
+    (i.e., features_basic_acc_gyr_mag_phone_watch[*]/P001/features_basic_acc_gyr_mag_phone_watch_P001.csv)
++ results_path (str): Path to the directory where to save the Excel sheet with the clustering and random forest results.
 
+For the 1GM and the 2GM, the *one_stage_general_model_each_subject* and *two_stage_general_model_clustering* functions
+are used. These two function differ from the SSM since the user must input the feature set (List[str]).
 
+## Experiment3_Cluster_Imbalance
 
+To run experiment 3, the user must the *run_experiment3.py*:
+
+    with open('run_experiment3.py') as f:
+        code = f.read()
+        exec(code)
+
+The *imbalanced_clustering* function applies a sliding window approach on a dataframe in order to extract multiple consecutive chunks of
+the standing still and walking medium data. These chunks are then added to the sitting data to form the final
+dataset. The clustering result is obtained  by doing the mean ARI over all datasets. With this function, 
+the user can select the final sitting proportion, as well as the number of chunks from the standing
+and walking instances to have.
 
 
 

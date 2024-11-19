@@ -19,8 +19,45 @@ import load
 # public functions
 # ------------------------------------------------------------------------------------------------------------------- #
 
-def unbalanced_clustering(main_path, sitting_perc, nr_windows, clustering_model, nr_clusters, features_folder_name: str,
-                          feature_set: List[str], results_path: str):
+def imbalanced_clustering(main_path: str, sitting_perc: float, nr_windows: int, clustering_model: str, nr_clusters: int,
+                          features_folder_name: str, feature_set: List[str], results_path: str):
+    """
+    This function generates imbalanced datasets and clusters. The results over all subjects are then saved in an Excel
+    sheet.
+
+    :param main_path: str
+    Path to the main folder containing the dataset. For example:
+    .../*main_folder*/subfolder/subsubfolder/dataset.csv
+    .../*subjects_datasets*/subject_P001/phone_features_basic_activities/dataset.csv
+
+    :param sitting_perc: float
+    Percentage that the sitting activity must have (i.e., 0.5, 0.7, 0.9)
+
+    :param nr_windows: int
+    Number of windows/chunks to have of the underrepresented classes
+
+    :param clustering_model: str
+    Unsupervised learning model used for clustering. Supported models are:
+        "kmeans" - KMeans clustering
+        "agglomerative": Agglomerative clustering model
+        "gmm": Gaussian Mixture Model
+
+    :param nr_clusters: int
+    Number of clusters to find
+
+    :param features_folder_name: str
+    Path to the folder containing the dataset. For example:
+    .../main_folder/subfolder/*subsubfolder*/dataset.csv
+    .../subjects_datasets/subject_P001/*phone_features_basic_activities*/dataset.csv
+
+    :param feature_set: List[str]
+    List containing the feature names to be used for clustering
+
+    :param results_path: str
+    Path in which to save the Excel sheet with the results
+
+    :return: None
+    """
     # list for holding the results on each subject
     results = []
 
@@ -45,7 +82,7 @@ def unbalanced_clustering(main_path, sitting_perc, nr_windows, clustering_model,
                     # only one csv file for the features folder
                     dataset_path = os.path.join(features_folder_path, os.listdir(features_folder_path)[0])
 
-                    ari, std_ari = _cluster_unbalanced_basic_activities(dataset_path, sitting_perc, nr_windows,
+                    ari, std_ari = _cluster_imbalanced_basic_activities(dataset_path, sitting_perc, nr_windows,
                                                                         clustering_model, nr_clusters, feature_set)
                     # ari = cluster_basic_data(dataset_path, clustering_model, nr_clusters, feature_set)
                     results.append({
@@ -76,8 +113,37 @@ def unbalanced_clustering(main_path, sitting_perc, nr_windows, clustering_model,
 # ------------------------------------------------------------------------------------------------------------------- #
 
 
-def _cluster_unbalanced_basic_activities(path, sitting_perc, nr_windows, clustering_model, nr_clusters,
-                                         feature_set: List[str]) -> Tuple[float, float]:
+def _cluster_imbalanced_basic_activities(path: str, sitting_perc: float, nr_windows: int, clustering_model: str,
+                                         nr_clusters: int, feature_set: List[str]) -> Tuple[float, float]:
+    """
+    This function applies a sliding window approach on a dataframe in order to extract multiple consecutive chunks of
+    the standing still and walking medium data. These chunks are then added to the sitting data to form the final
+    dataset. The clustering result is obtained  by doing the mean ARI over all datasets.
+
+    :param path: str
+    Path to the dataset (csv file)
+
+    :param sitting_perc: float
+    Percentage that the sitting activity must have (i.e., 0.5, 0.7, 0.9)
+
+    :param nr_windows: int
+    Number of windows/chunks to have of the underrepresented classes
+
+    :param clustering_model: str
+    Unsupervised learning model used for clustering. Supported models are:
+        "kmeans" - KMeans clustering
+        "agglomerative": Agglomerative clustering model
+        "gmm": Gaussian Mixture Model
+
+    :param nr_clusters: int
+    Number of clusters to find
+
+    :param feature_set: List[str]
+    List containing the feature names to be used for clustering
+
+    :return: Tuple[float, float]
+    Mean ARI and standard deviation
+    """
     # load dataframes from basic activities into a dictionary
     df_dict = load.load_basic_activities_only(path)
 
@@ -143,15 +209,6 @@ def _cluster_unbalanced_basic_activities(path, sitting_perc, nr_windows, cluster
         # put the train and test sets back into a pandas dataframe
         temp_dataset = pd.DataFrame(temp_dataset, columns=feature_set)
 
-        # df_to_save = pd.concat([temp_dataset, true_labels], axis=1)
-        #
-        # filename = f"P020_chunk_{chunk_cdounter}_50_imbalance.csv"
-        #
-        # path = f"D:/tese_backups/imbalanced_datasets/50/P020/{filename}"
-        #
-        # # save dataset
-        # df_to_save.to_csv(path)
-
         # cluster
         if clustering_model == AGGLOMERATIVE:
             cluster_labels = cluster_data(clustering_model, temp_dataset, nr_clusters)
@@ -174,18 +231,18 @@ def _sliding_window(df: pd.DataFrame, window_size: int, num_windows: int) -> Lis
     """
     Perform a sliding window approach over a pandas DataFrame.
 
-    Parameters:
-    - df: pandas.DataFrame
-        The DataFrame over which the sliding window is applied.
-    - window_size: int
-        The size of each window.
-    - num_windows: int
-        The number of windows to extract.
+    :param df: pd.DataFrame
+    The DataFrame over which the sliding window is applied.
 
-    Returns:
-    - list of tuples:
-        A list containing the start and stop indices of the corresponding windows.
-        Each list element is a tuple pair of the start index and the stop index.
+    :param window_size: int
+    The size of each window.
+
+    :param num_windows: int
+    The number of windows to extract.
+
+    :return: List[Tuple[int, int]]
+    A list containing the start and stop indices of the corresponding windows.
+    Each list element is a tuple pair of the start index and the stop index.
     """
     # Total number of rows in the DataFrame
     num_rows = len(df)

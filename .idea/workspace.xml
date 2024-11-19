@@ -7,8 +7,10 @@
     <list default="true" id="3466cb1d-2559-4122-9522-f23b0d0f6b0a" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/feature_engineering/feature_extraction.py" beforeDir="false" afterPath="$PROJECT_DIR$/feature_engineering/feature_extraction.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/feature_engineering/feature_selection.py" beforeDir="false" afterPath="$PROJECT_DIR$/feature_engineering/feature_selection.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clustering/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/clustering/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clustering/subject_specific_model.py" beforeDir="false" afterPath="$PROJECT_DIR$/clustering/subject_specific_model.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clustering/unbalanced_clustering.py" beforeDir="false" afterPath="$PROJECT_DIR$/clustering/imbalanced_clustering.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/run_experiment3.py" beforeDir="false" afterPath="$PROJECT_DIR$/run_experiment3.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -85,14 +87,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1711360410072</updated>
-    </task>
-    <task id="LOCAL-00025" summary="new segmentation implemented">
-      <option name="closed" value="true" />
-      <created>1716565185822</created>
-      <option name="number" value="00025" />
-      <option name="presentableId" value="LOCAL-00025" />
-      <option name="project" value="LOCAL" />
-      <updated>1716565185823</updated>
     </task>
     <task id="LOCAL-00026" summary="added features to tsfel">
       <option name="closed" value="true" />
@@ -478,7 +472,15 @@
       <option name="project" value="LOCAL" />
       <updated>1732036154125</updated>
     </task>
-    <option name="localTasksCounter" value="74" />
+    <task id="LOCAL-00074" summary="Updated README file and docstrings in feature_selection.py">
+      <option name="closed" value="true" />
+      <created>1732044114950</created>
+      <option name="number" value="00074" />
+      <option name="presentableId" value="LOCAL-00074" />
+      <option name="project" value="LOCAL" />
+      <updated>1732044114950</updated>
+    </task>
+    <option name="localTasksCounter" value="75" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -493,7 +495,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="changes to clustering and docstrings" />
     <MESSAGE value="subject specific clustering" />
     <MESSAGE value="function names changed" />
     <MESSAGE value="correted docstrings on feature selection" />
@@ -518,6 +519,7 @@
     <MESSAGE value="corrected error in clustering.__init__" />
     <MESSAGE value="Updated README file up to signal pre-processing" />
     <MESSAGE value="Updated README file and docstrings in feature_extraction.py" />
-    <option name="LAST_COMMIT_MESSAGE" value="Updated README file and docstrings in feature_extraction.py" />
+    <MESSAGE value="Updated README file and docstrings in feature_selection.py" />
+    <option name="LAST_COMMIT_MESSAGE" value="Updated README file and docstrings in feature_selection.py" />
   </component>
 </project>

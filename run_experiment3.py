@@ -19,5 +19,5 @@ feature_set = ['xMag_Max', 'yAcc_Interquartile range', 'zMag_Max', 'xAcc_Min', '
 sitting_perc = 0.9
 nr_chunks = 20
 
-clustering.unbalanced_clustering(main_path, sitting_perc, nr_chunks, clustering_model, 3, features_folder_name,
+clustering.imbalanced_clustering(main_path, sitting_perc, nr_chunks, clustering_model, 3, features_folder_name,
                                  feature_set, results_path)
