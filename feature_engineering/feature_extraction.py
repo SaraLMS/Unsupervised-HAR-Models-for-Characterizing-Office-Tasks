@@ -105,7 +105,6 @@ def feature_extractor(data_main_path: str, output_path: str, subclasses: list[st
     """
     # TODO filename prefix and subject number - FILE_SUFFIX = "_feature_P{}.csv" in the constants
     file_name = prefix + FILE_SUFFIX.format(subject_num)
-    # TODO doctsring improve
 
     Extracts features from sensor data files contained within the sub-folders of a main directory, as follows:
     main_dir/subfolders/sync_signals.csv

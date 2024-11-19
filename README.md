@@ -5,10 +5,10 @@
 - [Synchronization](#synchronization)
 - [Signal Pre-processing](#Signal_Preprocessing)
 - [Feature Extraction](#Feature_Extraction)
-- [Experiments](#experiments)
-  - [Experiment 1 - Feature Selection](#experiment1)
-  - [Experiment 2 - Cluster Stability](#experiment2)
-  - [Experiment 3 - Cluster Imbalance](#experiment3)
+- [Experiments](#Experiments)
+  - [Experiment 1 - Feature Selection](#Experiment1_Feature_Selection)
+  - [Experiment 2 - Cluster Stability](#Experiment2_Cluster_Stability)
+  - [Experiment 3 - Cluster Imbalance](Experiment3_Cluster_Imbalance)
 
 ## About 
 The python code available in this project is part of the methods for the Master Thesis
@@ -108,10 +108,82 @@ This function has the following parameters:
             "stairs": Going up and down the stairs
 + json_path (str): Path to the json file containing the features to be extracted using TSFEL
 + Prefix (str): String to be added at the start of the output filename
-+ Suffix (str): NString to be added at the end of the output filename
++ Suffix (str): String to be added at the end of the output filename
 + devices_folder_name (str): String to be used to form the output filename. Should be indicative of the sensors and devices used. If using "feature_extraction_all" this should be the name of the main folder as follows:
         *devices_folder_name*/folder/subfolders/sync_signals.csv
         *acc_gyr_mag_phone*/filtered_tasks/walking/walk_slow_signals_filename.csv
+
+## Experiments
+
+The models available for the following experiments are KMeans, Agglomerative Clustering (AGG), and Gaussian Mixture Model (GMM).
+More clustering models can be added in *models.py*. Update the valid models in *constants.py*.
+
+Three different models were implemented:
+
++ Subject-specific models (SSM): Cluster each subject individually with an optimized feature set
+
++ One-stage general model (1GM): Combine all subjects data for clustering
+
++ Two-stage general model (2GM): Cluster each subject individually with a common feature set
+
+## Experiment1_Feature_Selection
+
+Experiment 1 comprised of feature selection. To apply the one-stage feature selection method for the SSM and the 1GM
+run the *run_experiment1.py* as follows:
+
+    with open('run_experiment1.py') as f:
+        code = f.read()
+        exec(code)
+
+In this file, the user chooses which model (SSM, 1GM) to run this experiment by setting the booleans to True or False.
+For the 1GM, the *feature_selector* function works as follows:
+This function returns the feature sets that produce the best clustering results for the train set
+as well as the adjusted rand index of the respective feature sets. This feature selection method works as follows:
+1. Normalize the features between 0 and 1, using MinMaxScaler from sklearn
+2. Remove low variance and highly correlated features, given the variance_threshold and correlation_threshold
+3. Shuffle the remaining features and add iteratively to a subset
+4. If the Adjusted Rand Index(ARI) increases at least 1 % the feature is kept, if not, it is removed. This process
+    produces a plot where the y-axis contains the metrics and the x-axis the feature added in each iteration, in order
+    to analyze the most relevant features. This plot is saved if save_plots is set to True
+5. Repeat step 1-4 n_iterations times to account for the randomness introduced by the shuffling.
+
+The parameters are:
++ train_set (pd.DataFrame): Train set containing the features extracted (columns) and data instances (rows).
++ variance_threshold (float): Minimum variance value. Features with variance lower than this threshold will be removed.
++ correlation_threshold (float): Maximum correlation value. Removes features with a correlation higher or equal to this threshold
++ n_iterations (int): Number of times the feature selection method is repeated.
++ clustering_model (str): Unsupervised learning model used to select the best features. Supported models are:
+        "kmeans" - KMeans clustering
+        "agglomerative": Agglomerative clustering
+        "gmm": Gaussian Mixture Model
++ output_path (str): Path to the main folder in which the plots should be saved
++ folder_name (str): Name of the folder in which to store the plots. Default: "phone_features_kmeans_plots".
++ save_plots (bool): If True, saves the plots of each iteration of the feature selection process. Don't save if False.
+
+This function returns a list of feature sets, and correspondent list of ARI and NMI.
+
+For the SSM, the *one_stage_feature_selection* function calls the feature_selector function which returns a list of feature sets (list[str]), and the
+correspondent Adjusted Rand Index (List[float]) and Normalized Mutual Information (List[NMI]). Next, the feature
+set with the highest ARI is selected. If more than 1, then the one with the highest NMI is chosen. If there is still
+multiple feature sets with the same ARI and NMI, the feature set with the lowest number of features is chosen.
+If in this case there are still multiple sets, then one is chosen randomly.
+
+1. the subject id is extracted from the filename. For this, the filenames should have a capital P letter followed
+    by three digits as follows: P001. This is then added in the first column
+    The results are saved in a .txt file as follows:
+2. the best feature set obtained is saved in the second column
+3. the third and fourth columns of the txt file contain the ARI and NMI obtained, respectively.
+
+For the 2GM, a two-stage feature selection method is implemented, which consists of applying the one-stage method, then,
+from the subject-specific sets, the most common features are selected to form the final feature set. The used selects how many
+features the final feature set should have. The *two_stage_feature_selection* function is used for this model.
+
+
+
+
+
+
+
 
 
 

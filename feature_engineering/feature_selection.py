@@ -28,20 +28,20 @@ def feature_selector(train_set: pd.DataFrame, variance_threshold: float, correla
                      output_path: str, folder_name: str = "phone_features_kmeans_plots",
                      save_plots: bool = False) -> Tuple[List[List[str]], List[float], List[float]]:
     """
-    This function returns the features sets that give the best clustering results for the train set
-    as well as the adjusted rand index of the respective feature sets.
-    # TODO (1) (2) (3)
+    This function returns the feature sets that produce the best clustering results for the train set
+    as well as the adjusted rand index of the respective feature sets. This feature selection method works as follows:
 
-    The first step of the feature selection is removing the low variance and highly correlated features.
-    Then, shuffles the remaining features and iteratively adds one feature at a time. If by adding the feature, the
-    rand index (accuracy) doesn't improve, that feature is removed from the feature set.
-    This process generates a plot with the x-axis being the features added in each iteration and the y-axis the scores
-    for the rand index, adjusted rand index and normalized mutual information.
+    (1) Normalize the features between 0 and 1, using MinMaxScaler from sklearn
 
-    The plot is generated and saved if save_plots is set to True.
+    (2) Remove low variance and highly correlated features, given the variance_threshold and correlation_threshold
 
-    This process is repeated n_iterations times and with every iteration, the column names (feature names) are shuffled
-    so that different combinations of features can be tested.
+    (3) Shuffle the remaining features and add iteratively to a subset
+
+    (4) If the Adjusted Rand Index(ARI) increases at least 1 % the feature is kept, if not, it is removed. This process
+    produces a plot where the y-axis contains the metrics and the x-axis the feature added in each iteration, in order
+    to analyze the most relevant features. This plot is saved if save_plots is set to True
+
+    (5) Repeat step (1)-(4) n_iterations times to account for the randomness introduced by the shuffling.
 
     :param train_set: pd.DataFrame
     Train set containing the features extracted (columns) and data instances (rows).
@@ -70,8 +70,8 @@ def feature_selector(train_set: pd.DataFrame, variance_threshold: float, correla
     :param save_plots: bool (default = True)
     If True, saves the plots of each iteration of the feature selection process. Don't save if False.
 
-    :return: Tuple[List[List[str]], List[float]]
-    List of feature sets and another list with the rand index of each feature set
+    :return: Tuple[List[List[str]], List[float], List[float]]
+    List of feature sets, and correspondent list of ARI and NMI.
     """
     # TODO CHECK MODELS
     # get the true (class) labels
@@ -89,13 +89,12 @@ def feature_selector(train_set: pd.DataFrame, variance_threshold: float, correla
         train_set = train_set.drop([SUBCLASS], axis=1)
 
     # (1) scale features
-    # TODO EXPLAIN IN DOCSTRING NORM
     train_set = _normalize_features(train_set)
 
-    # drop features with variance lower than variance_threshold
+    # (2) drop features with variance lower than variance_threshold
     train_set = _drop_low_variance_features(train_set, variance_threshold)
 
-    # drop correlated features
+    # (2) drop correlated features
     train_set = _remove_collinear_features(train_set, correlation_threshold)
 
     if save_plots:
@@ -108,11 +107,13 @@ def feature_selector(train_set: pd.DataFrame, variance_threshold: float, correla
     feature_sets_ari = []
     feature_sets_nmi = []
 
+    # (5) repeat the feature selection method n_iterations times
+
     for iteration in range(1, n_iterations + 1):
         # Reset the best accuracy for each iteration
         best_ari = 0
 
-        # Shuffle the column names at the beginning of each iteration
+        # (3) Shuffle the column names at the beginning of each iteration
         shuffled_features = _shuffle_column_names(train_set)
         # print(f"Shuffled Features (Iteration {iteration}): {shuffled_features}")
 
@@ -125,7 +126,7 @@ def feature_selector(train_set: pd.DataFrame, variance_threshold: float, correla
         adj_rand_scores = []
         norm_mutual_infos = []
 
-        # Cycle over the shuffled columns of the dataframe
+        # (3) Cycle over the shuffled columns of the dataframe
         for feature in shuffled_features:
             # Add the feature to the feature list
             iter_feature_list.append(feature)
@@ -139,7 +140,7 @@ def feature_selector(train_set: pd.DataFrame, variance_threshold: float, correla
             # Evaluate clustering with this feature set
             ri, ari, nmi = metrics.evaluate_clustering(true_labels, pred_labels)
 
-            # if adjusted Rand Index improves atleast 1%
+            # (4) if adjusted Rand Index improves at least 1% add, if not, remove feature
             if ari > best_ari + 0.01:
 
                 best_ari = ari
@@ -197,6 +198,55 @@ def one_stage_feature_selection(file_path: str, variance_threshold: float, corre
                                 n_iterations: int, clustering_model: str,
                                 plots_output_path: str, results_output_path: str, results_folder_name: str,
                                 results_filename_prefix: str) -> Tuple[List[str], float, float]:
+    """
+    This function calls the feature_selector function which returns a list of feature sets (list[str]), and the
+    correspondent Adjusted Rand Index (List[float]) and Normalized Mutual Information (List[NMI]). Next, the feature
+    set with the highest ARI is selected. If more than 1, then the one with the highest NMI is chosen. If there is still
+    multiple feature sets with the same ARI and NMI, the feature set with the lowest number of features is chosen.
+    If in this case there are still multiple sets, then one is chosen randomly.
+
+    The results are saved in a .txt file as follows:
+
+    (1) the subject id is extracted from the filename. For this, the filenames should have a capital P letter followed
+    by three digits as follows: P001. This is then added in the first column
+
+    (2) the best feature set obtained is saved in the second column
+
+    (3) the third and fourth columns of the txt file contain the ARI and NMI obtained, respectively.
+
+    :param file_path: str
+    Path to the csv file containing the dataset
+
+    :param variance_threshold: float
+    Minimum variance value. Features with variance lower than this threshold will be removed.
+
+    :param correlation_threshold: float
+    Maximum correlation value. Removes features with a correlation higher or equal to this threshold
+
+    :param n_iterations: int
+    Number of times the feature selection method is repeated.
+
+    :param clustering_model: str
+    Unsupervised learning model used to select the best features. Supported models are:
+        "kmeans" - KMeans clustering
+        "agglomerative": Agglomerative clustering model
+        "gmm": Gaussian Mixture Model
+
+    :param plots_output_path: str
+    Path in which to store the plots should be saved.
+
+    :param results_output_path: str
+    Path in which the .txt file should be saved
+
+    :param results_folder_name: str
+    Name of the folder to contain the results .txt file
+
+    :param results_filename_prefix: str
+    Prefix to add to the filename of the results
+
+    :return: Tuple[List[str], float, float]
+    Tuple containing the best feature set, and the correspondent ARI and NMI.
+    """
     # check path
     # load dataset and train/test split
     train_set, _ = load.train_test_split(file_path, 0.8, 0.2)
@@ -234,9 +284,59 @@ def one_stage_feature_selection(file_path: str, variance_threshold: float, corre
     return final_feature_set, final_ari, final_nmi
 
 
-def two_stage_feature_selection(main_path, features_folder_name, variance_threshold, corr_threshold,
+def two_stage_feature_selection(main_path: str, features_folder_name: str, variance_threshold: float, corr_threshold: float,
                                 feature_selector_iterations: int,
-                                clustering_model, nr_iterations, top_n):
+                                clustering_model: str, nr_iterations: int, top_n: int):
+    """
+    Applies a two stage feature selection method. First, the one_stage feature selection method is implemented. Then,
+    the most common features across all subjects are selected to form the final feature set. This process is repeated
+    nr_iterations times to account for the randomness introduced in the one-stage feature selection method. This function
+    returns the feature set that obtained the highest ARI for the top_n features selected.
+
+    This function applies this method to find the best common feature set with axis, considering the axis of the sensor
+    for the best features, and without axis. Without the sensor axis, this function then tests the feature set obtained
+    with the same axis. For example:
+
+    Best feature set: Acc_Mean, Acc_Variance, Gyr_Minimum
+    Results with x-axis: xAcc_Mean, xAcc_Variance, xGyr_Minimum
+    Results with y-axis: yAcc_Mean, yAcc_Variance, yGyr_Minimum
+    Results with x-axis: zAcc_Mean, zAcc_Variance, zGyr_Minimum
+
+    :param main_path: str
+    Path to the main folder containing the datasets (csv files). For example:
+    .../*main_folder*/subfolder/subsubfolder/dataset.csv
+    .../*subjects_datasets*/subject_P001/watch_phone_features_all_activities/dataset.csv
+
+    :param features_folder_name: str
+    Name of the folder containing the dataset with the extracted features
+    .../main_folder/subfolder/*subsubfolder*/dataset.csv
+    .../subjects_datasets/subject_P001/*watch_phone_features_all_activities*/dataset.csv
+
+    :param variance_threshold: float
+    Minimum variance value. Features with variance lower than this threshold will be removed.
+
+    :param corr_threshold: float
+    Maximum correlation value. Removes features with a correlation higher or equal to this threshold
+
+    :param feature_selector_iterations: int
+    Number of times the one-stage feature selection method is repeated.
+
+    :param clustering_model: str
+    Unsupervised learning model used to select the best features. Supported models are:
+        "kmeans" - KMeans clustering
+        "agglomerative": Agglomerative clustering model
+        "gmm": Gaussian Mixture Model
+
+    :param nr_iterations: int
+    Number of times the two-stage feature selection method is repeated
+
+    :param top_n: int
+    Number of most common features to find
+
+    :return: Tuple[List[str], float, float, List[str], float, float]
+    Returns the best feature set obtained considering the axis and the correspondent ARI and NMI, and the best
+    feature set obtained without axis and correspondent ARI and NMI.
+    """
     best_feature_set_with_axis = None
     best_scores_with_axis = [0, 0, 0]
 

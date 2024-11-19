@@ -4,10 +4,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="3466cb1d-2559-4122-9522-f23b0d0f6b0a" name="Changes" comment="Updated README file up to signal pre-processing">
+    <list default="true" id="3466cb1d-2559-4122-9522-f23b0d0f6b0a" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/feature_engineering/feature_extraction.py" beforeDir="false" afterPath="$PROJECT_DIR$/feature_engineering/feature_extraction.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/feature_engineering/feature_selection.py" beforeDir="false" afterPath="$PROJECT_DIR$/feature_engineering/feature_selection.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -84,14 +85,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1711360410072</updated>
-    </task>
-    <task id="LOCAL-00024" summary="added tsfel">
-      <option name="closed" value="true" />
-      <created>1715876008354</created>
-      <option name="number" value="00024" />
-      <option name="presentableId" value="LOCAL-00024" />
-      <option name="project" value="LOCAL" />
-      <updated>1715876008355</updated>
     </task>
     <task id="LOCAL-00025" summary="new segmentation implemented">
       <option name="closed" value="true" />
@@ -477,7 +470,15 @@
       <option name="project" value="LOCAL" />
       <updated>1732033721279</updated>
     </task>
-    <option name="localTasksCounter" value="73" />
+    <task id="LOCAL-00073" summary="Updated README file and docstrings in feature_extraction.py">
+      <option name="closed" value="true" />
+      <created>1732036154125</created>
+      <option name="number" value="00073" />
+      <option name="presentableId" value="LOCAL-00073" />
+      <option name="project" value="LOCAL" />
+      <updated>1732036154125</updated>
+    </task>
+    <option name="localTasksCounter" value="74" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -492,7 +493,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="corrected clustering" />
     <MESSAGE value="changes to clustering and docstrings" />
     <MESSAGE value="subject specific clustering" />
     <MESSAGE value="function names changed" />
@@ -517,6 +517,7 @@
     <MESSAGE value="implemented run_experiment3.py. Missing docstings for experiment 3 functions" />
     <MESSAGE value="corrected error in clustering.__init__" />
     <MESSAGE value="Updated README file up to signal pre-processing" />
-    <option name="LAST_COMMIT_MESSAGE" value="Updated README file up to signal pre-processing" />
+    <MESSAGE value="Updated README file and docstrings in feature_extraction.py" />
+    <option name="LAST_COMMIT_MESSAGE" value="Updated README file and docstrings in feature_extraction.py" />
   </component>
 </project>
