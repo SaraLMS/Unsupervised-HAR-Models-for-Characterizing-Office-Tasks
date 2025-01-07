@@ -186,7 +186,7 @@ In this experiment, clustering is performed on the train set and the test set in
 preformed clusters. If Agglomerative Clustering is chosen, clustering is performed on 20 % of the data.
 Similar to experiment 1, this run experiment 2 as follows:
 
-    with open('run_experiment2.py') as f:
+    with open('run_experiment3.py') as f:
         code = f.read()
         exec(code)
 
@@ -209,9 +209,9 @@ results in an Excel sheet. This function has the following parameters:
         "agglomerative": Agglomerative clustering model
         "gmm": Gaussian Mixture Model
 + nr_clusters (int): Number of clusters to find
-+ features_folder_name: str:  Path to the folder[*] identifying which datasets to load. The directory scheme is the following
-    folder[*]/subfolder/dataset.csv
-    (i.e., features_basic_acc_gyr_mag_phone_watch[*]/P001/features_basic_acc_gyr_mag_phone_watch_P001.csv)
++ features_folder_name: str:  Path to the *folder* identifying which datasets to load. The directory scheme is the following
+    *folder*/subfolder/dataset.csv
+    (i.e., features_basic_acc_gyr_mag_phone_watch*/P001/features_basic_acc_gyr_mag_phone_watch_P001.csv)
 + results_path (str): Path to the directory where to save the Excel sheet with the clustering and random forest results.
 
 For the 1GM and the 2GM, the *one_stage_general_model_each_subject* and *two_stage_general_model_clustering* functions
@@ -226,11 +226,12 @@ To run experiment 3, the user must the *run_experiment3.py*:
         exec(code)
 
 The *imbalanced_clustering* function applies a sliding window approach on a dataframe in order to extract multiple consecutive chunks of
-the standing still and walking medium data. These chunks are then added to the sitting data to form the final
+the standing still and walking medium data, as shown in the figure bellow. These chunks are then added to the sitting data to form the final
 dataset. The clustering result is obtained  by doing the mean ARI over all datasets. With this function, 
 the user can select the final sitting proportion, as well as the number of chunks from the standing
 and walking instances to have.
 
+![Diagram](./Figures/imbalanced_datasets.png)
 
 
 
